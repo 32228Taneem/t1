@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ item_name }} - Subtopics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Subtopics - {{ item_name }}</a>
+        <div class="d-flex">
+            <a href="{{ url_for('admin_panel') }}" class="btn btn-outline-light me-2">Back</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <h2 class="mb-4">Add Subtopic for "{{ item_name }}"</h2>
+    <form method="POST" action="{{ url_for('add_subtopic', item_name=item_name) }}" class="row g-3">
+        <div class="col-md-8">
+            <input type="text" name="name" class="form-control" placeholder="Enter Subtopic" required>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-success w-100">Add Subtopic</button>
+        </div>
+    </form>
+
+    <hr class="my-5">
+
+    <h3>Existing Subtopics</h3>
+    {% if subtopics %}
+        <ul class="list-group mt-3">
+            {% for subtopic in subtopics %}
+                <li class="list-group-item">{{ subtopic }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted mt-3">No subtopics yet. Start adding some!</p>
+    {% endif %}
+</div>
+
+</body>
+</html>
