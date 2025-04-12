@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function openModal(type) {
+            document.getElementById('modal').style.display = 'block';
+            document.getElementById('itemType').value = type;
+            document.getElementById('modal-title').innerText = "Add " + type.charAt(0).toUpperCase() + type.slice(1) + " Item";
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+    </script>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <h2>Navigation Bar</h2>
+        <ul>
+            {% for item in navbar_items %}
+                <li>{{ item }}</li>
+            {% endfor %}
+            <li><button onclick="openModal('navbar')">+</button></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h3>Sidebar</h3>
+            <ul>
+                {% for item in sidebar_items %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+                <li><button onclick="openModal('sidebar')">+</button></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <h1>Welcome to Admin Panel</h1>
+            <p>Manage the website's navigation and sidebar here.</p>
+        </main>
+    </div>
+
+    <!-- Add Element Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title">Add Item</h2>
+            <form id="addForm" method="POST">
+                <input type="hidden" id="itemType" name="itemType">
+                <label for="name">Item Name:</label>
+                <input type="text" id="name" name="name" required>
+                <button type="submit">Add</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('addForm').onsubmit = function (e) {
+            e.preventDefault();
+            let itemType = document.getElementById('itemType').value;
+            let form = document.getElementById('addForm');
+
+            if (itemType === 'navbar') {
+                form.action = "{{ url_for('add_navbar_item') }}";
+            } else {
+                form.action = "{{ url_for('add_sidebar_item') }}";
+            }
+
+            form.submit();
+        };
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Navbar</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/navbar.css">
+    <style>
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .content-wrapper {
+            margin-top: 70px;
+        }
+        #sidebar {
+            width: 250px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Company Name</a>
+            <form class="d-flex me-auto">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            {{session.get('user')}}
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto" id="navbar-list">
+                    {% for item in navbar_items %}
+                        <li class="nav-item"><a class="nav-link" href="#">{{ item }}</a></li>
+                    {% endfor %}
+                </ul>
+                    <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link btn  text-white" href="{{url_for('login')}}">Admin Login</a>
+                    </li>
+                </ul>
+                <button class="btn btn-sm btn-success" onclick="addNavbarItem()">+</button>
+            </div>
+            <div class="d-none d-lg-block">
+                <a class="nav-link btn  text-white" href="{{url_for('login')}}">Admin Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="d-flex content-wrapper">
+        <div class="bg-light border-end vh-100 p-3" id="sidebar">
+            <h5 class="fw-bold">Python Tutorial <button class="btn btn-sm btn-success" onclick="addSidebarItem()">+</button></h5>
+            <ul class="list-unstyled" id="sidebar-list">
+                {% for item in sidebar_items %}
+                    <li class="d-flex justify-content-between align-items-center p-2 border-bottom">
+                        <a href="#" class="text-decoration-none">{{ item }}</a>
+                        <div>
+                            <button class="btn btn-sm btn-warning">Update</button>
+                            <button class="btn btn-sm btn-danger">Delete</button>
+                            <button class="btn btn-sm btn-info">View</button>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            
+                <li class="d-flex justify-content-between align-items-center p-2 border-bottom">
+                    <a href="#" class="text-decoration-none">Python HOME</a>
+                    <div>
+                        <button class="btn btn-sm btn-warning">Update</button>
+                        <button class="btn btn-sm btn-danger">Delete</button>
+                        <button class="btn btn-sm btn-info">View</button>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="p-4 flex-grow-1">
+            <h2>Welcome to Python Tutorials</h2>
+            <p>Select a topic from the sidebar to proceed.</p>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function addNavbarItem() {
+            let name = prompt("Enter name for the new navbar item:");
+            if (name) {
+                let navbarList = document.getElementById("navbar-list");
+                let newItem = document.createElement("li");
+                newItem.className = "nav-item";
+                newItem.innerHTML = `<a class="nav-link" href="#">${name}</a>`;
+                navbarList.appendChild(newItem);
+            }
+        }
+        
+        function addSidebarItem() {
+            let name = prompt("Enter name for the new sidebar topic:");
+            if (name) {
+                let sidebarList = document.getElementById("sidebar-list");
+                let newItem = document.createElement("li");
+                newItem.className = "d-flex justify-content-between align-items-center p-2 border-bottom";
+                newItem.innerHTML = `<a href="#" class="text-decoration-none">${name}</a>` +
+                    '<div>' +
+                    '<button class="btn btn-sm btn-warning">Update</button>' +
+                    '<button class="btn btn-sm btn-danger">Delete</button>' +
+                    '<button class="btn btn-sm btn-info">View</button>' +
+                    '</div>';
+                sidebarList.appendChild(newItem);
+            }
+        }
+    </script>
+</body>
+</html> -->

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Menu Items{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Menu Items</h2>
+    <ul class="list-group">
+        {% for item in items %}
+        <li class="list-group-item">{{ item.name }} - {{ item.position }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
