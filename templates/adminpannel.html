@@ -24,7 +24,7 @@
         <h2>Navigation Bar</h2>
         <ul>
             {% for item in navbar_items %}
-                <li>{{ item }}</li>
+                <li>{{ item.name }}</li>
             {% endfor %}
             <li><button onclick="openModal('navbar')">+</button></li>
         </ul>

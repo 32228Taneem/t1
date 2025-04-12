@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ item_name }} Subtopics</title>
+    <style>
+        .container {
+            display: flex;
+        }
+        .sidebar {
+            width: 200px;
+            background: #f0f0f0;
+            padding: 10px;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            background: rgba(0, 0, 0, 0.5);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            margin: 10% auto;
+            width: 300px;
+            border-radius: 5px;
+        }
+        .close {
+            float: right;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('admin_panel') }}">← Back to Admin Panel</a>
+    <h2>{{ item_name }}</h2>
+
+    <div class="container">
+        <div class="sidebar">
+            <h3>Subtopics</h3>
+            <ul>
+                {% for subtopic in subtopics %}
+                    <li>{{ subtopic }}</li>
+                {% endfor %}
+                <li><button onclick="openModal()">+</button></li>
+            </ul>
+        </div>
+        <div class="content">
+            <p>Click "+" to add a subtopic under {{ item_name }}</p>
+        </div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <form method="POST" action="{{ url_for('add_subtopic', item_name=item_name) }}">
+                <label for="name">Subtopic Name:</label>
+                <input type="text" name="name" required>
+                <button type="submit">Add Subtopic</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('modal').style.display = 'block';
+        }
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

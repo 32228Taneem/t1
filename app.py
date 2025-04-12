@@ -46,14 +46,20 @@ def login():
 
 @app.route('/adminpannel')
 def adminpannel():
-    cursor = mytdb.cursor()
-    cursor.execute("SELECT name FROM navbar_items")
-    navbar_items = [row[0] for row in cursor.fetchall()]
-
-    cursor.execute("SELECT name FROM sidebar_items")
-    sidebar_items = [row[0] for row in cursor.fetchall()]
+    cursor = mytdb.cursor(dictionary=True)
     
-    return render_template('adminpannel.html', navbar_items=navbar_items, sidebar_items=sidebar_items)
+    cursor.execute("SELECT id, name FROM navbar_items")
+    navbar_items = cursor.fetchall()
+    
+    cursor.execute("SELECT id, name, navbar_id FROM sidebar_items")
+    sidebar_items = cursor.fetchall()
+
+    # Group sidebar items by navbar_id
+    grouped_sidebar = {}
+    for item in sidebar_items:
+        grouped_sidebar.setdefault(item['navbar_id'], []).append(item)
+
+    return render_template('adminpannel.html', navbar_items=navbar_items, grouped_sidebar=grouped_sidebar)
 
 
 @app.route('/add_navbar_item', methods=['POST'])
@@ -66,14 +72,23 @@ def add_navbar_item():
         flash('Navbar item added successfully')
     return redirect(url_for('adminpannel'))
 
-@app.route('/add_sidebar_item', methods=['GET','POST'])
+@app.route('/add_sidebar_item', methods=['POST'])
 def add_sidebar_item():
     name = request.form.get('name')
-    if name:
+    navbar_id = request.form.get('navbar_id')  # comes from dropdown
+
+    if name and navbar_id:
         cursor = mytdb.cursor()
-        cursor.execute("INSERT INTO sidebar_items (name) VALUES (%s)", (name,))
+        cursor.execute("INSERT INTO sidebar_items (name, navbar_id) VALUES (%s, %s)", (name, navbar_id))
         mytdb.commit()
         flash('Sidebar item added successfully')
+
     return redirect(url_for('adminpannel'))
+
+@app.route('/view/<item_name>')
+def view_content(item_name):
+    # Do something with the item_name
+    return f"Viewing content for: {item_name}"
+
 
 app.run(use_reloader=True,debug=True)
