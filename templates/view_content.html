@@ -9,6 +9,12 @@
     body {
       display: flex;
       min-height: 100vh;
+      flex-direction: column;
+    }
+    .main-body {
+      display: flex;
+      flex: 1;
+      min-height: 0;
     }
     .sidebar {
       width: 250px;
@@ -20,6 +26,7 @@
     .content {
       flex: 1;
       padding: 2rem;
+      overflow-y: auto;
     }
     .subtopic-item {
       margin-bottom: 0.5rem;
@@ -49,31 +56,40 @@
 </head>
 <body>
 
-  <div class="sidebar">
-    <h5 class="text-primary">{{ item_name }} Subtopics</h5>
-    {% for sub in subtopics %}
-      <div class="subtopic-item" onclick="displaySubtopic(`{{ sub.title|escape }}`, `{{ sub.content|escape }}`)">
-        {{ sub.title }}
-      </div>
-    {% endfor %}
-    <button class="btn btn-sm btn-success mt-3" onclick="toggleForm()">+ Add Subtopic</button>
-  </div>
+  <!-- Navbar inclusion -->
+  {% include 'base.html' %}
 
-  <div class="content">
-    <div class="quill-form card p-4" id="formSection">
-      <form method="POST" action="{{ url_for('add_subtopic', item_name=item_name) }}" onsubmit="saveContent()">
-        <input type="text" name="title" placeholder="Enter Subtopic Title" class="form-control mb-3" required>
-        
-        <div id="editor-container" style="height: 200px;"></div>
-        <textarea name="content" id="content" style="display:none;"></textarea>
-
-        <button type="submit" class="btn btn-primary mt-3">Save</button>
-      </form>
+  <div class="main-body">
+    <div class="sidebar">
+      <h5 class="text-primary">{{ item_name }} Subtopics</h5>
+      {% for sub in subtopics %}
+        <div class="subtopic-item" onclick="displaySubtopic(`{{ sub.title|escape }}`, `{{ sub.content|escape }}`)">
+          {{ sub.title }}
+        </div>
+      {% endfor %}
+      <button class="btn btn-sm btn-success mt-3" onclick="toggleForm()">+ Add Subtopic</button>
     </div>
 
-    <div id="displayArea" class="mt-5" style="display:none;">
-      <div class="subtopic-title" id="displayTitle"></div>
-      <div id="displayContent"></div>
+    <div class="content">
+      <!-- Back Button -->
+      <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary mb-4">&larr; Back to Admin Panel</a>
+
+      <div class="quill-form card p-4" id="formSection" style="display: none;">
+
+        <form method="POST" action="{{ url_for('add_subtopic', item_name=item_name) }}" onsubmit="saveContent()">
+          <input type="text" name="title" placeholder="Enter Subtopic Title" class="form-control mb-3" required>
+          
+          <div id="editor-container" style="height: 200px;"></div>
+          <textarea name="content" id="content" style="display:none;"></textarea>
+
+          <button type="submit" class="btn btn-primary mt-3">Save</button>
+        </form>
+      </div>
+
+      <div id="displayArea" class="mt-5" style="display:none;">
+        <div class="subtopic-title" id="displayTitle"></div>
+        <div id="displayContent"></div>
+      </div>
     </div>
   </div>
 
@@ -93,9 +109,10 @@
     });
 
     function toggleForm() {
-      const form = document.getElementById('formSection');
-      form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
-    }
+  const form = document.getElementById('formSection');
+  form.style.display = 'block';
+}
+
 
     function saveContent() {
       const contentField = document.getElementById('content');
