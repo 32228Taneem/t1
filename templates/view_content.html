@@ -15,6 +15,7 @@
       background: #f8f9fa;
       padding: 1rem;
       border-right: 1px solid #ddd;
+      overflow-y: auto;
     }
     .content {
       flex: 1;
@@ -26,10 +27,23 @@
       background: #fff;
       border: 1px solid #ccc;
       border-radius: 5px;
+      cursor: pointer;
     }
     .quill-form {
       display: none;
       margin-top: 2rem;
+    }
+    #displayArea {
+      border: 1px solid #ddd;
+      padding: 1rem;
+      margin-top: 2rem;
+      background: #fff;
+      border-radius: 10px;
+    }
+    .subtopic-title {
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
     }
   </style>
 </head>
@@ -38,7 +52,9 @@
   <div class="sidebar">
     <h5 class="text-primary">{{ item_name }} Subtopics</h5>
     {% for sub in subtopics %}
-      <div class="subtopic-item">{{ sub.title }}</div>
+      <div class="subtopic-item" onclick="displaySubtopic(`{{ sub.title|escape }}`, `{{ sub.content|escape }}`)">
+        {{ sub.title }}
+      </div>
     {% endfor %}
     <button class="btn btn-sm btn-success mt-3" onclick="toggleForm()">+ Add Subtopic</button>
   </div>
@@ -53,6 +69,11 @@
 
         <button type="submit" class="btn btn-primary mt-3">Save</button>
       </form>
+    </div>
+
+    <div id="displayArea" class="mt-5" style="display:none;">
+      <div class="subtopic-title" id="displayTitle"></div>
+      <div id="displayContent"></div>
     </div>
   </div>
 
@@ -79,6 +100,19 @@
     function saveContent() {
       const contentField = document.getElementById('content');
       contentField.value = editor.root.innerHTML;
+    }
+
+    function displaySubtopic(title, content) {
+      document.getElementById('displayTitle').innerText = title;
+      document.getElementById('displayContent').innerHTML = unescape(content);
+      document.getElementById('displayArea').style.display = 'block';
+    }
+
+    // Ensure escaping works for innerHTML display
+    function unescape(html) {
+      const temp = document.createElement('textarea');
+      temp.innerHTML = html;
+      return temp.value;
     }
   </script>
 </body>
