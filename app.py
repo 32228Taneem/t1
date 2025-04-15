@@ -70,14 +70,14 @@ def view_content(item_name):
 
 @app.route('/add_subtopic/<item_name>', methods=['POST'])
 def add_subtopic(item_name):
-    title = request.form['name']
+    title = request.form['title']
     content = request.form.get('content')
 
     if item_name not in subtopic_db:
         subtopic_db[item_name] = []
 
     subtopic_db[item_name].append({'title': title, 'content': content})
-    return redirect(url_for('add_subtopic.html', item_name=item_name))
+    return redirect(url_for('view_content', item_name=item_name))
 
 # @app.route('/add_subtopic_form/<item_name>')
 # def add_subtopic_form(item_name):
