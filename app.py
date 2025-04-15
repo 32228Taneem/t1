@@ -6,10 +6,11 @@ app=Flask(__name__)
 app.config['SESSION_TYPE']='filesystem'
 
 navbar_items = ['Python', 'HTML']
-subtopic_db = {
-    'Python': ['Intro', 'Variables'],
-    'HTML': ['Tags', 'Forms']
-}
+subtopic_db = {}
+# {
+#     'Python': ['Intro', 'Variables'],
+#     'HTML': ['Tags', 'Forms']
+# }
 
 mytdb=mysql.connector.connect(host='localhost',user='root',password='Taneem_2002',db='sharetech')
 Session(app)
@@ -62,17 +63,26 @@ def add_navbar_item():
         subtopic_db[item] = []
     return redirect(url_for('admin_panel'))
 
-@app.route('/view/<item_name>')
+@app.route('/view_content/<item_name>')
 def view_content(item_name):
     subtopics = subtopic_db.get(item_name, [])
-    return render_template('add_subtopic.html', item_name=item_name, subtopics=subtopics)
+    return render_template('view_content.html', item_name=item_name, subtopics=subtopics)
 
 @app.route('/add_subtopic/<item_name>', methods=['POST'])
 def add_subtopic(item_name):
-    subtopic = request.form['name']
-    if subtopic:
-        subtopic_db.setdefault(item_name, []).append(subtopic)
-    return redirect(url_for('view_content', item_name=item_name))
+    title = request.form['name']
+    content = request.form.get('content')
+
+    if item_name not in subtopic_db:
+        subtopic_db[item_name] = []
+
+    subtopic_db[item_name].append({'title': title, 'content': content})
+    return redirect(url_for('add_subtopic.html', item_name=item_name))
+
+# @app.route('/add_subtopic_form/<item_name>')
+# def add_subtopic_form(item_name):
+#     return render_template('add_subtopic.html', item_name=item_name)
+
 
 @app.route('/logout')
 def logout():
