@@ -52,6 +52,25 @@
       font-size: 1.2rem;
       margin-bottom: 1rem;
     }
+
+    .rich-content-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.rich-content-container img {
+  max-width: 150px;
+  height: auto;
+  border-radius: 8px;
+}
+
+.rich-content-container p {
+  margin: 0;
+  padding: 0;
+}
+
   </style>
 </head>
 <body>
@@ -88,8 +107,9 @@
 
       <div id="displayArea" class="mt-5" style="display:none;">
         <div class="subtopic-title" id="displayTitle"></div>
-        <div id="displayContent"></div>
+        <div id="displayContent" class="rich-content-container"></div>
       </div>
+      
     </div>
   </div>
 

@@ -73,9 +73,16 @@ def view_content(item_name):
     if not nav_id:
         return 'Navbar item not found'
 
-    cursor.execute('SELECT title, content FROM subtopics WHERE navbar_id=%s', (nav_id[0],))
-    subtopics = [{'title': row[0], 'content': row[1]} for row in cursor.fetchall()]
+    cursor.execute('SELECT title, content, image_filename FROM subtopics WHERE navbar_id=%s', (nav_id[0],))
+    subtopics = [
+        {
+            'title': row[0],
+            'content': row[1],
+            'image': url_for('static', filename=f'uploads/{row[2]}') if row[2] else None
+        } for row in cursor.fetchall()
+    ]
     return render_template('view_content.html', item_name=item_name, subtopics=subtopics)
+
 
 @app.route('/add_subtopic/<item_name>', methods=['POST'])
 def add_subtopic(item_name):
