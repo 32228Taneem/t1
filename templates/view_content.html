@@ -52,30 +52,25 @@
       font-size: 1.2rem;
       margin-bottom: 1rem;
     }
-
     .rich-content-container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 15px;
-}
-
-.rich-content-container img {
-  max-width: 150px;
-  height: auto;
-  border-radius: 8px;
-}
-
-.rich-content-container p {
-  margin: 0;
-  padding: 0;
-}
-
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 15px;
+    }
+    .rich-content-container img {
+      max-width: 150px;
+      height: auto;
+      border-radius: 8px;
+    }
+    .rich-content-container p {
+      margin: 0;
+      padding: 0;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Navbar inclusion -->
   {% include 'base.html' %}
 
   <div class="main-body">
@@ -85,22 +80,22 @@
         <div class="subtopic-item" onclick="displaySubtopic(`{{ sub.title|escape }}`, `{{ sub.content|escape }}`)">
           {{ sub.title }}
         </div>
+        <div class="d-flex gap-2 mb-3">
+          <a href="{{ url_for('edit_subtopic', sub_id=sub.id) }}" class="btn btn-sm btn-warning w-50">Edit</a>
+          <a href="{{ url_for('delete_subtopic', sub_id=sub.id, item_name=item_name) }}" class="btn btn-sm btn-danger w-50" onclick="return confirm('Are you sure to delete this subtopic?')">Delete</a>
+        </div>
       {% endfor %}
-      <button class="btn btn-sm btn-success mt-3" onclick="toggleForm()">+ Add Subtopic</button>
+      <button class="btn btn-success btn-sm w-100 mt-3" onclick="toggleForm()">+ Add Subtopic</button>
     </div>
 
     <div class="content">
-      <!-- Back Button -->
       <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary mb-4">&larr; Back to Admin Panel</a>
 
-      <div class="quill-form card p-4" id="formSection" style="display: none;">
-
+      <div id="formSection" class="quill-form card p-4" style="display: none;">
         <form method="POST" action="{{ url_for('add_subtopic', item_name=item_name) }}" onsubmit="saveContent()">
           <input type="text" name="title" placeholder="Enter Subtopic Title" class="form-control mb-3" required>
-          
           <div id="editor-container" style="height: 200px;"></div>
           <textarea name="content" id="content" style="display:none;"></textarea>
-
           <button type="submit" class="btn btn-primary mt-3">Save</button>
         </form>
       </div>
@@ -109,7 +104,6 @@
         <div class="subtopic-title" id="displayTitle"></div>
         <div id="displayContent" class="rich-content-container"></div>
       </div>
-      
     </div>
   </div>
 
@@ -129,10 +123,9 @@
     });
 
     function toggleForm() {
-  const form = document.getElementById('formSection');
-  form.style.display = 'block';
-}
-
+      const form = document.getElementById('formSection');
+      form.style.display = form.style.display === 'block' ? 'none' : 'block';
+    }
 
     function saveContent() {
       const contentField = document.getElementById('content');
@@ -145,7 +138,6 @@
       document.getElementById('displayArea').style.display = 'block';
     }
 
-    // Ensure escaping works for innerHTML display
     function unescape(html) {
       const temp = document.createElement('textarea');
       temp.innerHTML = html;
