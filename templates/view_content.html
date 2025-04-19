@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>{{ item_name }} - Subtopics</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.tiny.cloud/1/lezf5y9e1y8vwjv3870f06avrgu9855j1octvf69ab6d8hut/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
   <style>
     body {
       display: flex;
@@ -14,7 +15,6 @@
     .main-body {
       display: flex;
       flex: 1;
-      min-height: 0;
     }
     .sidebar {
       width: 250px;
@@ -36,36 +36,27 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    .quill-form {
+    .form-section {
       display: none;
       margin-top: 2rem;
     }
     #displayArea {
-      border: 1px solid #ddd;
-      padding: 1rem;
+      display: none;
       margin-top: 2rem;
+      padding: 1rem;
       background: #fff;
       border-radius: 10px;
+      border: 1px solid #ccc;
     }
     .subtopic-title {
+      font-size: 1.5rem;
       font-weight: bold;
-      font-size: 1.2rem;
+      text-align: center;
       margin-bottom: 1rem;
     }
-    .rich-content-container {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      gap: 15px;
-    }
     .rich-content-container img {
-      max-width: 150px;
+      max-width: 100%;
       height: auto;
-      border-radius: 8px;
-    }
-    .rich-content-container p {
-      margin: 0;
-      padding: 0;
     }
   </style>
 </head>
@@ -74,75 +65,86 @@
   {% include 'base.html' %}
 
   <div class="main-body">
+    <!-- Sidebar -->
     <div class="sidebar">
       <h5 class="text-primary">{{ item_name }} Subtopics</h5>
+
       {% for sub in subtopics %}
-        <div class="subtopic-item" onclick="displaySubtopic(`{{ sub.title|escape }}`, `{{ sub.content|escape }}`)">
-          {{ sub.title }}
-        </div>
-        <div class="d-flex gap-2 mb-3">
-          <a href="{{ url_for('edit_subtopic', sub_id=sub.id) }}" class="btn btn-sm btn-warning w-50">Edit</a>
-          <a href="{{ url_for('delete_subtopic', sub_id=sub.id, item_name=item_name) }}" class="btn btn-sm btn-danger w-50" onclick="return confirm('Are you sure to delete this subtopic?')">Delete</a>
-        </div>
+      <div class="subtopic-item"
+           data-title="{{ sub.title }}"
+           data-content="{{ sub.content | e }}"
+           onclick="handleSubtopicClick(this)">
+        {{ sub.title }}
+      </div>
       {% endfor %}
+
       <button class="btn btn-success btn-sm w-100 mt-3" onclick="toggleForm()">+ Add Subtopic</button>
     </div>
 
+    <!-- Content Area -->
     <div class="content">
-      <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary mb-4">&larr; Back to Admin Panel</a>
+      <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary mb-3">&larr; Back</a>
 
-      <div id="formSection" class="quill-form card p-4" style="display: none;">
-        <form method="POST" action="{{ url_for('add_subtopic', item_name=item_name) }}" onsubmit="saveContent()">
+      <!-- Add Subtopic Form -->
+      <div id="formSection" class="form-section card p-4" style="display: none;">
+        <form method="POST" action="{{ url_for('add_subtopic', item_name=item_name) }}" onsubmit="return saveContent();">
           <input type="text" name="title" placeholder="Enter Subtopic Title" class="form-control mb-3" required>
-          <div id="editor-container" style="height: 200px;"></div>
-          <textarea name="content" id="content" style="display:none;"></textarea>
+          <textarea id="editor" name="content"></textarea>
           <button type="submit" class="btn btn-primary mt-3">Save</button>
         </form>
       </div>
 
-      <div id="displayArea" class="mt-5" style="display:none;">
+      <!-- Display Area -->
+      <div id="displayArea">
         <div class="subtopic-title" id="displayTitle"></div>
         <div id="displayContent" class="rich-content-container"></div>
       </div>
     </div>
   </div>
 
-  <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
   <script>
-    const editor = new Quill('#editor-container', {
-      theme: 'snow',
-      placeholder: 'Write your content here...',
-      modules: {
-        toolbar: [
-          ['bold', 'italic', 'underline'],
-          [{ 'header': 1 }, { 'header': 2 }],
-          [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-          ['link', 'image']
-        ]
-      }
+    tinymce.init({
+      selector: '#editor',
+      height: 400,
+      plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table emoticons',
+      toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | link image media emoticons | forecolor backcolor | preview code',
+      menubar: false
     });
-
+  
     function toggleForm() {
       const form = document.getElementById('formSection');
-      form.style.display = form.style.display === 'block' ? 'none' : 'block';
+      const displayArea = document.getElementById('displayArea');
+  
+      // Hide display area
+      displayArea.style.display = 'none';
+  
+      // Toggle form
+      if (form.style.display === 'block') {
+        form.style.display = 'none';
+      } else {
+        form.style.display = 'block';
+      }
     }
-
+  
     function saveContent() {
-      const contentField = document.getElementById('content');
-      contentField.value = editor.root.innerHTML;
+      tinymce.triggerSave();
+      return true;
     }
+  
+    function handleSubtopicClick(element) {
+  const title = element.dataset.title;
+  const content = element.dataset.content;
 
-    function displaySubtopic(title, content) {
-      document.getElementById('displayTitle').innerText = title;
-      document.getElementById('displayContent').innerHTML = unescape(content);
-      document.getElementById('displayArea').style.display = 'block';
-    }
+  // Hide form and show content
+  document.getElementById('formSection').style.display = 'none';
 
-    function unescape(html) {
-      const temp = document.createElement('textarea');
-      temp.innerHTML = html;
-      return temp.value;
-    }
+  document.getElementById('displayTitle').innerText = title;
+  document.getElementById('displayContent').innerHTML = content;
+  document.getElementById('displayArea').style.display = 'block';
+}
+
   </script>
+  
+
 </body>
 </html>
