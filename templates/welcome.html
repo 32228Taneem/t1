@@ -33,13 +33,31 @@
                     <li class="nav-item"><a class="nav-link" href="#">About</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Services</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
-                    <li class="nav-item d-lg-none">
-                        <a class="nav-link btn text-white" href="{{url_for('login')}}">Admin Login</a>
-                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                          aria-expanded="false">
+                          SignUp
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                          <li>
+                            <a class="dropdown-item" href="{{url_for('admincreate')}}">Admin Signup</a>
+                          </li>
+                          <li><a class="dropdown-item" href="{{url_for('usercreate')}}">User SignUp</a></li>
+                        </ul>
+                      </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                          aria-expanded="false">
+                          Login
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                          <li>
+                            <a class="dropdown-item" href="{{url_for('login')}}">Admin Login</a>
+                          </li>
+                          <li><a class="dropdown-item" href="{{url_for('userlogin')}}">User Login</a></li>
+                        </ul>
+                      </li>
                 </ul>
-            </div>
-            <div class="d-none d-lg-block">
-                <a class="nav-link btn text-white" href="{{url_for('login')}}">Admin Login</a>
             </div>
         </div>
     </nav>

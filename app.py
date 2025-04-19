@@ -1,8 +1,12 @@
-from flask import Flask, request, render_template, redirect, url_for, flash, session
+from flask import Flask,render_template,url_for,redirect,request,flash,session
+from otp import genotp
+from cmail import sendmail
+from tokens import encode,decode
 import mysql.connector
 from flask_session import Session
 from werkzeug.utils import secure_filename
 import os
+import re
 
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -27,6 +31,224 @@ def home():
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/usercreate',methods=['GET','POST'])
+def usercreate():
+    if request.method=='POST':
+        uname=request.form['name']
+        uemail=request.form['email']
+        uaddress=request.form['address']
+        upassword=request.form['password']
+        cursor=mytdb.cursor(buffered=True)
+        cursor.execute('select count(user_email) from usercreate where user_email=%s',[uemail])
+        uemail_count=cursor.fetchone()
+        if uemail_count[0]==0:
+            uotp=genotp()
+            userdata={'uname':uname,'uemail':uemail,'upassword':upassword,'uotp':uotp}
+            subject='TQ for registering in taneemkart'
+            body=f'Ecommers verification otp for user regrestation {uotp}'
+            sendmail(to=uemail,subject=subject,body=body)
+            flash('OTP has sent to given mail')
+            return redirect(url_for('uotp',pudata=encode(data=userdata)))
+        elif uemail_count[0]==1:
+            flash('email already exist please login')
+            return redirect(url_for('userlogin'))
+    return render_template('usersignup.html')
+
+@app.route('/uotp/<pudata>',methods=['GET','POST'])
+def uotp(pudata):
+    if request.method=='POST':
+        fuotp=request.form['otp']
+        try:
+            d_udata=decode(data=pudata)
+        except Exception as e:
+            print(e)
+            flash('something went wrong')
+            return redirect(url_for('usercreate'))
+        else:
+            if fuotp==d_udata['uotp']:
+                cursor=mytdb.cursor(buffered=True)
+                cursor.execute('insert into usercreate( user_email,username,password) values(%s,%s,%s)',[d_udata['uemail'],d_udata['uname'],d_udata['upassword']])
+                mytdb.commit()
+                cursor.close()
+                flash('reg success')
+                return redirect(url_for('userlogin'))
+            else:
+                flash('otp is wrong')
+                return redirect(url_for('usercreate'))
+    return render_template('userotp.html')
+
+@app.route('/userlogin',methods=['GET','POST'])
+def userlogin():
+    if not session.get('user'):
+        if request.method=='POST':
+                log_uemail=request.form['email']
+                log_upassword=request.form['password']
+                try:
+                    cursor=mytdb.cursor(buffered=True)
+                    cursor.execute('select count(user_email) from usercreate where user_email=%s',[log_uemail])
+                    stored_emailcount=cursor.fetchone()
+                except Exception as e:
+                    print(e)
+                    flash('something went wrong connection error')
+                    return redirect(url_for('userlogin'))
+                else:
+                    if stored_emailcount[0]==1:
+                        cursor.execute('select password from usercreate where user_email=%s',[log_uemail])
+                        stored_password=cursor.fetchone()
+                        print(stored_password)
+                        if log_upassword==stored_password[0].decode('utf-8'):
+                            print(session)
+                            session['user']=log_uemail
+                            if not session.get(log_uemail):
+                                session[log_uemail]={}
+                            print(session)
+                            return redirect(url_for('index')) # ya asal readreview page aanaaa
+                        else:
+                            flash('wrong pass')
+                            return redirect(url_for('userlogin'))
+                    else:
+                        flash('wrong email')
+                        return redirect(url_for('userlogin'))
+        return render_template('userlogin.html')
+    else:
+        return redirect(url_for('index'))
+    
+@app.route('/userforgot',methods=['GET','POST'])
+def userforgot():
+    if request.method=='POST':
+        forgot_useremail=request.form['uemail']
+        cursor=mytdb.cursor(buffered=True)
+        cursor.execute('select count(user_email) from usercreate where user_email=%s',[forgot_useremail])
+        stored_email=cursor.fetchone()
+        if stored_email[0]==1:
+            subject='reset link for user'
+            body=f"click on the link to update ur password:{url_for('user_password_update',token=encode(data=forgot_useremail),_external=True)}" # _external=true likhay nai tho o data pura text kay naad jata
+            sendmail(to=forgot_useremail,subject=subject,body=body)
+            flash(f'reset link has sent to given mail {forgot_useremail}')
+            return redirect(url_for('userforgot'))
+        elif stored_email[0]==0:
+            flash('no email regestered please check')
+            return redirect(url_for('userlogin'))
+    return render_template('userforfot.html')
+
+@app.route('/user_password_update/<token>',methods=['GET','POST'])
+def user_password_update(token):
+    if request.method=='POST':
+        try:
+            npassword=request.form['npassword']
+            cpassword=request.form['cpassword']
+            dtoken=decode(data=token) #detoken the encrpt email
+        except Exception as e:
+            print(e)
+            flash('something went wrong')
+            return redirect(url_for('userlogin'))
+        else:
+            if npassword==cpassword:
+                cursor=mytdb.cursor(buffered=True)
+                cursor.execute('update usercreate set password=%s where user_email=%s',[npassword,dtoken])
+                mytdb.commit()
+                flash('password updated succesfully')
+                return redirect(url_for('userlogin'))
+            else:
+                flash('password mismaitches')
+                return redirect(url_for('ad_password_update',token=token))
+    return render_template('newuserpassword.html')
+
+@app.route('/userlogout')
+def userlogout():
+    if session.get('user'):
+        session.pop('user')
+        return redirect(url_for('index'))
+    return redirect(url_for('userlogin'))
+
+
+@app.route('/admincreate',methods=['GET','POST'])
+def admincreate():
+    if request.method=='POST':
+        #print(request.form) form ka data kaisa aata hey kako dekhnay aisa likhtey
+        aname=request.form['username']
+        aemail=request.form['email']
+        password=request.form['password']
+        cursor=mytdb.cursor(buffered=True)
+        cursor.execute('select count(admin_email) from admins where admin_email=%s',[aemail])
+        email_count=cursor.fetchone()
+        if email_count[0]==0:
+            otp=genotp()
+            admindata={'aname':aname,'aemail':aemail,'password':password,'aotp':otp}
+            subject='TQ for registering in taneemkart'
+            body=f'Ecommers verification otp for admin regrestation {otp}'
+            sendmail(to=aemail,subject=subject,body=body)
+            flash('OTP has sent to given mail')
+            return redirect(url_for('otp',padata=encode(data=admindata)))
+        elif email_count[0]==1:
+            flash('email already exist please login')
+            return redirect(url_for('login'))
+    return render_template('admincreate.html')
+
+@app.route('/otp/<padata>',methods=['GET','POST'])
+def otp(padata):
+    if request.method=='POST':
+        fotp=request.form['otp']
+        try:
+            d_data=decode(data=padata)
+        except Exception as e:
+            print(e)
+            flash('something went wrong')
+            return redirect(url_for('admincreate'))
+        else:
+            if fotp==d_data['aotp']:
+                cursor=mytdb.cursor(buffered=True)
+                cursor.execute('insert into admins(admin_email, admin_name,password) values(%s,%s,%s)',[d_data['aemail'],d_data['aname'],d_data['password']])
+                mytdb.commit()
+                cursor.close()
+                flash('reg success')
+                return redirect(url_for('login'))
+            else:
+                flash('otp is wrong')
+                return redirect(url_for('admincreate'))
+    return render_template('adminotp.html')
+
+@app.route('/adminforgot',methods=['GET','POST'])
+def adminforgot():
+    if request.method=='POST':
+        forgot_email=request.form['email']
+        cursor=mytdb.cursor(buffered=True)
+        cursor.execute('select count(email) from admincreate where email=%s',[forgot_email])
+        stored_email=cursor.fetchone()
+        if stored_email[0]==1:
+            subject='reset link for admin '
+            body=f"click on the link to update ur password:{url_for('ad_password_update',token=encode(data=forgot_email),_external=True)}" # _external=true likhay nai tho o data pura text kay naad jata
+            sendmail(to=forgot_email,subject=subject,body=body)
+            flash(f'reset link has sent to given mail {forgot_email}')
+            return redirect(url_for('adminforgot'))
+        elif stored_email[0]==0:
+            flash('no email regestered please check')
+            return redirect(url_for('login'))
+    return render_template('forgot.html')
+
+@app.route('/ad_password_update/<token>',methods=['GET','POST'])
+def ad_password_update(token):
+    if request.method=='POST':
+        try:
+            npassword=request.form['npassword']
+            cpassword=request.form['cpassword']
+            dtoken=decode(data=token) #detoken the encrpt email
+        except Exception as e:
+            print(e)
+            flash('something went wrong')
+            return redirect(url_for('login'))
+        else:
+            if npassword==cpassword:
+                cursor=mytdb.cursor(buffered=True)
+                cursor.execute('update admincreate set password=%s where email=%s',[npassword,dtoken])
+                mytdb.commit()
+                flash('password updated succesfully')
+                return redirect(url_for('login'))
+            else:
+                flash('password mismaitches')
+                return redirect(url_for('ad_password_update',token=token))
+    return render_template('newpassword.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
