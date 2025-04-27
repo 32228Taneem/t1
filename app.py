@@ -27,7 +27,32 @@ cursor = mytdb.cursor(buffered=True)
 
 @app.route('/')
 def home():
-    return render_template('welcome.html')
+    # cursor = db.cursor()
+    cursor.execute('SELECT id, name FROM navbar_items')  # Fetch navbar items
+    navbar_items = cursor.fetchall()  # Retrieve all navbar items
+    
+    return render_template('welcome.html', navbar_items=navbar_items)
+
+
+@app.route('/view_subtopics/<item_name>')
+def view_subtopics(item_name):
+    cursor.execute('SELECT id FROM navbar_items WHERE name=%s', (item_name,))
+    nav_id = cursor.fetchone()
+    if not nav_id:
+        return 'Navbar item not found'
+
+    cursor.execute('SELECT id, title, content, image_filename FROM subtopics WHERE navbar_id=%s', (nav_id[0],))
+    subtopics = [
+        {
+            'id': row[0],
+            'title': row[1],
+            'content': row[2],
+            'image': url_for('static', filename=f'uploads/{row[3]}') if row[3] else None
+        } for row in cursor.fetchall()
+    ]
+    return render_template('view_subtopics.html', item_name=item_name, subtopics=subtopics)
+
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

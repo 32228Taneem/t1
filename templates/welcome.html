@@ -1,7 +1,6 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,58 +9,71 @@
     <link rel="stylesheet" href="static/navbar.css">
 </head>
 {% with messages = get_flashed_messages() %}
-  {% if messages %}
-    {% for message in messages %}
-      <h2>{{ message }}</h2>
-    {% endfor %}
-  {% endif %}
+{% if messages %}
+{% for message in messages %}
+<h2>{{ message }}</h2>
+{% endfor %}
+{% endif %}
 {% endwith %}
+
 <body>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Company Name</a>
+            <a class="navbar-brand" href="{{ url_for('home') }}">Company Name</a>
             <form class="d-flex me-auto">
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
                 <button class="btn btn-outline-success" type="submit">Search</button>
             </form>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
+
+                  {% for item in navbar_items %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('view_subtopics', item_name=item[1]) }}">{{ item[1] }}</a>
+                    </li>
+                    {% endfor %}
+
+                    <!-- Static Navbar Items like Home, About, Services, Contact -->
                     <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">About</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Services</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+
+                    <!-- SignUp & Login Dropdown (as per your initial code) -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
-                          aria-expanded="false">
-                          SignUp
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            SignUp
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                          <li>
-                            <a class="dropdown-item" href="{{url_for('admincreate')}}">Admin Signup</a>
-                          </li>
-                          <li><a class="dropdown-item" href="{{url_for('usercreate')}}">User SignUp</a></li>
+                            <li><a class="dropdown-item" href="{{url_for('admincreate')}}">Admin Signup</a></li>
+                            <li><a class="dropdown-item" href="{{url_for('usercreate')}}">User SignUp</a></li>
                         </ul>
-                      </li>
+                    </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
-                          aria-expanded="false">
-                          Login
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Login
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                          <li>
-                            <a class="dropdown-item" href="{{url_for('login')}}">Admin Login</a>
-                          </li>
-                          <li><a class="dropdown-item" href="{{url_for('userlogin')}}">User Login</a></li>
+                            <li><a class="dropdown-item" href="{{url_for('login')}}">Admin Login</a></li>
+                            <li><a class="dropdown-item" href="{{url_for('userlogin')}}">User Login</a></li>
                         </ul>
-                      </li>
+                    </li>
+
                 </ul>
             </div>
         </div>
     </nav>
-    
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
