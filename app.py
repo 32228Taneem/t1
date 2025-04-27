@@ -176,8 +176,8 @@ def admincreate():
         if email_count[0]==0:
             otp=genotp()
             admindata={'aname':aname,'aemail':aemail,'password':password,'aotp':otp}
-            subject='TQ for registering in taneemkart'
-            body=f'Ecommers verification otp for admin regrestation {otp}'
+            subject='TQ for registering in this website'
+            body=f'admin verification otp for admin regrestation {otp}'
             sendmail(to=aemail,subject=subject,body=body)
             flash('OTP has sent to given mail')
             return redirect(url_for('otp',padata=encode(data=admindata)))
