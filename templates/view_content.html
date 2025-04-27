@@ -68,6 +68,21 @@
       max-width: 100%;
       height: auto;
     }
+
+    #displayContent table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#displayContent table, #displayContent th, #displayContent td {
+  border: 1px solid #ddd;
+}
+
+#displayContent th, #displayContent td {
+  padding: 8px;
+  text-align: left;
+}
+
   </style>
 </head>
 
@@ -130,7 +145,7 @@
       selector: '#editor',
       height: 400,
       plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table emoticons',
-      toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | link image media emoticons | forecolor backcolor | preview code',
+      toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | link image media table emoticons | forecolor backcolor | preview code',
       menubar: false
     });
 
