@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>{{ item_name }} - Subtopics</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.tiny.cloud/1/lezf5y9e1y8vwjv3870f06avrgu9855j1octvf69ab6d8hut/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+  <script src="https://cdn.tiny.cloud/1/lezf5y9e1y8vwjv3870f06avrgu9855j1octvf69ab6d8hut/tinymce/6/tinymce.min.js"
+    referrerpolicy="origin"></script>
 
   <style>
     body {
@@ -12,10 +14,12 @@
       min-height: 100vh;
       flex-direction: column;
     }
+
     .main-body {
       display: flex;
       flex: 1;
     }
+
     .sidebar {
       width: 250px;
       background: #f8f9fa;
@@ -23,11 +27,13 @@
       border-right: 1px solid #ddd;
       overflow-y: auto;
     }
+
     .content {
       flex: 1;
       padding: 2rem;
       overflow-y: auto;
     }
+
     .subtopic-item {
       margin-bottom: 0.5rem;
       padding: 0.5rem;
@@ -36,10 +42,12 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
     .form-section {
       display: none;
       margin-top: 2rem;
     }
+
     #displayArea {
       display: none;
       margin-top: 2rem;
@@ -48,18 +56,21 @@
       border-radius: 10px;
       border: 1px solid #ccc;
     }
+
     .subtopic-title {
       font-size: 1.5rem;
       font-weight: bold;
       text-align: center;
       margin-bottom: 1rem;
     }
+
     .rich-content-container img {
       max-width: 100%;
       height: auto;
     }
   </style>
 </head>
+
 <body>
 
   {% include 'base.html' %}
@@ -68,15 +79,26 @@
     <!-- Sidebar -->
     <div class="sidebar">
       <h5 class="text-primary">{{ item_name }} Subtopics</h5>
-
       {% for sub in subtopics %}
-      <div class="subtopic-item"
-           data-title="{{ sub.title }}"
-           data-content="{{ sub.content | e }}"
-           onclick="handleSubtopicClick(this)">
-        {{ sub.title }}
+      <div class="d-flex align-items-center mb-2">
+        <div class="subtopic-item flex-grow-1" data-title="{{ sub.title }}" data-content="{{ sub.content | e }}"
+          onclick="handleSubtopicClick(this)">
+          {{ sub.title }}
+        </div>
+        <div class="dropdown ms-2">
+          <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            ⋮
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{{ url_for('edit_subtopic', sub_id=sub.id) }}">Edit</a></li>
+            <li><a class="dropdown-item text-danger"
+                href="{{ url_for('delete_subtopic', sub_id=sub.id, item_name=item_name) }}"
+                onclick="return confirm('Are you sure you want to delete this subtopic?');">Delete</a></li>
+          </ul>
+        </div>
       </div>
       {% endfor %}
+
 
       <button class="btn btn-success btn-sm w-100 mt-3" onclick="toggleForm()">+ Add Subtopic</button>
     </div>
@@ -87,7 +109,8 @@
 
       <!-- Add Subtopic Form -->
       <div id="formSection" class="form-section card p-4" style="display: none;">
-        <form method="POST" action="{{ url_for('add_subtopic', item_name=item_name) }}" onsubmit="return saveContent();">
+        <form method="POST" action="{{ url_for('add_subtopic', item_name=item_name) }}"
+          onsubmit="return saveContent();">
           <input type="text" name="title" placeholder="Enter Subtopic Title" class="form-control mb-3" required>
           <textarea id="editor" name="content"></textarea>
           <button type="submit" class="btn btn-primary mt-3">Save</button>
@@ -110,14 +133,14 @@
       toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | link image media emoticons | forecolor backcolor | preview code',
       menubar: false
     });
-  
+
     function toggleForm() {
       const form = document.getElementById('formSection');
       const displayArea = document.getElementById('displayArea');
-  
+
       // Hide display area
       displayArea.style.display = 'none';
-  
+
       // Toggle form
       if (form.style.display === 'block') {
         form.style.display = 'none';
@@ -125,26 +148,27 @@
         form.style.display = 'block';
       }
     }
-  
+
     function saveContent() {
       tinymce.triggerSave();
       return true;
     }
-  
+
     function handleSubtopicClick(element) {
-  const title = element.dataset.title;
-  const content = element.dataset.content;
+      const title = element.dataset.title;
+      const content = element.dataset.content;
 
-  // Hide form and show content
-  document.getElementById('formSection').style.display = 'none';
+      // Hide form and show content
+      document.getElementById('formSection').style.display = 'none';
 
-  document.getElementById('displayTitle').innerText = title;
-  document.getElementById('displayContent').innerHTML = content;
-  document.getElementById('displayArea').style.display = 'block';
-}
+      document.getElementById('displayTitle').innerText = title;
+      document.getElementById('displayContent').innerHTML = content;
+      document.getElementById('displayArea').style.display = 'block';
+    }
 
   </script>
-  
+
 
 </body>
+
 </html>
