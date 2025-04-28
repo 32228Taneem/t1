@@ -1,4 +1,4 @@
-from flask import Flask,render_template,url_for,redirect,request,flash,session
+from flask import Flask,render_template,url_for,redirect,request,flash,session,jsonify,send_from_directory
 from otp import genotp
 from cmail import sendmail
 from tokens import encode,decode
@@ -12,8 +12,8 @@ app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'
 app.secret_key = 'your_secret_key'  # Required for session and flash
 UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 Session(app)
 
 # MySQL Configuration
@@ -25,6 +25,12 @@ mytdb = mysql.connector.connect(
 )
 cursor = mytdb.cursor(buffered=True)
 
+# ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg', 'webp'}
+# app.config['UPLOAD_FOLDER'] = 'static/uploads'
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
 @app.route('/')
 def home():
     # cursor = db.cursor()
@@ -33,6 +39,26 @@ def home():
     
     return render_template('welcome.html', navbar_items=navbar_items)
 
+@app.route('/upload_image', methods=['POST'])
+def upload_image():
+    if 'file' not in request.files:
+        return 'No file part', 400
+    file = request.files['file']
+    if file.filename == '':
+        return 'No selected file', 400
+    if file and allowed_file(file.filename):
+        filename = file.filename
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(upload_path)
+        file_url = url_for('uploaded_file', filename=filename)  # Returns the URL of the file
+        return {'location': file_url}
+    else:
+        return 'File type not allowed', 400
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(os.path.join(app.root_path, 'static', 'uploads'), filename)
+ 
 
 @app.route('/view_subtopics/<item_name>')
 def view_subtopics(item_name):
@@ -52,10 +78,6 @@ def view_subtopics(item_name):
     ]
     return render_template('view_subtopics.html', item_name=item_name, subtopics=subtopics)
 
-
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/usercreate',methods=['GET','POST'])
 def usercreate():

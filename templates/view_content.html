@@ -82,6 +82,13 @@
   padding: 8px;
   text-align: left;
 }
+#displayContent img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 10px 0;
+}
+
 
   </style>
 </head>
@@ -142,12 +149,42 @@
 
   <script>
     tinymce.init({
-      selector: '#editor',
-      height: 400,
-      plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table emoticons',
-      toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | link image media table emoticons | forecolor backcolor | preview code',
-      menubar: false
-    });
+    selector: '#editor',
+    height: 400,
+    plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table emoticons',
+    toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | link image media table emoticons | forecolor backcolor | preview code',
+    menubar: false,
+    images_upload_url: '/upload_image',
+    images_upload_base_path: '/uploads/', // or '/static/uploads/' depending on your path
+    automatic_uploads: true,
+    file_picker_types: 'image',
+    file_picker_callback: function (callback, value, meta) {
+        var input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+
+        input.onchange = function () {
+            var file = input.files[0];
+            var formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                callback(data.location); // Insert the image URL returned from Flask
+            })
+            .catch(error => {
+                console.error('Error uploading image:', error);
+            });
+        };
+    }
+});
+
+
 
     function toggleForm() {
       const form = document.getElementById('formSection');
