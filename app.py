@@ -66,7 +66,7 @@ def view_subtopics(item_name):
     if not nav_id:
         return 'Navbar item not found'
 
-    cursor.execute('SELECT id, title, content, image_filename FROM subtopics WHERE navbar_id=%s', (nav_id[0],))
+    cursor.execute('SELECT id, title, content, image_filename FROM subtopics WHERE navbar_id=%s ORDER BY position', (nav_id[0],))
     subtopics = [
         {
             'id': row[0],
@@ -363,7 +363,7 @@ def view_content(item_name):
     if not nav_id:
         return 'Navbar item not found'
 
-    cursor.execute('SELECT id, title, content, image_filename FROM subtopics WHERE navbar_id=%s', (nav_id[0],))
+    cursor.execute('SELECT id, title, content, image_filename FROM subtopics WHERE navbar_id=%s ORDER BY position', (nav_id[0],))
     subtopics = [
         {
             'id': row[0],
@@ -373,6 +373,7 @@ def view_content(item_name):
         } for row in cursor.fetchall()
     ]
     return render_template('view_content.html', item_name=item_name, subtopics=subtopics)
+
 
 
 @app.route('/add_subtopic/<item_name>', methods=['POST'])
@@ -449,6 +450,29 @@ def update_navbar_order():
 
     mytdb.commit()
     return {'status': 'success'}
+
+
+@app.route('/update_subtopic_order', methods=['POST'])
+def update_subtopic_order():
+    order = request.json.get('order')
+    print(f"Received order: {order}")  # Log the order
+    if not order:
+        return {'status': 'No order provided'}, 400
+
+    try:
+        for position, sub_id in enumerate(order, start=1):
+            print(f"Updating subtopic {sub_id} to position {position}")  # Log each update
+            cursor.execute('UPDATE subtopics SET position=%s WHERE id=%s', (position, sub_id))
+
+        mytdb.commit()
+        return {'status': 'success', 'message': 'Order updated successfully'}
+
+    except Exception as e:
+        mytdb.rollback()
+        print(f"Error: {e}")
+        return {'status': 'error', 'message': str(e)}, 500
+
+
 
 @app.route('/logout')
 def logout():
