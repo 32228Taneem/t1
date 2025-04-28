@@ -1,4 +1,4 @@
-from flask import Flask,render_template,url_for,redirect,request,flash,session,jsonify,send_from_directory
+from flask import Flask,render_template,url_for,redirect,request,flash,session,jsonify,send_from_directory,json
 from otp import genotp
 from cmail import sendmail
 from tokens import encode,decode
@@ -34,9 +34,8 @@ def allowed_file(filename):
 @app.route('/')
 def home():
     # cursor = db.cursor()
-    cursor.execute('SELECT id, name FROM navbar_items')  # Fetch navbar items
+    cursor.execute('SELECT id, name FROM navbar_items ORDER BY position ASC')  # Fetch navbar items
     navbar_items = cursor.fetchall()  # Retrieve all navbar items
-    
     return render_template('welcome.html', navbar_items=navbar_items)
 
 @app.route('/upload_image', methods=['POST'])
@@ -330,20 +329,32 @@ def login():
 
 @app.route('/admin_panel')
 def admin_panel():
-    cursor.execute('SELECT name FROM navbar_items')
+    cursor.execute('SELECT name FROM navbar_items ORDER BY position')
     nav_items = [item[0] for item in cursor.fetchall()]
     return render_template('admin_panel.html', navbar_items=nav_items)
+
 
 @app.route('/add_navbar_item', methods=['POST'])
 def add_navbar_item():
     item = request.form['item']
+    
     if item:
         try:
-            cursor.execute('INSERT INTO navbar_items (name) VALUES (%s)', (item,))
+            # Get the current maximum position from the navbar_items table
+            cursor.execute('SELECT MAX(position) FROM navbar_items')
+            max_position = cursor.fetchone()[0]
+            
+            # If no items exist, start from position 1
+            new_position = max_position + 1 if max_position is not None else 1
+            
+            # Insert the new item into the navbar_items table with the assigned position
+            cursor.execute('INSERT INTO navbar_items (name, position) VALUES (%s, %s)', (item, new_position))
             mytdb.commit()
         except mysql.connector.IntegrityError:
             flash('Item already exists.')
+    
     return redirect(url_for('admin_panel'))
+
 
 @app.route('/view_content/<item_name>')
 def view_content(item_name):
@@ -403,13 +414,13 @@ def delete_navbar_item():
     mytdb.commit()
     return redirect(url_for('admin_panel'))
 
-@app.route('/update_navbar_item', methods=['POST'])
-def update_navbar_item():
-    old_item = request.form['old_item']
-    new_item = request.form['new_item']
-    cursor.execute('UPDATE navbar_items SET name=%s WHERE name=%s', (new_item, old_item))
-    mytdb.commit()
-    return redirect(url_for('admin_panel'))
+# @app.route('/update_navbar_item', methods=['POST'])
+# def update_navbar_item():
+#     old_item = request.form['old_item']
+#     new_item = request.form['new_item']
+#     cursor.execute('UPDATE navbar_items SET name=%s WHERE name=%s', (new_item, old_item))
+#     mytdb.commit()
+#     return redirect(url_for('admin_panel'))
 
 
 @app.route('/delete_subtopic/<int:sub_id>/<item_name>')
@@ -418,6 +429,26 @@ def delete_subtopic(sub_id, item_name):
     mytdb.commit()
     return redirect(url_for('view_content', item_name=item_name))
 
+
+@app.route('/update_navbar_item', methods=['POST'])
+def update_navbar_item():
+    old_item = request.form['old_item']
+    new_item = request.form['new_item']
+    cursor.execute('UPDATE navbar_items SET name=%s WHERE name=%s', (new_item, old_item))
+    mytdb.commit()
+    return redirect(url_for('admin_panel'))
+
+@app.route('/update_navbar_order', methods=['POST'])
+def update_navbar_order():
+    order = request.json.get('order')
+    if not order:
+        return {'status': 'No order provided'}, 400
+
+    for position, item_name in enumerate(order, start=1):
+        cursor.execute('UPDATE navbar_items SET position=%s WHERE name=%s', (position, item_name))
+
+    mytdb.commit()
+    return {'status': 'success'}
 
 @app.route('/logout')
 def logout():
