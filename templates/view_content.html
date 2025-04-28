@@ -68,9 +68,20 @@
     }
 
     .rich-content-container img {
-      max-width: 100%;
-      height: auto;
-    }
+  height: auto;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.rich-content-container p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+/* .rich-content-container p img {
+  flex: 1 1 auto;
+  max-width: 48%;
+} */
 
     #displayContent table {
       width: 100%;
