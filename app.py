@@ -472,7 +472,7 @@ def update_subtopic_order():
         print(f"Error: {e}")
         return {'status': 'error', 'message': str(e)}, 500
 
-
+# just for testing
 
 @app.route('/logout')
 def logout():
