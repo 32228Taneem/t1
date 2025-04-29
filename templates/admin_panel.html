@@ -1,30 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
-        /* Make sure navbar items are scrollable horizontally */
         .navbar-scroll-container {
             display: flex;
             align-items: center;
-            overflow: hidden; /* Hide the scrollbar */
+            overflow: hidden;
             position: relative;
+            flex-grow: 1;
         }
 
         .navbar-scroll-wrapper {
             display: flex;
-            overflow-x: scroll;  /* Allow horizontal scroll */
+            overflow-x: auto;
             scroll-behavior: smooth;
-            -ms-overflow-style: none;  /* For Internet Explorer and Edge */
-            scrollbar-width: none;     /* For Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
         .navbar-scroll-wrapper::-webkit-scrollbar {
-            display: none;             /* For Chrome, Safari, and Opera */
+            display: none;
         }
 
         .navbar-nav {
@@ -35,23 +34,19 @@
         .scroll-arrow {
             position: absolute;
             top: 50%;
-            z-index: 2;
+            transform: translateY(-50%);
+            z-index: 10;
             font-size: 24px;
             color: white;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 5px 10px;
             cursor: pointer;
+            user-select: none;
         }
 
-        #leftArrow {
-            left: 0;
-            transform: translateY(-50%);
-        }
+        #leftArrow { left: 0; }
+        #rightArrow { right: 0; }
 
-        #rightArrow {
-            right: 0;
-            transform: translateY(-50%);
-        }
-
-        /* Fixed logout button */
         .navbar .nav-item.logout-item {
             position: fixed;
             right: 10px;
@@ -60,129 +55,109 @@
             z-index: 9999;
         }
 
+        @media (max-width: 768px) {
+            .navbar .nav-item.logout-item {
+                top: auto;
+                bottom: 10px;
+            }
+        }
     </style>
 </head>
-
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-2">
-        <a class="navbar-brand me-2" href="#">Admin Panel</a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-2">
+    <a class="navbar-brand me-2" href="#">Admin Panel</a>
 
-        <!-- Scrollable navbar items with arrows -->
-        <div class="navbar-scroll-container flex-grow-1">
-            <div class="scroll-arrow" id="leftArrow" onclick="scrollNavbar(-200)">&#8592;</div>
+    <div class="navbar-scroll-container">
+        <div class="scroll-arrow" id="leftArrow" onclick="scrollNavbar(-200)">&#8592;</div>
 
-            <div class="navbar-scroll-wrapper" id="navbarScrollWrapper" onscroll="toggleArrows()">
-                <ul class="navbar-nav" id="navbarItems">
-                    {% for item in navbar_items %}
-                    <li class="nav-item d-flex align-items-center px-1" data-name="{{ item }}">
-                        <a class="nav-link" href="{{ url_for('view_content', item_name=item) }}">{{ item }}</a>
-                        <div class="dropdown ms-1">
-                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                                    aria-expanded="false">⋮</button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <form method="POST" action="{{ url_for('update_navbar_item') }}" class="d-inline">
-                                        <input type="hidden" name="old_item" value="{{ item }}">
-                                        <input type="text" name="new_item" class="form-control form-control-sm mb-2"
-                                               placeholder="New Name" required>
-                                        <button type="submit" class="btn btn-sm btn-warning w-100">Edit</button>
-                                    </form>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form method="POST" action="{{ url_for('delete_navbar_item') }}"
-                                          class="d-inline mx-1"
-                                          onsubmit="return confirm('Are you sure you want to delete this item?');">
-                                        <input type="hidden" name="item" value="{{ item }}">
-                                        <button type="submit" class="btn btn-sm btn-danger w-100">Delete</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <div class="scroll-arrow" id="rightArrow" onclick="scrollNavbar(200)">&#8594;</div>
+        <div class="navbar-scroll-wrapper" id="navbarScrollWrapper" onscroll="toggleArrows()">
+            <ul class="navbar-nav" id="navbarItems">
+                {% for item in navbar_items %}
+                <li class="nav-item d-flex align-items-center px-1" data-name="{{ item }}">
+                    <a class="nav-link" href="{{ url_for('view_content', item_name=item) }}">{{ item }}</a>
+                    <div class="dropdown ms-1">
+                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">⋮</button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form method="POST" action="{{ url_for('update_navbar_item') }}">
+                                    <input type="hidden" name="old_item" value="{{ item }}">
+                                    <input type="text" name="new_item" class="form-control form-control-sm mb-2" placeholder="New Name" required>
+                                    <button type="submit" class="btn btn-sm btn-warning w-100">Edit</button>
+                                </form>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ url_for('delete_navbar_item') }}"
+                                      onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="item" value="{{ item }}">
+                                    <button type="submit" class="btn btn-sm btn-danger w-100">Delete</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
 
-        <!-- Fixed logout button on the right -->
-        <ul class="navbar-nav ms-2 logout-item">
-            <li class="nav-item">
-                <a class="nav-link text-danger" href="{{ url_for('logout') }}">Logout</a>
-            </li>
-        </ul>
-    </nav>
-
-    <div class="container mt-4">
-        <h3>Add Navbar Item</h3>
-        <form method="POST" action="{{ url_for('add_navbar_item') }}">
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" name="item" placeholder="Enter new navbar item" required>
-                <button class="btn btn-success" type="submit">Add</button>
-            </div>
-        </form>
-
-        <button class="btn btn-primary mt-3" onclick="saveNewOrder()">Save New Order</button>
+        <div class="scroll-arrow" id="rightArrow" onclick="scrollNavbar(200)">&#8594;</div>
     </div>
 
-    <script>
-        var sortable = Sortable.create(document.getElementById('navbarItems'), {
-            animation: 150
-        });
+    <ul class="navbar-nav ms-2 logout-item">
+        <li class="nav-item">
+            <a class="nav-link text-danger" href="{{ url_for('logout') }}">Logout</a>
+        </li>
+    </ul>
+</nav>
 
-        // For horizontal scrolling on arrow click
-        function scrollNavbar(amount) {
-            var wrapper = document.getElementById('navbarScrollWrapper');
-            wrapper.scrollBy({
-                left: amount,
-                behavior: 'smooth'
-            });
-        }
+<div class="container mt-4">
+    <h3>Add Navbar Item</h3>
+    <form method="POST" action="{{ url_for('add_navbar_item') }}">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="item" placeholder="Enter new navbar item" required>
+            <button class="btn btn-success" type="submit">Add</button>
+        </div>
+    </form>
 
-        // Function to handle scroll arrows visibility
-        function toggleArrows() {
-            var wrapper = document.getElementById('navbarScrollWrapper');
-            var leftArrow = document.getElementById('leftArrow');
-            var rightArrow = document.getElementById('rightArrow');
-
-            if (wrapper.scrollLeft <= 0) {
-                leftArrow.style.display = 'none';
-            } else {
-                leftArrow.style.display = 'block';
-            }
-
-            if (wrapper.scrollWidth - wrapper.scrollLeft === wrapper.clientWidth) {
-                rightArrow.style.display = 'none';
-            } else {
-                rightArrow.style.display = 'block';
-            }
-        }
-
-        // Call toggle function to set initial state
-        toggleArrows();
-    </script>
+    <button class="btn btn-primary mt-3" onclick="saveNewOrder()">Save New Order</button>
+</div>
 
 <script>
-    var sortable = Sortable.create(document.getElementById('navbarItems'), {
-        animation: 150
+    // Enable drag-and-drop sorting
+    const sortable = Sortable.create(document.getElementById('navbarItems'), {
+        animation: 150,
+        onEnd: toggleArrows
     });
 
+    // Scroll navbar left/right
+    function scrollNavbar(amount) {
+        const wrapper = document.getElementById('navbarScrollWrapper');
+        wrapper.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+
+    // Toggle arrow visibility
+    function toggleArrows() {
+        const wrapper = document.getElementById('navbarScrollWrapper');
+        const leftArrow = document.getElementById('leftArrow');
+        const rightArrow = document.getElementById('rightArrow');
+
+        leftArrow.style.display = wrapper.scrollLeft > 5 ? 'block' : 'none';
+        rightArrow.style.display = (wrapper.scrollWidth - wrapper.clientWidth - wrapper.scrollLeft > 5) ? 'block' : 'none';
+    }
+
+    // Save order to backend
     function saveNewOrder() {
-        var newOrder = [];
-        document.querySelectorAll('#navbarItems li[data-name]').forEach(function (li) {
+        const newOrder = [];
+        document.querySelectorAll('#navbarItems li[data-name]').forEach(li => {
             newOrder.push(li.getAttribute('data-name'));
         });
 
         fetch('/update_navbar_order', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ order: newOrder })
         })
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
                 alert('Order saved successfully!');
@@ -192,10 +167,12 @@
             }
         });
     }
+
+    // Initial arrow state
+    window.addEventListener('load', toggleArrows);
+    window.addEventListener('resize', toggleArrows);
 </script>
 
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

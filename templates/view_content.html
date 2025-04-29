@@ -111,6 +111,57 @@
 
 <body>
 
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-2">
+    <a class="navbar-brand me-2" href="#">Admin Panel</a>
+
+    <!-- Scrollable navbar items with arrows -->
+    <div class="navbar-scroll-container flex-grow-1">
+        <div class="scroll-arrow" id="leftArrow" onclick="scrollNavbar(-200)">&#8592;</div>
+
+        <div class="navbar-scroll-wrapper" id="navbarScrollWrapper" onscroll="toggleArrows()">
+            <ul class="navbar-nav" id="navbarItems">
+                {% for item in navbar_items %}
+                <li class="nav-item d-flex align-items-center px-1" data-name="{{ item }}">
+                    <a class="nav-link" href="{{ url_for('view_content', item_name=item) }}">{{ item }}</a>
+                    <div class="dropdown ms-1">
+                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">⋮</button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form method="POST" action="{{ url_for('update_navbar_item') }}" class="d-inline">
+                                    <input type="hidden" name="old_item" value="{{ item }}">
+                                    <input type="text" name="new_item" class="form-control form-control-sm mb-2"
+                                           placeholder="New Name" required>
+                                    <button type="submit" class="btn btn-sm btn-warning w-100">Edit</button>
+                                </form>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ url_for('delete_navbar_item') }}"
+                                      class="d-inline mx-1"
+                                      onsubmit="return confirm('Are you sure you want to delete this item?');">
+                                    <input type="hidden" name="item" value="{{ item }}">
+                                    <button type="submit" class="btn btn-sm btn-danger w-100">Delete</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="scroll-arrow" id="rightArrow" onclick="scrollNavbar(200)">&#8594;</div>
+    </div>
+
+    <!-- Fixed logout button on the right -->
+    <ul class="navbar-nav ms-2 logout-item">
+        <li class="nav-item">
+            <a class="nav-link text-danger" href="{{ url_for('logout') }}">Logout</a>
+        </li>
+    </ul>
+</nav>
+
   {% include 'base.html' %}
 
   <div class="main-body">
