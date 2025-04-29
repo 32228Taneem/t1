@@ -1,17 +1,19 @@
-/* Navbar Background */
+/* Main Navbar */
 .navbar {
     background: linear-gradient(45deg, #ff7eb3, #ff758c, #ff585d);
     padding: 15px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1040;
 }
 
-/* Company Name Styling */
 .navbar-brand {
     color: #fff !important;
     font-weight: bold;
     font-size: 1.5rem;
 }
 
-/* Navigation Links */
 .nav-link {
     color: #fff !important;
     font-weight: bold;
@@ -22,7 +24,7 @@
     color: #ffd700 !important;
 }
 
-/* Search Bar Styling */
+/* Search Bar */
 .form-control {
     border-radius: 20px;
     border: 2px solid #fff;
@@ -52,7 +54,7 @@
     border-color: #0056b3;
 }
 
-/* Responsive Styles */
+/* Responsive Navbar */
 @media (max-width: 768px) {
     .navbar-nav {
         text-align: center;
@@ -62,4 +64,101 @@
         display: block;
         padding: 10px;
     }
+}
+
+/* Second Navbar Wrapper */
+.second-navbar-wrapper {
+    position: fixed;
+    top: 72px; /* Adjust if main navbar height changes */
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(45deg, #ff758c, #ff585d);
+    z-index: 1039;
+    border-top: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    padding: 5px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    left: 0;
+    right: 0;
+}
+
+/* Scroll Buttons */
+.scroll-btn {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 0 15px;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    z-index: 1041;
+}
+
+.scroll-btn:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Backend Scrollable Navbar (Second Navbar) */
+.second-navbar {
+    display: flex;
+    overflow-x: hidden; /* Prevent manual scroll */
+    white-space: nowrap;
+    scroll-behavior: smooth;
+    flex-grow: 1;
+}
+
+/* Backend nav items */
+.second-navbar .nav-link {
+    display: inline-block;
+    padding: 10px 20px;
+    color: #fff !important;
+    font-weight: bold;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.second-navbar .nav-link:hover {
+    color: #ffd700 !important;
+    border-bottom: 2px solid #ffd700;
+}
+
+.second-navbar .nav-link.active {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    border-bottom: 2px solid #fff;
+}
+
+.second-navbar a {
+    color: #fff;
+    padding: 10px 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.second-navbar a:hover,
+.second-navbar a.active {
+    color: #ff585d;
+    border-radius: 20px;
+    text-decoration: none;
+}
+
+/* Dropdowns and Modals */
+.dropdown-menu,
+.modal,
+.dropdown {
+    z-index: 1050 !important;
+}
+
+/* Extra Fixes */
+.fixed-navbar {
+    z-index: 1000;
+}
+
+body {
+    padding-top: 130px; /* Adjust based on navbar height */
 }
