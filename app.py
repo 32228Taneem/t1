@@ -58,14 +58,17 @@ def upload_image():
 def uploaded_file(filename):
     return send_from_directory(os.path.join(app.root_path, 'static', 'uploads'), filename)
  
-
+# user ku side panel key sub topics display karnay & o page may nav elements display karnay
 @app.route('/view_subtopics/<item_name>')
 def view_subtopics(item_name):
+    # Fetch navbar items
+    cursor.execute('SELECT id, name FROM navbar_items ORDER BY position ASC')
+    navbar_items = cursor.fetchall()
+    # Fetch subtopics
     cursor.execute('SELECT id FROM navbar_items WHERE name=%s', (item_name,))
     nav_id = cursor.fetchone()
     if not nav_id:
         return 'Navbar item not found'
-
     cursor.execute('SELECT id, title, content, image_filename FROM subtopics WHERE navbar_id=%s ORDER BY position', (nav_id[0],))
     subtopics = [
         {
@@ -75,7 +78,7 @@ def view_subtopics(item_name):
             'image': url_for('static', filename=f'uploads/{row[3]}') if row[3] else None
         } for row in cursor.fetchall()
     ]
-    return render_template('view_subtopics.html', item_name=item_name, subtopics=subtopics)
+    return render_template('view_subtopics.html', item_name=item_name, subtopics=subtopics, navbar_items=navbar_items)
 
 
 @app.route('/usercreate',methods=['GET','POST'])
@@ -375,7 +378,6 @@ def view_content(item_name):
     return render_template('view_content.html', item_name=item_name, subtopics=subtopics)
 
 
-
 @app.route('/add_subtopic/<item_name>', methods=['POST'])
 def add_subtopic(item_name):
     title = request.form['title']
@@ -415,15 +417,6 @@ def delete_navbar_item():
     mytdb.commit()
     return redirect(url_for('admin_panel'))
 
-# @app.route('/update_navbar_item', methods=['POST'])
-# def update_navbar_item():
-#     old_item = request.form['old_item']
-#     new_item = request.form['new_item']
-#     cursor.execute('UPDATE navbar_items SET name=%s WHERE name=%s', (new_item, old_item))
-#     mytdb.commit()
-#     return redirect(url_for('admin_panel'))
-
-
 @app.route('/delete_subtopic/<int:sub_id>/<item_name>')
 def delete_subtopic(sub_id, item_name):
     cursor.execute('DELETE FROM subtopics WHERE id=%s', (sub_id,))
@@ -451,28 +444,23 @@ def update_navbar_order():
     mytdb.commit()
     return {'status': 'success'}
 
-
 @app.route('/update_subtopic_order', methods=['POST'])
 def update_subtopic_order():
     order = request.json.get('order')
     print(f"Received order: {order}")  # Log the order
     if not order:
         return {'status': 'No order provided'}, 400
-
     try:
         for position, sub_id in enumerate(order, start=1):
             print(f"Updating subtopic {sub_id} to position {position}")  # Log each update
             cursor.execute('UPDATE subtopics SET position=%s WHERE id=%s', (position, sub_id))
-
         mytdb.commit()
         return {'status': 'success', 'message': 'Order updated successfully'}
-
     except Exception as e:
         mytdb.rollback()
         print(f"Error: {e}")
         return {'status': 'error', 'message': str(e)}, 500
 
-# just for testing
 
 @app.route('/logout')
 def logout():

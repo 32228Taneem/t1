@@ -5,23 +5,113 @@
   <title>{{ item_name }} - Subtopics</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.tiny.cloud/1/lezf5y9e1y8vwjv3870f06avrgu9855j1octvf69ab6d8hut/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-
   <style>
-    body {
-      display: flex;
-      min-height: 100vh;
-      flex-direction: column;
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    .navbar-fixed-top {
+      background: linear-gradient(45deg, #ff7eb3, #ff758c, #ff585d);
+    padding: 15px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1040;
+      /* position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1030; */
+    }
+    .second-navbar-wrapper {
+  /* position: fixed;
+  top: 72px;  
+  width: 100%;
+  z-index: 1020;
+  display: flex;
+  justify-content: space-between;
+  align-items: center; */
+  position: fixed;
+    top: 72px; /* Adjust if main navbar height changes */
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(45deg, #ff758c, #ff585d);
+    z-index: 1039;
+    border-top: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    padding: 5px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    left: 0;
+    right: 0;
+}
+
+.second-navbar {
+  display: flex;
+    overflow-x: hidden; /* Prevent manual scroll */
+    white-space: nowrap;
+    scroll-behavior: smooth;
+    flex-grow: 1;
+  /* background: #e9ecef;
+  overflow-x: auto;
+  white-space: nowrap;
+  flex-grow: 1;
+  padding: 10px; */
+}
+
+.scroll-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 0 15px;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    z-index: 1041;
+  /* background-color: #ddd;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  z-index: 1030; */
+}
+
+/* .left-btn {
+  margin-left: 10px;
+}
+
+.right-btn {
+  margin-right: 10px;
+} */
+
+    .second-navbar a {
+      display: inline-block;
+      padding: 10px 20px;
+      color: black;
+      text-decoration: none;
     }
     .main-body {
-      display: flex;
-      flex: 1;
+      margin-left: 250px; /* width of side panel */
+  padding: 20px;
+  padding-top: 160px; /* height of both navbars */
+      /* display: flex;
+      margin-top: 112px;
+      height: calc(100% - 112px); */
     }
     .sidebar {
-      width: 250px;
+      position: fixed;
+  top: 160px; /* after both navbars and second navbar */
+  left: 0;
+  width: 250px;
+  height: calc(100vh - 160px); /* full height minus navbars height */
+  overflow-y: auto; /* scroll only inside the side panel */
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+      /* width: 250px;
       background: #f8f9fa;
       padding: 1rem;
       border-right: 1px solid #ddd;
-      overflow-y: auto;
+      overflow-y: auto; */
     }
     .content {
       flex: 1;
@@ -58,14 +148,62 @@
 </head>
 <body>
 
-  
+  <!-- First Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('home') }}">Company Name</a>
+      <form class="d-flex me-auto">
+        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Services</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+          <!-- <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">SignUp</a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="{{url_for('admincreate')}}">Admin Signup</a></li>
+              <li><a class="dropdown-item" href="{{url_for('usercreate')}}">User SignUp</a></li>
+            </ul>
+          </li> -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">Login</a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="{{url_for('login')}}">Admin Login</a></li>
+              <li><a class="dropdown-item" href="{{url_for('admincreate')}}">Admin Signup</a></li>
+              <li><a class="dropdown-item" href="{{url_for('usercreate')}}">User SignUp</a></li>
+              <li><a class="dropdown-item" href="{{url_for('userlogin')}}">User Login</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Second Fixed Navbar for Backend Items -->
+  <div class="second-navbar-wrapper">
+    <button class="scroll-btn left-btn">&larr;</button>
+    <div class="second-navbar" id="backendNav">
+      {% for item in navbar_items %}
+        <a class="nav-link backend-link" href="{{ url_for('view_subtopics', item_name=item[1]) }}">{{ item[1] }}</a>
+      {% endfor %}
+    </div>
+    <button class="scroll-btn right-btn">&rarr;</button>
+  </div>
 
   <div class="main-body">
     <!-- Sidebar -->
     <div class="sidebar">
       <h5 class="text-primary">{{ item_name }} Subtopics</h5>
-
-      <!-- Display all subtopics in sidebar -->
       {% for sub in subtopics %}
       <div class="subtopic-item"
            data-title="{{ sub.title }}"
@@ -78,9 +216,7 @@
 
     <!-- Content Area -->
     <div class="content">
-        <a href="{{ url_for('home') }}" class="btn btn-secondary mb-3">&larr; Back</a>
-
-      <!-- Display Area -->
+      <a href="{{ url_for('home') }}" class="btn btn-secondary mb-3">&larr; Back</a>
       <div id="displayArea">
         <div class="subtopic-title" id="displayTitle"></div>
         <div id="displayContent" class="rich-content-container"></div>
@@ -93,14 +229,24 @@
       const title = element.dataset.title;
       const content = element.dataset.content;
 
-      // Set the title and content for display
       document.getElementById('displayTitle').innerText = title;
       document.getElementById('displayContent').innerHTML = content;
 
-      // Display the content area
       document.getElementById('displayArea').style.display = 'block';
     }
+    document.querySelector('.left-btn').addEventListener('click', function() {
+  const secondNavbar = document.getElementById('backendNav');
+  secondNavbar.scrollBy(-200, 0);  // Scroll left
+});
+
+document.querySelector('.right-btn').addEventListener('click', function() {
+  const secondNavbar = document.getElementById('backendNav');
+  secondNavbar.scrollBy(200, 0);  // Scroll right
+});
+
   </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
