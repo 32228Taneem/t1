@@ -1,45 +1,205 @@
-/* Centering the login card */
-.container {
-    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-}
+/* ============= LOGIN PAGE CSS ============= */
+/* Save as: static/login.css */
 
-/* Card Styling */
-.card {
+/* 1. BASE STYLES */
+body {
+    background-color: #f5f7fa;
+    font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    line-height: 1.5;
+  }
+  
+  /* 2. CARD CONTAINER */
+  .login-container {
     width: 100%;
-    max-width: 400px;
-    border-radius: 10px;
+    max-width: 420px;
+    padding: 0 20px;
+  }
+  
+  .login-card {
     background: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Form Labels */
-.form-label {
-    font-weight: bold;
-    color: #333;
-}
-
-/* Input Fields */
-.form-control {
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    padding: 10px;
-}
-
-/* Login Button */
-.btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-    transition: all 0.3s ease-in-out;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #004080;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .container {
-        padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+  }
+  
+  /* 3. HEADER SECTION */
+  .card-header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 25px;
+    text-align: center;
+  }
+  
+  .card-header h2 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+  }
+  
+  /* 4. FORM ELEMENTS */
+  .login-form {
+    padding: 25px;
+  }
+  
+  .form-group {
+    margin: 1rem 1.5rem 1rem 1.5rem;
+    /* position: relative; */
+  }
+  
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #2c3e50;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  }
+  
+  /* 5. PASSWORD TOGGLE */
+  .password-wrapper {
+    position: relative;
+  }
+  
+  .toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #95a5a6;
+    transition: color 0.2s;
+  }
+  
+  .toggle-password:hover {
+    color: #3498db;
+  }
+  
+  /* 6. LOGIN BUTTON */
+  .btn-login {
+    width: 100%;
+    padding: 12px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 5px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-login:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+  }
+  
+  /* 7. FORGOT PASSWORD LINK */
+  .forgot-password {
+    text-align: right;
+    margin-top: -5px;
+    margin-bottom: 15px;
+  }
+  
+  .forgot-password a {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .forgot-password a:hover {
+    color: #3498db;
+    text-decoration: underline;
+  }
+  
+  /* 8. SIGNUP LINK SECTION */
+  .signup-section {
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    color: #7f8c8d;
+    font-size: 0.95rem;
+  }
+  
+  .signup-section a {
+    color: #3498db;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    margin-left: 5px;
+  }
+  
+  .signup-section a:hover {
+    text-decoration: underline;
+    color: #2980b9;
+  }
+  
+  /* 9. FLASH MESSAGES */
+  .flash-messages {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+  
+  .alert {
+    padding: 12px 20px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    border-left: 4px solid transparent;
+  }
+  
+  .alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left-color: #28a745;
+  }
+  
+  .alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left-color: #dc3545;
+  }
+  
+  /* 10. RESPONSIVE ADJUSTMENTS */
+  @media (max-width: 480px) {
+    body {
+      padding: 0;
+      background: white;
     }
-}
+    
+    .login-card {
+      border-radius: 0;
+      box-shadow: none;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .card-header {
+      border-radius: 0;
+    }
+  }

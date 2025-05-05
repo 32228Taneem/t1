@@ -11,254 +11,184 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 
   <style>
-    body {
-      display: flex;
-      min-height: 100vh;
-      flex-direction: column;
-      margin: 0;
-    padding: 0;
-    height: 100vh;
-    overflow: hidden; /* Disable main page scrolling */
+     :root {
+      --primary-color: #3498db;
+      --secondary-color: #2ecc71;
+      --dark-color: #2c3e50;
+      --light-color: #ecf0f1;
+      --danger-color: #e74c3c;
+      --sidebar-width: 280px;
     }
+
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    /* .main-container {
+  padding: 0;
+} */
 
     .main-body {
       display: flex;
-      flex: 1;
-      height: 100vh;
+      height: calc(100vh - 120px); /* Subtract navbar height */
     }
 
+    /* Sidebar - Clean without boxes */
     .sidebar {
-      width: 250px;
-      background: #f8f9fa;
-      padding: 1rem;
-      border-right: 1px solid #ddd;
+      width: var(--sidebar-width);
+      background-color: var(--light-color);
+      border-right: 1px solid #dee2e6;
       overflow-y: auto;
-      /* scroll-behavior: smooth; */
-      display: flex;
-    flex-direction: column;
-    height: 100vh;
-    }
-    .sidebar-content {
-    overflow-y: auto; /* Only this container will scroll */
-    flex-grow: 1;
-    padding: 1rem;
+      padding: 1rem;
+      height: calc(100vh - 120px); /* Match the main-body height */
     }
 
+    .sidebar-content {
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    /* Subtopic items - no boxes */
+    .subtopic-container {
+      margin-bottom: 1rem;
+    }
+
+    .subtopic-wrapper {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0;
+    }
+
+    .subtopic-item {
+      flex-grow: 1;
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      color: var(--dark-color);
+      font-weight: 500;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .subtopic-item:hover {
+      background-color: rgba(52, 152, 219, 0.1);
+      color: var(--primary-color);
+    }
+
+    /* Sub-subtopics - no boxes */
+    .subsubtopic-list {
+      margin-left: 1.5rem;
+      padding-left: 0.5rem;
+      border-left: 2px solid #dee2e6;
+      display: none;
+    }
+
+    .subsubtopic-item {
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      color: #6c757d;
+      transition: all 0.2s ease;
+      margin: 0.25rem 0;
+      border-radius: 4px;
+    }
+
+    .subsubtopic-item:hover {
+      background-color: rgba(52, 152, 219, 0.05);
+      color: var(--primary-color);
+    }
+
+    /* Content Area */
     .content {
       flex: 1;
       padding: 2rem;
       overflow-y: auto;
-      position: relative;
-      height: 100vh;
-    }
-
-    .subtopic-item {
-      margin-bottom: 0.5rem;
-      padding: 0.5rem;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .form-section {
-      display: none;
-      margin: 2rem auto;
-      width: 100%;
-      max-width: 800px;
+      background-color: #fff;
+      height: calc(100vh - 120px); /* Match the main-body height */
     }
 
     #displayArea {
       display: none;
       margin-top: 2rem;
-      padding: 1rem;
-      background: #fff;
-      border-radius: 10px;
-      border: 1px solid #ccc;
+      padding: 1.5rem;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
-    .subtopic-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-/* Add this to your stylesheet */
-.content-container {
-  padding-bottom: 40px; /* Gives space at the bottom */
-  overflow-y: auto; /* Ensures proper scrolling */
-}
-    /* Drag and Drop Styles */
-    .sortable-ghost {
-      opacity: 0.5;
-      background: #c8ebfb;
-    }
-
-    .sortable-chosen {
-      background: #f8f9fa;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .subtopic-wrapper {
-      cursor: move;
-      user-select: none;
-      transition: transform 0.2s ease;
-    }
-
-    .subtopic-item {
-      cursor: move;
-      /* Make the title area draggable */
-    }
-
-    /* Keep existing styles for buttons and dropdowns */
-    .dropdown,
+    /* Buttons and dropdowns */
     .btn-link {
-      cursor: default !important;
-      /* Prevent these from being draggable */
+      color: #6c757d;
+      padding: 0 0.5rem;
+      transition: all 0.2s ease;
     }
 
-    .alert {
-      z-index: 1000;
-      min-width: 200px;
-      opacity: 0;
-      animation: fadeInOut 2.5s ease;
+    .btn-link:hover {
+      color: var(--primary-color);
     }
 
-    @keyframes fadeInOut {
-      0% {
-        opacity: 0;
-        transform: translateY(20px);
+    .dropdown-toggle::after {
+      display: none;
+    }
+
+    /* Scrollbars */
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: #adb5bd;
+      border-radius: 3px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+      .main-body {
+        flex-direction: column;
+        padding-top: 160px;
       }
-
-      20% {
-        opacity: 1;
-        transform: translateY(0);
+      .sidebar {
+        width: 280px;
+  background-color: var(--light-color);
+  padding: 1rem;
+  border-right: 1px solid #dee2e6;
+  overflow-y: auto;
+  height: 100%;
       }
-
-      80% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      100% {
-        opacity: 0;
-        transform: translateY(20px);
+      .content {
+        padding: 1rem;
       }
     }
-
-    .rich-content-container img {
-      height: auto;
-      display: inline-block;
-      max-width: 100%;
-    }
-
-    #subSubtopicFormContainer {
-      max-width: 800px;
-      margin: 0 auto;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .spinner-border-sm {
-      width: 1rem;
-      height: 1rem;
-      border-width: 0.2em;
-      vertical-align: middle;
-      margin-right: 0.5rem;
-    }
-
-    .subsubtopic-container {
-      margin-left: 1rem;
-      margin-top: 0.5rem;
-    }
-    .subsubtopic-item > span {
-  cursor: pointer;
-  padding-right: 10px;
-}
-.subsubtopic-item .dropdown {
-  flex-shrink: 0;
+    .subtopic-container {
+  margin-bottom: 1rem;
 }
 
-.subsubtopic-item .dropdown-menu {
-  min-width: 120px;
-}
-    .subsubtopic-item {
-      cursor: pointer;
-      background: #f8f9fa;
-      padding: 0.5rem;
-      margin: 0.25rem 0;
-      border-radius: 4px;
-      border: 1px solid #dee2e6;
-      cursor: move;
-  transition: transform 0.2s ease;
-  user-select: none;
-    }
-    .subsubtopic-list {
-  min-height: 20px;
-  padding: 0;
-  list-style-type: none;
-}
-.dropdown, .dropdown * {
-  cursor: default !important;
-  user-select: auto !important;
-}
-    .subsubtopic-item:hover {
-      background: #f8f9fa;
-    }
-    /* Custom scrollbar for sidebar */
-.sidebar::-webkit-scrollbar {
-    width: 8px;
-}
-.sidebar::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-.sidebar::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-}
-.sidebar::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-/* Prevent any weird margins */
-* {
-    box-sizing: border-box;
+.subtopic-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
 }
 
-/* Custom scrollbar for sidebar only */
-.sidebar-content::-webkit-scrollbar {
-    width: 6px;
+.subsubtopic-list {
+  margin-left: 1.5rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid #dee2e6;
 }
-.sidebar-content::-webkit-scrollbar-thumb {
-    background: #adb5bd;
-    border-radius: 3px;
-}
-.dropdown-toggle::after {
-  display: none !important;
-}
-
-.btn-light {
-  border: 1px solid #ddd;
-}
-.rich-content-container table {
-  border-collapse: collapse;
+/* Ensure these exist */
+.navbar-fixed-top {
+  position: fixed;
+  top: 0;
   width: 100%;
-  margin: 1rem 0;
+  height: 60px; /* Adjust to match actual height */
+  z-index: 1030;
 }
 
-.rich-content-container table, 
-.rich-content-container th, 
-.rich-content-container td {
-  border: 1px solid #dee2e6;
-}
-
-.rich-content-container th,
-.rich-content-container td {
-  padding: 0.5rem;
-  text-align: left;
-}
-
-.rich-content-container th {
-  background-color: #f8f9fa;
-  font-weight: bold;
+.second-navbar-wrapper {
+  position: fixed;
+  top: 60px; /* Height of first navbar */
+  width: 100%;
+  height: 60px; /* Adjust to match actual height */
+  z-index: 1029;
 }
   </style>
 </head>
@@ -276,7 +206,7 @@
           {% for subtopic in subtopics %}
           <div class="subtopic-container">
             <div class="d-flex align-items-center mb-2 subtopic-wrapper" data-id="{{ subtopic.id }}">
-              <div class="subtopic-item flex-grow-1" data-title="{{ subtopic.title }}"
+              <div class="subtopic-item" data-title="{{ subtopic.title }}"
                 data-content="{{ subtopic.content | e }}" onclick="handleSubtopicClick(this)">
                 {{ subtopic.title }}
               </div>
@@ -312,10 +242,10 @@
 
             <div id="subsubtopics-{{ subtopic.id }}" class="subsubtopic-list" style="display:none; margin-left: 1rem;" data-parent-id="{{ subtopic.id }}">
               {% for subsub in subtopic.sub_subtopics %}
-              <div class="subsubtopic-item p-2 my-1 border rounded d-flex justify-content-between align-items-center" 
-     data-title="{{ subsub.title }}"
-     data-content="{{ subsub.content }}" 
-     data-id="{{ subsub.id }}">
+              <div class="subsubtopic-item d-flex justify-content-between align-items-center" 
+  data-title="{{ subsub.title }}"
+  data-content="{{ subsub.content }}" 
+  data-id="{{ subsub.id }}">
   <span class="flex-grow-1" onclick="showSubSubtopic(event, this)">{{ subsub.title }}</span>
                 <!-- Add this dropdown menu -->
       <div class="dropdown">
@@ -397,42 +327,113 @@
     plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table emoticons',
     toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | link image media table emoticons | forecolor backcolor | preview code',
     menubar: false,
-    images_upload_url: '/upload_image',
-    images_upload_base_path: '/uploads/',
-    automatic_uploads: true,
-    file_picker_types: 'image',
     content_css: false,
     content_style: `
-      table { border-collapse: collapse; width: 100%; }
-      table, th, td { border: 1px solid #dee2e6; }
-      th, td { padding: 8px; text-align: left; }
-      th { background-color: #f8f9fa; font-weight: bold; }
+        /* Table Styles with Visible Borders */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1rem 0;
+            border: 2px solid #000000 !important; /* Thicker outer border */
+        }
+        
+        table td, table th {
+            border: 1px solid #000000 !important; /* Visible cell borders */
+            padding: 8px;
+            text-align: left;
+        }
+        
+        table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        /* Image Styles */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Make sure borders are visible in editor too */
+        .mce-item-table, .mce-item-table td, .mce-item-table th {
+            border: 1px solid #000000 !important;
+        }
     `,
-    file_picker_callback: function (callback, value, meta) {
-      var input = document.createElement('input');
-      input.setAttribute('type', 'file');
-      input.setAttribute('accept', 'image/*');
-      input.click();
-
-      input.onchange = function () {
-        var file = input.files[0];
-        var formData = new FormData();
-        formData.append('file', file);
-
+    /* === IMAGE UPLOAD HANDLER (FIXED VERSION) === */
+    images_upload_handler: function (blobInfo, success, failure) {
+        const formData = new FormData();
+        formData.append('file', blobInfo.blob(), blobInfo.filename());
+        
+        // Get CSRF token from your Flask template
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        
         fetch('/upload_image', {
-          method: 'POST',
-          body: formData
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Upload failed: ' + response.status);
+            return response.json();
+        })
         .then(data => {
-          callback(data.location);
+            if (!data.location) throw new Error('Invalid server response');
+            success(data.location);
         })
         .catch(error => {
-          console.error('Error uploading image:', error);
+            console.error('Upload error:', error);
+            failure('Image upload failed. Please try another image.');
         });
-      };
+    },
+    /* === FILE PICKER (ORIGINAL FUNCTIONALITY) === */
+    file_picker_callback: function (callback, value, meta) {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+
+        input.onchange = function () {
+            const file = input.files[0];
+            if (!file) return;
+
+            const blobInfo = {
+                blob: () => file,
+                filename: () => file.name,
+                id: () => Date.now().toString()
+            };
+
+            // Use the same upload handler
+            tinyMCEConfig.images_upload_handler(
+                blobInfo,
+                function (url) {
+                    callback(url, { title: file.name });
+                },
+                function (error) {
+                    alert(error);
+                }
+            );
+        };
+    },
+    /* === ALL YOUR ORIGINAL FEATURES === */
+    automatic_uploads: true,
+    images_reuse_filename: true,
+    paste_data_images: true,
+    image_advtab: true,
+    image_caption: true,
+    image_title: true,
+    /* === SETUP CALLBACKS === */
+    setup: function (editor) {
+        // Restore any custom setup you had
+        editor.on('init', function () {
+            console.log('Editor initialized');
+        });
     }
-  };
+};
+
+// Initialize editor
+tinymce.init(tinyMCEConfig);
 
   // Initialize everything when DOM is loaded
   document.addEventListener('DOMContentLoaded', function() {

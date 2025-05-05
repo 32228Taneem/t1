@@ -43,24 +43,42 @@ def home():
 
 @app.route('/upload_image', methods=['POST'])
 def upload_image():
-    if 'file' not in request.files:
-        return 'No file part', 400
-    file = request.files['file']
-    if file.filename == '':
-        return 'No selected file', 400
-    if file and allowed_file(file.filename):
-        filename = file.filename
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        
+        if not (file and allowed_file(file.filename)):
+            return jsonify({'error': 'Allowed file types: png, jpg, jpeg, gif'}), 400
+
+        # Secure filename and handle duplicates
+        filename = secure_filename(file.filename)
+        base, ext = os.path.splitext(filename)
         upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Handle duplicate files
+        counter = 1
+        while os.path.exists(upload_path):
+            filename = f"{base}_{counter}{ext}"
+            upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            counter += 1
+
         file.save(upload_path)
-        file_url = url_for('uploaded_file', filename=filename)  # Returns the URL of the file
-        return {'location': file_url}
-    else:
-        return 'File type not allowed', 400
+        return jsonify({
+            'location': url_for('uploaded_file', filename=filename, _external=True)
+        })
+
+    except Exception as e:
+        app.logger.error(f"Upload failed: {str(e)}")
+        return jsonify({'error': 'Server error during upload'}), 500
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    return send_from_directory(os.path.join(app.root_path, 'static', 'uploads'), filename)
- 
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 # user ku side panel key sub topics display karnay & o page may nav elements display karnay
 @app.route('/view_subtopics/<item_name>')
 def view_subtopics(item_name):

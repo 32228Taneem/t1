@@ -2,141 +2,305 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>{{ item_name }} - Subtopics</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
   <script src="https://cdn.tiny.cloud/1/lezf5y9e1y8vwjv3870f06avrgu9855j1octvf69ab6d8hut/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
-    .navbar-fixed-top {
-      background: linear-gradient(45deg, #ff7eb3, #ff758c, #ff585d);
-      padding: 15px;
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 1040;
-    }
-    .second-navbar-wrapper {
-      position: fixed;
-      top: 72px;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      background: linear-gradient(45deg, #ff758c, #ff585d);
-      z-index: 1039;
-      border-top: 2px solid #fff;
-      border-bottom: 2px solid #fff;
-      padding: 5px 0;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      left: 0;
-      right: 0;
-    }
-    .second-navbar {
-      display: flex;
-      overflow-x: hidden;
-      white-space: nowrap;
-      scroll-behavior: smooth;
-      flex-grow: 1;
-    }
-    .scroll-btn {
-      background-color: rgba(255, 255, 255, 0.2);
-      border: none;
-      color: white;
-      padding: 0 15px;
-      font-size: 1.8rem;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      z-index: 1041;
-    }
-    .second-navbar a {
-      display: inline-block;
-      padding: 10px 20px;
-      color: black;
-      text-decoration: none;
-    }
-    .main-body {
-      margin-left: 250px;
-      padding: 20px;
-      padding-top: 160px;
-    }
-    .sidebar {
-      position: fixed;
-      top: 160px;
-      left: 0;
-      width: 250px;
-      height: calc(100vh - 160px);
-      overflow-y: auto;
-      background-color: #f8f9fa;
-      padding: 10px;
-      border-right: 1px solid #ddd;
-    }
-    .content {
-      flex: 1;
-      padding: 2rem;
-      overflow-y: auto;
-    }
-    .subtopic-container {
-      margin-bottom: 0.5rem;
-    }
-    .subtopic-wrapper {
-      display: flex;
-      align-items: center;
-    }
-    .subtopic-item {
-      flex-grow: 1;
-      padding: 0.5rem;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .subsubtopic-list {
-      margin-left: 1rem;
-      margin-top: 0.5rem;
-      display: none;
-    }
-    .subsubtopic-item {
-      padding: 0.5rem;
-      background: #f8f9fa;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      margin-bottom: 0.25rem;
-      cursor: pointer;
-    }
-    #displayArea {
-      display: none;
-      margin-top: 2rem;
-      padding: 1rem;
-      background: #fff;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-    }
-    .subtopic-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    .rich-content-container img {
-      max-width: 100%;
-      height: auto;
-    }
-    .dropdown-toggle::after {
-      display: none;
-    }
-    .btn-link {
-      padding: 0 0.5rem;
-    }
+/* view_subtopics.html CSS - Matching navbar.css */
+:root {
+  --primary-color: #3498db !important;
+  --secondary-color: #2ecc71 !important;
+  --dark-color: #2c3e50 !important; /* This is your dark blue navbar color */
+  --light-color: #ecf0f1 !important;
+  --danger-color: #e74c3c !important;
+  --navbar-height: 60px !important;
+}
+
+/* Body and Layout */
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  padding-top: calc(var(--navbar-height) * 2);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* First Navbar - Exact match to your navbar.css */
+.navbar-fixed-top {
+  background-color: var(--dark-color); /* Dark blue like welcome page */
+  height: var(--navbar-height);
+  padding: 0 1rem;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1040;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+}
+/* Navbar text/links - matching welcome page */
+.navbar-brand {
+  font-weight: 700;
+  color: white !important;
+  font-size: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+  color: var(--primary-color) !important;
+}
+
+.nav-link {
+  color: rgba(255,255,255,0.85) !important;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  color: white !important;
+  transform: translateY(-2px);
+}
+
+/* Second Navbar - Keeping your blue color */
+.second-navbar-wrapper {
+  background-color: var(--primary-color); /* Blue color */
+ 
+/* Second Navbar - Exact match to your navbar.css */
+  position: fixed;
+  top: var(--navbar-height);
+  left: 0;
+  right: 0;
+  background-color: var(--primary-color);
+  height: var(--navbar-height);
+  display: flex;
+  align-items: center;
+  z-index: 1030;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.second-navbar {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  flex-grow: 1;
+  height: 100%;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.second-navbar::-webkit-scrollbar {
+  display: none;
+}
+
+.backend-link {
+  color: rgba(255,255,255,0.9) !important;
+  padding: 0.5rem 1rem !important;
+  white-space: nowrap;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  margin: 0 0.25rem;
+  text-decoration: none;
+}
+
+.backend-link:hover {
+  background-color: rgba(255,255,255,0.2) !important;
+  color: white !important;
+  transform: translateY(-2px);
+}
+
+.backend-link.active {
+  background-color: rgba(255,255,255,0.3) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.scroll-btn {
+  background-color: rgba(0,0,0,0.2);
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 1;
+  margin: 0 0.5rem;
+}
+
+.scroll-btn:hover {
+  background-color: rgba(0,0,0,0.3);
+  transform: scale(1.1);
+}
+
+/* Main Content Layout */
+.main-body {
+  margin-left: 250px;
+  padding: 20px;
+  padding-top: calc(var(--navbar-height) * 2 + 20px);
+}
+
+/* Sidebar - Boxes removed as requested */
+.sidebar {
+  position: fixed;
+  top: calc(var(--navbar-height) * 2);
+  left: 0;
+  width: 250px;
+  height: calc(100vh - var(--navbar-height) * 2);
+  overflow-y: auto;
+  background-color: var(--light-color);
+  padding: 15px;
+  border-right: 1px solid #ddd;
+}
+
+.subtopic-container {
+  margin-bottom: 0.75rem;
+}
+
+.subtopic-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* Subtopic items - boxes removed */
+.subtopic-item {
+  flex-grow: 1;
+  padding: 0.75rem;
+  cursor: pointer;
+  color: var(--dark-color);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.subtopic-item:hover {
+  color: var(--primary-color);
+}
+
+/* Sub-subtopics - boxes removed */
+.subsubtopic-list {
+  margin-left: 1.5rem;
+  margin-top: 0.5rem;
+  display: none;
+}
+
+.subsubtopic-item {
+  padding: 0.5rem 0;
+  cursor: pointer;
+  color: #6c757d;
+  transition: all 0.2s ease;
+}
+
+.subsubtopic-item:hover {
+  color: var(--primary-color);
+}
+
+/* Chevron buttons */
+.btn-link {
+  color: #6c757d;
+  padding: 0 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-link:hover {
+  color: var(--primary-color);
+}
+
+/* Content Display Area */
+.content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+#displayArea {
+  display: none;
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.subtopic-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--dark-color);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+  .main-body {
+    margin-left: 0;
+    padding-top: calc(var(--navbar-height) * 2 + 60px);
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    top: 0;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --navbar-height: 50px;
+  }
+  
+  .second-navbar a {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.9rem;
+  }
+  
+  .content {
+    padding: 1rem;
+  }
+}
+/* Add this to your existing CSS */
+#displayContent table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  border: 1px solid #dee2e6 !important;
+}
+
+#displayContent table td, 
+#displayContent table th {
+  border: 1px solid #dee2e6 !important;
+  padding: 8px;
+  text-align: left;
+}
+
+#displayContent table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+/* Make sure borders are visible in all cases */
+.mce-content-body table, 
+.mce-content-body td, 
+.mce-content-body th {
+  border: 1px solid #dee2e6 !important;
+}
   </style>
 </head>
 <body>
 
   <!-- First Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-fixed-top">
+  <nav class="navbar navbar-expand-lg navbar-fixed-top">
     <div class="container-fluid">
       <a class="navbar-brand" href="{{ url_for('home') }}">Company Name</a>
       <form class="d-flex me-auto">
