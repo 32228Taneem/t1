@@ -5,22 +5,26 @@
   <meta charset="UTF-8">
   <title>{{ item_name }} - Subtopics</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
   <script src="https://cdn.tiny.cloud/1/lezf5y9e1y8vwjv3870f06avrgu9855j1octvf69ab6d8hut/tinymce/6/tinymce.min.js"
     referrerpolicy="origin"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-
 
   <style>
     body {
       display: flex;
       min-height: 100vh;
       flex-direction: column;
+      margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden; /* Disable main page scrolling */
     }
 
     .main-body {
       display: flex;
       flex: 1;
+      height: 100vh;
     }
 
     .sidebar {
@@ -29,12 +33,23 @@
       padding: 1rem;
       border-right: 1px solid #ddd;
       overflow-y: auto;
+      /* scroll-behavior: smooth; */
+      display: flex;
+    flex-direction: column;
+    height: 100vh;
+    }
+    .sidebar-content {
+    overflow-y: auto; /* Only this container will scroll */
+    flex-grow: 1;
+    padding: 1rem;
     }
 
     .content {
       flex: 1;
       padding: 2rem;
       overflow-y: auto;
+      position: relative;
+      height: 100vh;
     }
 
     .subtopic-item {
@@ -48,7 +63,9 @@
 
     .form-section {
       display: none;
-      margin-top: 2rem;
+      margin: 2rem auto;
+      width: 100%;
+      max-width: 800px;
     }
 
     #displayArea {
@@ -66,46 +83,183 @@
       text-align: center;
       margin-bottom: 1rem;
     }
+/* Add this to your stylesheet */
+.content-container {
+  padding-bottom: 40px; /* Gives space at the bottom */
+  overflow-y: auto; /* Ensures proper scrolling */
+}
+    /* Drag and Drop Styles */
+    .sortable-ghost {
+      opacity: 0.5;
+      background: #c8ebfb;
+    }
+
+    .sortable-chosen {
+      background: #f8f9fa;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .subtopic-wrapper {
+      cursor: move;
+      user-select: none;
+      transition: transform 0.2s ease;
+    }
+
+    .subtopic-item {
+      cursor: move;
+      /* Make the title area draggable */
+    }
+
+    /* Keep existing styles for buttons and dropdowns */
+    .dropdown,
+    .btn-link {
+      cursor: default !important;
+      /* Prevent these from being draggable */
+    }
+
+    .alert {
+      z-index: 1000;
+      min-width: 200px;
+      opacity: 0;
+      animation: fadeInOut 2.5s ease;
+    }
+
+    @keyframes fadeInOut {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      20% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      80% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+    }
 
     .rich-content-container img {
-  height: auto;
-  display: inline-block;
-  max-width: 100%;
-}
-
-.rich-content-container p {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-/* .rich-content-container p img {
-  flex: 1 1 auto;
-  max-width: 48%;
-} */
-
-    #displayContent table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    #displayContent table,
-    #displayContent th,
-    #displayContent td {
-      border: 1px solid #ddd;
-    }
-
-    #displayContent th,
-    #displayContent td {
-      padding: 8px;
-      text-align: left;
-    }
-
-    #displayContent img {
-      max-width: 100%;
       height: auto;
-      display: block;
-      margin: 10px 0;
+      display: inline-block;
+      max-width: 100%;
     }
+
+    #subSubtopicFormContainer {
+      max-width: 800px;
+      margin: 0 auto;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .spinner-border-sm {
+      width: 1rem;
+      height: 1rem;
+      border-width: 0.2em;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+
+    .subsubtopic-container {
+      margin-left: 1rem;
+      margin-top: 0.5rem;
+    }
+    .subsubtopic-item > span {
+  cursor: pointer;
+  padding-right: 10px;
+}
+.subsubtopic-item .dropdown {
+  flex-shrink: 0;
+}
+
+.subsubtopic-item .dropdown-menu {
+  min-width: 120px;
+}
+    .subsubtopic-item {
+      cursor: pointer;
+      background: #f8f9fa;
+      padding: 0.5rem;
+      margin: 0.25rem 0;
+      border-radius: 4px;
+      border: 1px solid #dee2e6;
+      cursor: move;
+  transition: transform 0.2s ease;
+  user-select: none;
+    }
+    .subsubtopic-list {
+  min-height: 20px;
+  padding: 0;
+  list-style-type: none;
+}
+.dropdown, .dropdown * {
+  cursor: default !important;
+  user-select: auto !important;
+}
+    .subsubtopic-item:hover {
+      background: #f8f9fa;
+    }
+    /* Custom scrollbar for sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+.sidebar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+/* Prevent any weird margins */
+* {
+    box-sizing: border-box;
+}
+
+/* Custom scrollbar for sidebar only */
+.sidebar-content::-webkit-scrollbar {
+    width: 6px;
+}
+.sidebar-content::-webkit-scrollbar-thumb {
+    background: #adb5bd;
+    border-radius: 3px;
+}
+.dropdown-toggle::after {
+  display: none !important;
+}
+
+.btn-light {
+  border: 1px solid #ddd;
+}
+.rich-content-container table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.rich-content-container table, 
+.rich-content-container th, 
+.rich-content-container td {
+  border: 1px solid #dee2e6;
+}
+
+.rich-content-container th,
+.rich-content-container td {
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.rich-content-container th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
   </style>
 </head>
 
@@ -116,32 +270,85 @@
   <div class="main-body">
     <!-- Sidebar -->
     <div class="sidebar">
-      <h5 class="text-primary">{{ item_name }} Subtopics</h5>
-      <div id="subtopicList">
-        {% for sub in subtopics %}
-          <div class="d-flex align-items-center mb-2 subtopic-wrapper" data-id="{{ sub.id }}">
-            <div class="subtopic-item flex-grow-1" data-title="{{ sub.title }}" data-content="{{ sub.content | e }}"
-              onclick="handleSubtopicClick(this)">
-              {{ sub.title }}
-            </div>
-            <div class="dropdown ms-2">
-              <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                ⋮
+      <div class="sidebar-content">
+        <h5 class="text-primary">{{ item_name }} Subtopics</h5>
+        <div id="subtopicList">
+          {% for subtopic in subtopics %}
+          <div class="subtopic-container">
+            <div class="d-flex align-items-center mb-2 subtopic-wrapper" data-id="{{ subtopic.id }}">
+              <div class="subtopic-item flex-grow-1" data-title="{{ subtopic.title }}"
+                data-content="{{ subtopic.content | e }}" onclick="handleSubtopicClick(this)">
+                {{ subtopic.title }}
+              </div>
+
+              <div class="dropdown ms-2">
+                <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown"
+                  onclick="event.stopPropagation()">
+                  ⋮
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="{{ url_for('edit_subtopic', sub_id=subtopic.id) }}">Edit</a></li>
+                  <li><a class="dropdown-item text-danger"
+                      href="{{ url_for('delete_subtopic', sub_id=subtopic.id, item_name=item_name) }}"
+                      onclick="return confirm('Are you sure?')">Delete</a></li>
+                  <li>
+                    <a class="dropdown-item text-primary" href="#"
+                      onclick="event.stopPropagation(); showSubSubtopicForm('{{ subtopic.id }}'); return false;">
+                      Add Sub-Subtopic
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Add this arrow button for sub-subtopics -->
+              {% if subtopic.sub_subtopics %}
+              <button class="btn btn-sm btn-link ms-2" onclick="toggleSubSubtopics('{{ subtopic.id }}', event)"
+                style="display: '{% if subtopic.sub_subtopics %}'block'{% else %}'none'{% endif %}';">
+                <i class="bi bi-chevron-down" id="arrow-{{ subtopic.id }}"></i>
               </button>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{{ url_for('edit_subtopic', sub_id=sub.id) }}">Edit</a></li>
-                <li><a class="dropdown-item text-danger"
-                    href="{{ url_for('delete_subtopic', sub_id=sub.id, item_name=item_name) }}"
-                    onclick="return confirm('Are you sure you want to delete this subtopic?');">Delete</a></li>
-              </ul>
+              {% endif %}
+            </div>
+
+
+            <div id="subsubtopics-{{ subtopic.id }}" class="subsubtopic-list" style="display:none; margin-left: 1rem;" data-parent-id="{{ subtopic.id }}">
+              {% for subsub in subtopic.sub_subtopics %}
+              <div class="subsubtopic-item p-2 my-1 border rounded d-flex justify-content-between align-items-center" 
+     data-title="{{ subsub.title }}"
+     data-content="{{ subsub.content }}" 
+     data-id="{{ subsub.id }}">
+  <span class="flex-grow-1" onclick="showSubSubtopic(event, this)">{{ subsub.title }}</span>
+                <!-- Add this dropdown menu -->
+      <div class="dropdown">
+        <button class="btn btn-sm btn-light" 
+                type="button" 
+                data-bs-toggle="dropdown"
+                onclick="event.stopPropagation()">
+          ⋮
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <a class="dropdown-item" 
+               href="{{ url_for('edit_subsubtopic', subsub_id=subsub.id) }}">
+              Edit
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item text-danger" 
+               href="#"
+               onclick="deleteSubSubtopic('{{ subsub.id }}', event)">
+              Delete
+            </a>
+          </li>
+        </ul>
+      </div>
+              </div>
+              {% endfor %}
             </div>
           </div>
-        {% endfor %}
-      </div>
-      
-      <button class="btn btn-success btn-sm w-100 mt-3" onclick="toggleForm()">+ Add Subtopic</button>
-      <div class="mt-3">
-        <button class="btn btn-primary" onclick="saveSubtopicOrder()">Save Subtopic Order</button>
+          {% endfor %}
+        </div>
+
+        <button class="btn btn-success btn-sm w-100 mt-3" onclick="toggleForm()" style="margin-bottom: 30px;">+ Add Subtopic</button>
       </div>
     </div>
 
@@ -153,9 +360,25 @@
       <div id="formSection" class="form-section card p-4" style="display: none;">
         <form method="POST" action="{{ url_for('add_subtopic', item_name=item_name) }}"
           onsubmit="return saveContent();">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="text" name="title" placeholder="Enter Subtopic Title" class="form-control mb-3" required>
           <textarea id="editor" name="content"></textarea>
           <button type="submit" class="btn btn-primary mt-3">Save</button>
+        </form>
+      </div>
+
+      <!-- Add Sub-Subtopic Form -->
+      <!-- In your sub-subtopic form section -->
+      <div id="subSubtopicFormContainer" class="form-section card p-4" style="display:none">
+        <form id="subSubtopicForm" onsubmit="return saveSubSubtopicContent()">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" id="parentSubtopicId" name="parent_subtopic_id">
+          <input type="text" name="title" placeholder="Sub-Subtopic Title" class="form-control mb-3" required>
+          <textarea id="subSubtopicEditor" name="content"></textarea>
+          <div class="mt-3">
+            <button type="submit" class="btn btn-primary" id="submitSubSubtopicBtn">Save</button>
+            <button type="button" class="btn btn-secondary" onclick="hideSubSubtopicForm()">Cancel</button>
+          </div>
         </form>
       </div>
 
@@ -168,117 +391,405 @@
   </div>
 
   <script>
-    tinymce.init({
-    selector: '#editor',
+    // Shared TinyMCE configuration
+    const tinyMCEConfig = {
     height: 400,
     plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table emoticons',
     toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | link image media table emoticons | forecolor backcolor | preview code',
     menubar: false,
     images_upload_url: '/upload_image',
-    images_upload_base_path: '/uploads/', // or '/static/uploads/' depending on your path
+    images_upload_base_path: '/uploads/',
     automatic_uploads: true,
     file_picker_types: 'image',
+    content_css: false,
+    content_style: `
+      table { border-collapse: collapse; width: 100%; }
+      table, th, td { border: 1px solid #dee2e6; }
+      th, td { padding: 8px; text-align: left; }
+      th { background-color: #f8f9fa; font-weight: bold; }
+    `,
     file_picker_callback: function (callback, value, meta) {
-        var input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
+      var input = document.createElement('input');
+      input.setAttribute('type', 'file');
+      input.setAttribute('accept', 'image/*');
+      input.click();
 
-        input.onchange = function () {
-            var file = input.files[0];
-            var formData = new FormData();
-            formData.append('file', file);
+      input.onchange = function () {
+        var file = input.files[0];
+        var formData = new FormData();
+        formData.append('file', file);
 
-            fetch('/upload_image', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                callback(data.location); // Insert the image URL returned from Flask
-            })
-            .catch(error => {
-                console.error('Error uploading image:', error);
-            });
-        };
+        fetch('/upload_image', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          callback(data.location);
+        })
+        .catch(error => {
+          console.error('Error uploading image:', error);
+        });
+      };
     }
-});
+  };
 
+  // Initialize everything when DOM is loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize TinyMCE editors
+    tinymce.init({
+      selector: '#editor',
+      ...tinyMCEConfig
+    });
 
+    tinymce.init({
+      selector: '#subSubtopicEditor',
+      ...tinyMCEConfig,
+      height: 300
+    });
 
+    initializeSortables();
+    
+    // Adjust sidebar height if needed
+    const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+    document.querySelector('.sidebar').style.height = `calc(100vh - ${headerHeight}px)`;
+    document.querySelector('.content').style.height = `calc(100vh - ${headerHeight}px)`;
+  });
+
+  // Display functions with table support
+  function handleSubtopicClick(element) {
+    const title = element.dataset.title;
+    let content = element.dataset.content;
+    
+    // Ensure table styles are applied
+    content = applyTableStyles(content);
+
+    document.getElementById('formSection').style.display = 'none';
+    document.getElementById('subSubtopicFormContainer').style.display = 'none';
+    document.getElementById('displayTitle').innerText = title;
+    document.getElementById('displayContent').innerHTML = content;
+    document.getElementById('displayArea').style.display = 'block';
+  }
+
+  function showSubSubtopic(event, element) {
+    event.stopPropagation();
+    const target = element.closest('.subsubtopic-item');
+    const title = target.dataset.title;
+    let content = target.dataset.content;
+    
+    // Ensure table styles are applied
+    content = applyTableStyles(content);
+
+    document.getElementById('displayTitle').innerText = title;
+    document.getElementById('displayContent').innerHTML = content;
+    document.getElementById('displayArea').style.display = 'block';
+    document.getElementById('formSection').style.display = 'none';
+    document.getElementById('subSubtopicFormContainer').style.display = 'none';
+  }
+
+  // Helper function to apply table styles
+  function applyTableStyles(content) {
+    if (!content) return content;
+    
+    // Create temporary div to parse HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    
+    // Apply styles to all tables
+    const tables = tempDiv.querySelectorAll('table');
+    tables.forEach(table => {
+      table.style.borderCollapse = 'collapse';
+      table.style.width = '100%';
+      table.style.margin = '1rem 0';
+      
+      const ths = table.querySelectorAll('th');
+      ths.forEach(th => {
+        th.style.border = '1px solid #dee2e6';
+        th.style.padding = '8px';
+        th.style.backgroundColor = '#f8f9fa';
+        th.style.fontWeight = 'bold';
+      });
+      
+      const tds = table.querySelectorAll('td');
+      tds.forEach(td => {
+        td.style.border = '1px solid #dee2e6';
+        td.style.padding = '8px';
+      });
+    });
+    
+    return tempDiv.innerHTML;
+  }
+  
+    // Main Functions
     function toggleForm() {
       const form = document.getElementById('formSection');
       const displayArea = document.getElementById('displayArea');
-
-      // Hide display area
+      const subSubtopicForm = document.getElementById('subSubtopicFormContainer');
+  
+      // Hide other sections
       displayArea.style.display = 'none';
-
-      // Toggle form
+      subSubtopicForm.style.display = 'none';
+  
+      // Toggle form and reset if showing
       if (form.style.display === 'block') {
         form.style.display = 'none';
       } else {
         form.style.display = 'block';
+        form.querySelector('input[name="title"]').value = '';
+        tinymce.get('editor').setContent('');
       }
     }
-
+  
     function saveContent() {
       tinymce.triggerSave();
       return true;
     }
-
-    function handleSubtopicClick(element) {
-      const title = element.dataset.title;
-      const content = element.dataset.content;
-
-      // Hide form and show content
+  
+  
+    // Sub-Subtopic Functions
+    function showSubSubtopicForm(subtopicId) {
       document.getElementById('formSection').style.display = 'none';
-
-      document.getElementById('displayTitle').innerText = title;
-      document.getElementById('displayContent').innerHTML = content;
-      document.getElementById('displayArea').style.display = 'block';
+      document.getElementById('displayArea').style.display = 'none';
+      
+      const formContainer = document.getElementById('subSubtopicFormContainer');
+      formContainer.style.display = 'block';
+      document.getElementById('parentSubtopicId').value = subtopicId;
+      
+      // Reset form
+      document.getElementById('subSubtopicForm').reset();
+      tinymce.get('subSubtopicEditor').setContent('');
+      
+      formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+  
+    function hideSubSubtopicForm() {
+      document.getElementById('subSubtopicFormContainer').style.display = 'none';
+    }
+  
+    function saveSubSubtopicContent() {
+      tinymce.triggerSave();
+      const form = document.getElementById('subSubtopicForm');
+      const formData = new FormData(form);
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.innerHTML;
+  
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+  
+      fetch('/add_sub_subtopic', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            hideSubSubtopicForm();
+            updateSubSubtopicList(document.getElementById('parentSubtopicId').value, data.newSubSubtopic);
+            showAlert('Sub-subtopic added successfully!', 'success');
+          } else {
+            throw new Error(data.error || 'Failed to save');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showAlert('Error: ' + error.message, 'danger');
+        })
+        .finally(() => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+        });
+  
+      return false;
+    }
+  
+    function toggleSubSubtopics(subtopicId, event) {
+      event.stopPropagation();
+      const container = document.getElementById(`subsubtopics-${subtopicId}`);
+      const arrow = document.getElementById(`arrow-${subtopicId}`);
+  
+      if (container.style.display === 'none' || !container.style.display) {
+        container.style.display = 'block';
+        arrow.classList.replace('bi-chevron-down', 'bi-chevron-up');
+      } else {
+        container.style.display = 'none';
+        arrow.classList.replace('bi-chevron-up', 'bi-chevron-down');
+      }
+    }
+  
+  
+    // Sortable Initialization
+    function initializeSortables() {
+      // Initialize only once for subtopics
+      new Sortable(document.getElementById('subtopicList'), {
+        animation: 150,
+        handle: '.subtopic-item',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        onEnd: function() {
+          const order = Array.from(document.querySelectorAll('.subtopic-wrapper'))
+            .map(el => el.getAttribute('data-id'));
+          
+          fetch('/update_subtopic_order', {
+            method: 'POST',
+            body: JSON.stringify({ order: order }),
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': "{{ csrf_token() }}"
+            }
+          }).then(() => {
+            showAlert('Order saved!', 'success');
+          });
+        }
+      });
+  
+      // Initialize sub-subtopic sortables
+      document.querySelectorAll('.subsubtopic-list').forEach(container => {
+        new Sortable(container, {
+          animation: 150,
+          ghostClass: 'sortable-ghost',
+          chosenClass: 'sortable-chosen',
+          onEnd: function(evt) {
+            const parentId = container.getAttribute('data-parent-id');
+            const order = Array.from(container.children).map(item => item.dataset.id);
+            
+            fetch('/update_subsubtopic_order', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': "{{ csrf_token() }}"
+              },
+              body: JSON.stringify({
+                order: order,
+                parent_id: parentId
+              })
+            }).then(response => response.json())
+              .then(data => {
+                showAlert('Sub-subtopic order saved!', 'success');
+              })
+              .catch(error => console.error('Error:', error));
+          }
+        });
+      });
+    }
+  
+    // Update the updateSubSubtopicList function to show the arrow automatically
+function updateSubSubtopicList(parentId, newSubSubtopic) {
+  const container = document.getElementById(`subsubtopics-${parentId}`);
+  const arrowBtn = document.querySelector(`.subtopic-wrapper[data-id="${parentId}"] .btn-link`);
+  const arrowIcon = document.getElementById(`arrow-${parentId}`);
 
-  </script>
+  const newItem = document.createElement('div');
+  newItem.className = 'subsubtopic-item p-2 my-1 border rounded d-flex justify-content-between align-items-center';
+  newItem.dataset.id = newSubSubtopic.id;
+  newItem.dataset.title = newSubSubtopic.title;
+  newItem.dataset.content = newSubSubtopic.content;
+  
+  newItem.innerHTML = `
+    <span class="flex-grow-1">${newSubSubtopic.title}</span>
+    <div class="dropdown">
+      <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" onclick="event.stopPropagation()">
+        ⋮
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="/edit_subsubtopic/${newSubSubtopic.id}">Edit</a></li>
+        <li><a class="dropdown-item text-danger" href="#" onclick="deleteSubSubtopic('${newSubSubtopic.id}', event)">Delete</a></li>
+      </ul>
+    </div>
+  `;
+  
+  newItem.querySelector('span').onclick = (e) => showSubSubtopic(e, newItem);
 
-  <script>
-    var sortable = new Sortable(document.getElementById('subtopicList'), {
+  if (!container) {
+    const wrapper = document.querySelector(`.subtopic-wrapper[data-id="${parentId}"]`);
+    const newContainer = document.createElement('div');
+    newContainer.id = `subsubtopics-${parentId}`;
+    newContainer.className = 'subsubtopic-list';
+    newContainer.setAttribute('data-parent-id', parentId);
+    newContainer.style.marginLeft = '1rem';
+    wrapper.parentNode.insertBefore(newContainer, wrapper.nextSibling);
+    newContainer.appendChild(newItem);
+    
+    // Create and show the arrow button if it doesn't exist
+    if (!arrowBtn) {
+      const newArrowBtn = document.createElement('button');
+      newArrowBtn.className = 'btn btn-sm btn-link ms-2';
+      newArrowBtn.innerHTML = '<i class="bi bi-chevron-down" id="arrow-' + parentId + '"></i>';
+      newArrowBtn.onclick = (e) => toggleSubSubtopics(parentId, e);
+      wrapper.querySelector('.dropdown').insertAdjacentElement('afterend', newArrowBtn);
+    } else {
+      arrowBtn.style.display = 'block';
+    }
+    
+    // Reinitialize sortable for this new container
+    new Sortable(newContainer, {
       animation: 150,
-      onEnd: function (evt) {
-        saveNewOrder();
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      onEnd: function(evt) {
+        const order = Array.from(newContainer.children).map(item => item.dataset.id);
+        fetch('/update_subsubtopic_order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': "{{ csrf_token() }}"
+          },
+          body: JSON.stringify({
+            order: order,
+            parent_id: parentId
+          })
+        });
       }
     });
+  } else {
+    container.appendChild(newItem);
+  }
   
-    function saveNewOrder() {
-  var order = [];
-  document.querySelectorAll('#subtopicList .subtopic-wrapper').forEach(function (item) {
-    order.push(item.getAttribute('data-id'));
-  });
-
-  // Check if the order array has any changes
-  console.log('New order:', order);  // Debugging
-
-  fetch('/update_subtopic_order', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ order: order })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.status === 'success') {
-      console.log('Order saved successfully');
-    } else {
-      console.error('Failed to save order:', data);
+  // Always show the container when adding a new sub-subtopic
+  if (container) {
+    container.style.display = 'block';
+    if (arrowIcon) {
+      arrowIcon.classList.replace('bi-chevron-down', 'bi-chevron-up');
     }
-  })
-  .catch(error => {
-    console.error('Error saving order:', error);
-  });
+  }
 }
-
-  </script>
   
+    function deleteSubSubtopic(subsubId, event) {
+      event.stopPropagation();
+      event.preventDefault();
+      
+      if (confirm('Are you sure you want to delete this sub-subtopic?')) {
+        fetch(`/delete_sub_subtopic/${subsubId}`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token() }}'
+          }
+        })
+        .then(response => {
+          if (response.ok) {
+            // Remove the item from UI
+            const item = document.querySelector(`.subsubtopic-item[data-id="${subsubId}"]`);
+            if (item) {
+              item.remove();
+              showAlert('Sub-subtopic deleted!', 'success');
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showAlert('Error deleting sub-subtopic', 'danger');
+        });
+      }
+    }
+  
+    // Helper function for showing alerts
+    function showAlert(message, type) {
+      const tempMsg = document.createElement('div');
+      tempMsg.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3`;
+      tempMsg.innerHTML = message;
+      document.body.appendChild(tempMsg);
+      setTimeout(() => tempMsg.remove(), 2000);
+    }
+  </script>
 
 </body>
 

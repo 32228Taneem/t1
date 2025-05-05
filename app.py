@@ -2,6 +2,7 @@ from flask import Flask,render_template,url_for,redirect,request,flash,session,j
 from otp import genotp
 from cmail import sendmail
 from tokens import encode,decode
+from flask_wtf.csrf import CSRFProtect
 import mysql.connector
 from flask_session import Session
 from werkzeug.utils import secure_filename
@@ -10,11 +11,13 @@ import re
 
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'
-app.secret_key = 'your_secret_key'  # Required for session and flash
+app.secret_key = 'tech$tan111'  # Required for session and flash
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['WTF_CSRF_ENABLED'] = True  # Should be True in production
 Session(app)
+csrf = CSRFProtect(app)
 
 # MySQL Configuration
 mytdb = mysql.connector.connect(
@@ -64,22 +67,46 @@ def view_subtopics(item_name):
     # Fetch navbar items
     cursor.execute('SELECT id, name FROM navbar_items ORDER BY position ASC')
     navbar_items = cursor.fetchall()
-    # Fetch subtopics
+    # Fetch navbar item ID
     cursor.execute('SELECT id FROM navbar_items WHERE name=%s', (item_name,))
     nav_id = cursor.fetchone()
     if not nav_id:
         return 'Navbar item not found'
-    cursor.execute('SELECT id, title, content, image_filename FROM subtopics WHERE navbar_id=%s ORDER BY position', (nav_id[0],))
-    subtopics = [
-        {
+    
+    # Fetch subtopics with their sub-subtopics
+    cursor.execute('''SELECT id, title, content, image_filename FROM subtopics WHERE navbar_id=%s ORDER BY position''', (nav_id[0],))
+    subtopics = []
+    for row in cursor.fetchall():
+        # Get sub-subtopics for each subtopic
+        cursor.execute('''
+            SELECT id, title, content 
+            FROM sub_subtopics 
+            WHERE subtopic_id=%s 
+            ORDER BY position
+        ''', (row[0],))
+        
+        sub_subtopics = [
+            {
+                'id': sub_row[0],
+                'title': sub_row[1],
+                'content': sub_row[2]
+            } for sub_row in cursor.fetchall()
+        ]
+        
+        subtopics.append({
             'id': row[0],
             'title': row[1],
             'content': row[2],
-            'image': url_for('static', filename=f'uploads/{row[3]}') if row[3] else None
-        } for row in cursor.fetchall()
-    ]
-    return render_template('view_subtopics.html', item_name=item_name, subtopics=subtopics, navbar_items=navbar_items)
-
+            'image': url_for('static', filename=f'uploads/{row[3]}') if row[3] else None,
+            'sub_subtopics': sub_subtopics  # Add sub-subtopics to each subtopic
+        })
+    
+    return render_template(
+        'view_subtopics.html',
+        item_name=item_name,
+        subtopics=subtopics,
+        navbar_items=navbar_items
+    )
 
 @app.route('/usercreate',methods=['GET','POST'])
 def usercreate():
@@ -361,21 +388,55 @@ def add_navbar_item():
 
 @app.route('/view_content/<item_name>')
 def view_content(item_name):
-    cursor.execute('SELECT id FROM navbar_items WHERE name=%s', (item_name,))
-    nav_id = cursor.fetchone()
-    if not nav_id:
-        return 'Navbar item not found'
+    try:
+        # 1. Get the navbar item ID
+        cursor.execute('SELECT id FROM navbar_items WHERE name=%s', (item_name,))
+        nav_id = cursor.fetchone()
+        if not nav_id:
+            return 'Navbar item not found', 404
 
-    cursor.execute('SELECT id, title, content, image_filename FROM subtopics WHERE navbar_id=%s ORDER BY position', (nav_id[0],))
-    subtopics = [
-        {
-            'id': row[0],
-            'title': row[1],
-            'content': row[2],
-            'image': url_for('static', filename=f'uploads/{row[3]}') if row[3] else None
-        } for row in cursor.fetchall()
-    ]
-    return render_template('view_content.html', item_name=item_name, subtopics=subtopics)
+        # 2. Get all subtopics for this navbar item
+        cursor.execute('''
+            SELECT id, title, content, image_filename 
+            FROM subtopics 
+            WHERE navbar_id=%s 
+            ORDER BY position
+        ''', (nav_id[0],))
+        
+        subtopics = []
+        for subtopic_row in cursor.fetchall():
+            # 3. Get ALL sub-subtopics for this subtopic
+            cursor.execute('''
+                SELECT id, title, content
+                FROM sub_subtopics
+                WHERE subtopic_id=%s
+                ORDER BY id
+            ''', (subtopic_row[0],))
+            
+            subsubtopics = []
+            for subsub_row in cursor.fetchall():
+                subsubtopics.append({
+                    'id': subsub_row[0],
+                    'title': subsub_row[1],
+                    'content': subsub_row[2]
+                })
+            
+            # 4. Add to subtopics list WITH subsubtopics
+            subtopics.append({
+                'id': subtopic_row[0],
+                'title': subtopic_row[1],
+                'content': subtopic_row[2],
+                'image': url_for('static', filename=f'uploads/{subtopic_row[3]}') if subtopic_row[3] else None,
+                'sub_subtopics': subsubtopics,  # This makes the down arrow appear
+                'has_subsub': len(subsubtopics) > 0  # Alternative approach
+            })
+        
+        return render_template('view_content.html', 
+                            item_name=item_name, 
+                            subtopics=subtopics)
+    
+    except Exception as e:
+        return str(e), 500
 
 
 @app.route('/add_subtopic/<item_name>', methods=['POST'])
@@ -466,5 +527,238 @@ def update_subtopic_order():
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+# sub-sub-topics key routes ya c
+@app.route('/get_sub_subtopics/<int:subtopic_id>')
+def get_sub_subtopics(subtopic_id):
+    try:
+        cursor.execute('''
+            SELECT id, title, content 
+            FROM sub_subtopics 
+            WHERE subtopic_id=%s
+            ORDER BY id
+        ''', (subtopic_id,))
+        
+        subsubtopics = []
+        for row in cursor.fetchall():
+            subsubtopics.append({
+                'id': row[0],
+                'title': row[1],
+                'content': row[2]
+            })
+        
+        return jsonify(subsubtopics)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/add_sub_subtopic', methods=['POST'])
+def add_sub_subtopic():
+    try:
+        subtopic_id = request.form.get('parent_subtopic_id')
+        title = request.form.get('title')
+        content = request.form.get('content', '')
+        
+        if not subtopic_id or not title:
+            return jsonify({'success': False, 'error': 'Missing required fields'}), 400
+            
+        cursor.execute('''
+            INSERT INTO sub_subtopics (subtopic_id, title, content)
+            VALUES (%s, %s, %s)
+        ''', (subtopic_id, title, content))
+        mytdb.commit()
+        
+        # Get the newly created sub-subtopic
+        cursor.execute('SELECT id, title, content FROM sub_subtopics WHERE id = LAST_INSERT_ID()')
+        new_subsub = cursor.fetchone()
+        
+        return jsonify({
+            'success': True,
+            'newSubSubtopic': {
+                'id': new_subsub[0],
+                'title': new_subsub[1],
+                'content': new_subsub[2]
+            }
+        })
+    except Exception as e:
+        mytdb.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
+@app.route('/update_subsubtopic_order', methods=['POST'])
+def update_subsubtopic_order():
+    order = request.json.get('order')
+    parent_id = request.json.get('parent_id')
+    print(f"Received order: {order} for parent {parent_id}")  # Log the order
+    
+    if not order or not parent_id:
+        return {'status': 'No order or parent_id provided'}, 400
+    
+    try:
+        for position, subsub_id in enumerate(order, start=1):
+            print(f"Updating subsubtopic {subsub_id} to position {position}")  # Log each update
+            cursor.execute('''
+                UPDATE sub_subtopics 
+                SET position=%s 
+                WHERE id=%s AND subtopic_id=%s
+            ''', (position, subsub_id, parent_id))
+        
+        mytdb.commit()
+        return {'status': 'success', 'message': 'Sub-subtopic order updated successfully'}
+    
+    except Exception as e:
+        mytdb.rollback()
+        print(f"Error: {e}")  # Log the error
+        return {'status': 'error', 'message': str(e)}, 500
+    
+@app.route('/delete_sub_subtopic/<int:subsub_id>', methods=['DELETE'])
+def delete_sub_subtopic(subsub_id):
+    try:
+        # Get redirect info first
+        cursor.execute('''
+            SELECT ni.name 
+            FROM sub_subtopics ss
+            JOIN subtopics st ON ss.subtopic_id = st.id
+            JOIN navbar_items ni ON st.navbar_id = ni.id
+            WHERE ss.id = %s
+        ''', (subsub_id,))
+        result = cursor.fetchone()
+        
+        if not result:
+            return jsonify({'success': False, 'message': 'Not found'}), 404
+            
+        # Perform deletion
+        cursor.execute('DELETE FROM sub_subtopics WHERE id = %s', (subsub_id,))
+        mytdb.commit()
+        
+        return jsonify({
+            'success': True,
+            'redirect_url': url_for('view_subtopics', item_name=result[0])
+        })
+        
+    except Exception as e:
+        mytdb.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/edit_subsubtopic/<int:subsub_id>', methods=['GET', 'POST'])
+def edit_subsubtopic(subsub_id):
+    if request.method == 'POST':
+        # Handle form submission (UPDATE)
+        title = request.form['title']
+        content = request.form['content']
+        
+        # 1. Update the sub-subtopic
+        cursor.execute('''
+            UPDATE sub_subtopics 
+            SET title=%s, content=%s 
+            WHERE id=%s
+        ''', (title, content, subsub_id))
+        mytdb.commit()
+        
+        # 2. Get navbar_id (EXACTLY like your subtopic route)
+        cursor.execute('SELECT subtopic_id FROM sub_subtopics WHERE id=%s', (subsub_id,))
+        subtopic_id = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT navbar_id FROM subtopics WHERE id=%s', (subtopic_id,))
+        nav_id = cursor.fetchone()[0]
+        
+        # 3. Get item_name for redirect (identical to your approach)
+        cursor.execute('SELECT name FROM navbar_items WHERE id=%s', (nav_id,))
+        item_name = cursor.fetchone()[0]
+        
+        return redirect(url_for('view_content', item_name=item_name))
+    
+    else:
+        # Handle GET request (show edit form)
+        # 1. Get sub-subtopic data (matching your subtopic pattern)
+        cursor.execute('''
+            SELECT title, content, subtopic_id 
+            FROM sub_subtopics 
+            WHERE id=%s
+        ''', (subsub_id,))
+        subsub = cursor.fetchone()
+        
+        # 2. Get navbar_id (same as your approach)
+        cursor.execute('SELECT navbar_id FROM subtopics WHERE id=%s', (subsub[2],))
+        nav_id = cursor.fetchone()[0]
+        
+        # 3. Get item_name (identical to your subtopic route)
+        cursor.execute('SELECT name FROM navbar_items WHERE id=%s', (nav_id,))
+        item_name = cursor.fetchone()[0]
+        
+        return render_template('edit_subsubtopic.html', 
+                            subsub_id=subsub_id,
+                            title=subsub[0],
+                            content=subsub[1],
+                            item_name=item_name)
+    
+# @app.route('/view_sub_subtopics/<int:subtopic_id>', methods=['GET', 'POST'])
+# def view_sub_subtopics(subtopic_id):
+#     # Fetch sub-subtopics based on the subtopic_id
+#     cursor.execute("SELECT * FROM sub_subtopics WHERE subtopic_id = %s", (subtopic_id,))
+#     sub_subtopics = cursor.fetchall()
+#     # Format the results
+#     formatted_sub_subtopics = [{'id': row[0], 'title': row[1], 'content': row[2]} for row in sub_subtopics]
+#     # conn.close()
+#     return render_template('sub_subtopics.html', sub_subtopics=formatted_sub_subtopics, subtopic_id=subtopic_id)
+
+# @app.route('/add_sub_subtopic/<int:subtopic_id>', methods=['POST'])
+# def add_sub_subtopic(subtopic_id):
+#     title = request.form['title']
+#     content = request.form['content']
+    
+#     # Check if the subtopic_id exists
+#     cursor.execute("SELECT id FROM subtopics WHERE id = %s", (subtopic_id,))
+#     subtopic_exists = cursor.fetchone()
+    
+#     if not subtopic_exists:
+#         return "Invalid Subtopic ID"
+    
+#     # Insert the sub_subtopic if valid
+#     cursor.execute("INSERT INTO sub_subtopics (subtopic_id, title, content) VALUES (%s, %s, %s)", 
+#                    (subtopic_id, title, content))
+#     return redirect(url_for('view_sub_subtopics', subtopic_id=subtopic_id))
+
+
+# @app.route('/edit_sub_subtopic/<int:sub_subtopic_id>', methods=['GET', 'POST'])
+# def edit_sub_subtopic(sub_subtopic_id):
+#     cursor = mysql.connection.cursor()
+#     if request.method == 'POST':
+#         title = request.form['title']
+#         content = request.form['content']
+#         cursor.execute("UPDATE sub_subtopics SET title = %s, content = %s WHERE id = %s", 
+#                        (title, content, sub_subtopic_id))
+#         mysql.connection.commit()
+#         return redirect(url_for('view_subtopics', subtopic_id=sub_subtopic_id))
+#     cursor.execute("SELECT * FROM sub_subtopics WHERE id = %s", (sub_subtopic_id,))
+#     sub_subtopic = cursor.fetchone()
+#     return render_template('edit_sub_subtopic.html', sub_subtopic=sub_subtopic)
+
+# @app.route('/delete_sub_subtopic/<int:sub_subtopic_id>', methods=['GET', 'POST'])
+# def delete_sub_subtopic(sub_subtopic_id):
+#     cursor = mysql.connection.cursor()
+#     cursor.execute("DELETE FROM sub_subtopics WHERE id = %s", (sub_subtopic_id,))
+#     mysql.connection.commit()
+#     return redirect(url_for('view_contents'))
+
+# @app.route('/update_sub_subtopic_order', methods=['POST'])
+# def update_sub_subtopic_order():
+#     order = request.json['order']
+#     cursor = mysql.connection.cursor()
+#     for idx, sub_subtopic_id in enumerate(order):
+#         cursor.execute("UPDATE sub_subtopics SET position = %s WHERE id = %s", (idx, sub_subtopic_id))
+#     mysql.connection.commit()
+#     return jsonify(status='success')
+
+# @app.route('/get_sub_subtopics/<int:subtopic_id>', methods=['GET'])
+# def get_sub_subtopics(subtopic_id):
+#     cursor = mysql.connection.cursor()
+#     cursor.execute("SELECT * FROM sub_subtopics WHERE subtopic_id = %s", (subtopic_id,))
+#     sub_subtopics = cursor.fetchall()
+#     cursor.close()
+    
+#     sub_subtopics_list = [{'id': sub[0], 'title': sub[1], 'content': sub[2]} for sub in sub_subtopics]
+    
+#     return jsonify({'subSubtopics': sub_subtopics_list})
+
 
 app.run(use_reloader=True, debug=True)

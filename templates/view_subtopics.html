@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>{{ item_name }} - Subtopics</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
   <script src="https://cdn.tiny.cloud/1/lezf5y9e1y8vwjv3870f06avrgu9855j1octvf69ab6d8hut/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
   <style>
     html, body {
@@ -13,76 +14,44 @@
     }
     .navbar-fixed-top {
       background: linear-gradient(45deg, #ff7eb3, #ff758c, #ff585d);
-    padding: 15px;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1040;
-      /* position: fixed;
+      padding: 15px;
+      position: fixed;
       top: 0;
       width: 100%;
-      z-index: 1030; */
+      z-index: 1040;
     }
     .second-navbar-wrapper {
-  /* position: fixed;
-  top: 72px;  
-  width: 100%;
-  z-index: 1020;
-  display: flex;
-  justify-content: space-between;
-  align-items: center; */
-  position: fixed;
-    top: 72px; /* Adjust if main navbar height changes */
-    width: 100%;
-    display: flex;
-    align-items: center;
-    background: linear-gradient(45deg, #ff758c, #ff585d);
-    z-index: 1039;
-    border-top: 2px solid #fff;
-    border-bottom: 2px solid #fff;
-    padding: 5px 0;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    left: 0;
-    right: 0;
-}
-
-.second-navbar {
-  display: flex;
-    overflow-x: hidden; /* Prevent manual scroll */
-    white-space: nowrap;
-    scroll-behavior: smooth;
-    flex-grow: 1;
-  /* background: #e9ecef;
-  overflow-x: auto;
-  white-space: nowrap;
-  flex-grow: 1;
-  padding: 10px; */
-}
-
-.scroll-btn {
-  background-color: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    padding: 0 15px;
-    font-size: 1.8rem;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    z-index: 1041;
-  /* background-color: #ddd;
-  border: none;
-  padding: 10px;
-  cursor: pointer;
-  z-index: 1030; */
-}
-
-/* .left-btn {
-  margin-left: 10px;
-}
-
-.right-btn {
-  margin-right: 10px;
-} */
-
+      position: fixed;
+      top: 72px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      background: linear-gradient(45deg, #ff758c, #ff585d);
+      z-index: 1039;
+      border-top: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      padding: 5px 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      left: 0;
+      right: 0;
+    }
+    .second-navbar {
+      display: flex;
+      overflow-x: hidden;
+      white-space: nowrap;
+      scroll-behavior: smooth;
+      flex-grow: 1;
+    }
+    .scroll-btn {
+      background-color: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 0 15px;
+      font-size: 1.8rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      z-index: 1041;
+    }
     .second-navbar a {
       display: inline-block;
       padding: 10px 20px;
@@ -90,40 +59,52 @@
       text-decoration: none;
     }
     .main-body {
-      margin-left: 250px; /* width of side panel */
-  padding: 20px;
-  padding-top: 160px; /* height of both navbars */
-      /* display: flex;
-      margin-top: 112px;
-      height: calc(100% - 112px); */
+      margin-left: 250px;
+      padding: 20px;
+      padding-top: 160px;
     }
     .sidebar {
       position: fixed;
-  top: 160px; /* after both navbars and second navbar */
-  left: 0;
-  width: 250px;
-  height: calc(100vh - 160px); /* full height minus navbars height */
-  overflow-y: auto; /* scroll only inside the side panel */
-  background-color: #f8f9fa;
-  padding: 10px;
-  border-right: 1px solid #ddd;
-      /* width: 250px;
-      background: #f8f9fa;
-      padding: 1rem;
+      top: 160px;
+      left: 0;
+      width: 250px;
+      height: calc(100vh - 160px);
+      overflow-y: auto;
+      background-color: #f8f9fa;
+      padding: 10px;
       border-right: 1px solid #ddd;
-      overflow-y: auto; */
     }
     .content {
       flex: 1;
       padding: 2rem;
       overflow-y: auto;
     }
-    .subtopic-item {
+    .subtopic-container {
       margin-bottom: 0.5rem;
+    }
+    .subtopic-wrapper {
+      display: flex;
+      align-items: center;
+    }
+    .subtopic-item {
+      flex-grow: 1;
       padding: 0.5rem;
       background: #fff;
       border: 1px solid #ccc;
       border-radius: 5px;
+      cursor: pointer;
+    }
+    .subsubtopic-list {
+      margin-left: 1rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .subsubtopic-item {
+      padding: 0.5rem;
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 0.25rem;
       cursor: pointer;
     }
     #displayArea {
@@ -143,6 +124,12 @@
     .rich-content-container img {
       max-width: 100%;
       height: auto;
+    }
+    .dropdown-toggle::after {
+      display: none;
+    }
+    .btn-link {
+      padding: 0 0.5rem;
     }
   </style>
 </head>
@@ -166,14 +153,7 @@
           <li class="nav-item"><a class="nav-link" href="#">About</a></li>
           <li class="nav-item"><a class="nav-link" href="#">Services</a></li>
           <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
-          <!-- <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">SignUp</a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" href="{{url_for('admincreate')}}">Admin Signup</a></li>
-              <li><a class="dropdown-item" href="{{url_for('usercreate')}}">User SignUp</a></li>
-            </ul>
-          </li> -->
+
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                data-bs-toggle="dropdown" aria-expanded="false">Login</a>
@@ -205,11 +185,33 @@
     <div class="sidebar">
       <h5 class="text-primary">{{ item_name }} Subtopics</h5>
       {% for sub in subtopics %}
-      <div class="subtopic-item"
-           data-title="{{ sub.title }}"
-           data-content="{{ sub.content | e }}"
-           onclick="handleSubtopicClick(this)">
-        {{ sub.title }}
+      <div class="subtopic-container">
+        <div class="subtopic-wrapper">
+          <div class="subtopic-item"
+               data-title="{{ sub.title }}"
+               data-content="{{ sub.content | e }}"
+               onclick="handleSubtopicClick(this)">
+            {{ sub.title }}
+          </div>
+          
+          {% if sub.sub_subtopics %}
+          <button class="btn btn-sm btn-link ms-2" 
+                  onclick="toggleSubSubtopics('{{ sub.id }}', event)">
+            <i class="bi bi-chevron-down" id="arrow-{{ sub.id }}"></i>
+          </button>
+          {% endif %}
+        </div>
+        
+        <div id="subsubtopics-{{ sub.id }}" class="subsubtopic-list">
+          {% for subsub in sub.sub_subtopics %}
+          <div class="subsubtopic-item"
+               data-title="{{ subsub.title }}"
+               data-content="{{ subsub.content }}"
+               onclick="showSubSubtopic(event, this)">
+            {{ subsub.title }}
+          </div>
+          {% endfor %}
+        </div>
       </div>
       {% endfor %}
     </div>
@@ -231,22 +233,45 @@
 
       document.getElementById('displayTitle').innerText = title;
       document.getElementById('displayContent').innerHTML = content;
-
       document.getElementById('displayArea').style.display = 'block';
     }
+
+    function toggleSubSubtopics(subtopicId, event) {
+      event.stopPropagation();
+      const container = document.getElementById(`subsubtopics-${subtopicId}`);
+      const arrow = document.getElementById(`arrow-${subtopicId}`);
+
+      if (container.style.display === 'none' || !container.style.display) {
+        container.style.display = 'block';
+        arrow.classList.replace('bi-chevron-down', 'bi-chevron-up');
+      } else {
+        container.style.display = 'none';
+        arrow.classList.replace('bi-chevron-up', 'bi-chevron-down');
+      }
+    }
+
+    function showSubSubtopic(event, element) {
+      event.stopPropagation();
+      const target = element.closest('.subsubtopic-item');
+      const title = target.dataset.title;
+      const content = target.dataset.content;
+
+      document.getElementById('displayTitle').innerText = title;
+      document.getElementById('displayContent').innerHTML = content;
+      document.getElementById('displayArea').style.display = 'block';
+    }
+
     document.querySelector('.left-btn').addEventListener('click', function() {
-  const secondNavbar = document.getElementById('backendNav');
-  secondNavbar.scrollBy(-200, 0);  // Scroll left
-});
+      const secondNavbar = document.getElementById('backendNav');
+      secondNavbar.scrollBy(-200, 0);
+    });
 
-document.querySelector('.right-btn').addEventListener('click', function() {
-  const secondNavbar = document.getElementById('backendNav');
-  secondNavbar.scrollBy(200, 0);  // Scroll right
-});
-
+    document.querySelector('.right-btn').addEventListener('click', function() {
+      const secondNavbar = document.getElementById('backendNav');
+      secondNavbar.scrollBy(200, 0);
+    });
   </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
