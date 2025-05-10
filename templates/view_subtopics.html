@@ -6,15 +6,13 @@
   <title>{{ item_name }} - Subtopics</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="/static/colours.css">
   <script src="https://cdn.tiny.cloud/1/lezf5y9e1y8vwjv3870f06avrgu9855j1octvf69ab6d8hut/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-  <style>
-/* view_subtopics.html CSS - Matching navbar.css */
+ 
+ <style>
+  /* view_subtopics.html CSS - Using color variables */
+   @import url('/static/colours.css');
 :root {
-  --primary-color: #3498db !important;
-  --secondary-color: #2ecc71 !important;
-  --dark-color: #2c3e50 !important; /* This is your dark blue navbar color */
-  --light-color: #ecf0f1 !important;
-  --danger-color: #e74c3c !important;
   --navbar-height: 60px !important;
 }
 
@@ -27,87 +25,90 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* First Navbar - Exact match to your navbar.css */
+/* First Navbar */
 .navbar-fixed-top {
-  background-color: var(--dark-color); /* Dark blue like welcome page */
+  background-color: var(--midnight-blue);
   height: var(--navbar-height);
   padding: 0 1rem;
   position: fixed;
   top: 0;
   width: 100%;
   z-index: 1040;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px var(--shadow-10);
   display: flex;
   align-items: center;
 }
-/* Navbar text/links - matching welcome page */
+
+/* Navbar text/links */
 .navbar-brand {
   font-weight: 700;
-  color: white !important;
+  color: var(--pure-white) !important;
   font-size: 1.25rem;
   transition: all 0.3s ease;
 }
 
 .navbar-brand:hover {
-  color: var(--primary-color) !important;
+  color: var(--ocean-blue) !important;
 }
 
 .nav-link {
-  color: rgba(255,255,255,0.85) !important;
+  color: var(--white-85) !important;
   padding: 0.5rem 1rem !important;
   transition: all 0.2s ease;
   font-weight: 500;
 }
 
 .nav-link:hover {
-  color: white !important;
+  color: var(--pure-white) !important;
   transform: translateY(-2px);
 }
+
 .navbar .form-control {
   border-radius: 20px 0 0 20px !important;
   padding: 0.5rem 1.2rem !important;
-  border: 2px solid rgba(255,255,255,0.4) !important;
-  background-color: rgba(255,255,255,0.25) !important;
-  color: white !important;
+  border: 2px solid var(--white-40) !important;
+  background-color: var(--white-25) !important;
+  color: var(--pure-white) !important;
   transition: all 0.3s ease;
   min-width: 200px;
 }
 
 .navbar .form-control::placeholder {
-  color: rgba(255,255,255,0.7) !important;
+  color: var(--white-70) !important;
 }
 
 .navbar .form-control:focus {
-  background-color: rgba(255,255,255,0.35) !important;
-  border-color: var(--light-color) !important;
+  background-color: var(--white-35) !important;
+  border-color: var(--cloud-white) !important;
   box-shadow: 0 0 0 0.25rem rgba(236, 240, 241, 0.25) !important;
-  color: white !important;
+  color: var(--pure-white) !important;
 }
 
 .navbar .btn-outline-success {
   border-radius: 0 20px 20px 0 !important;
-  background-color: var(--secondary-color) !important;
-  border: 2px solid var(--secondary-color) !important;
+  background-color: var(--emerald-green) !important;
+  border: 2px solid var(--emerald-green) !important;
   padding: 0 1.5rem !important;
-  color: white !important;
+  color: var(--pure-white) !important;
   transition: all 0.3s ease;
   font-weight: 500;
 }
 
 .navbar .btn-outline-success:hover {
-  background-color: #27ae60 !important;
-  border-color: #27ae60 !important;
+  background-color: var(--forest-green) !important;
+  border-color: var(--forest-green) !important;
 }
+
 .second-navbar .backend-link.active {
   background: linear-gradient(to right, 
-              rgba(255,255,255,0.15), 
-              rgba(255,255,255,0.3), 
-              rgba(255,255,255,0.15)) !important;
-  color: white !important;
+              var(--white-15), 
+              var(--white-30), 
+              var(--white-15)) !important;
+  color: var(--pure-white) !important;
   font-weight: 600;
   position: relative;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px var(--shadow-10);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   text-decoration: none !important;
 }
@@ -122,28 +123,29 @@ body {
   height: 2px;
   background: linear-gradient(90deg, 
               transparent, 
-              white, 
+              var(--pure-white), 
               transparent);
   border-radius: 100% 100% 0 0;
   animation: pulse 2s infinite ease-in-out;
 }
+
 .second-navbar .backend-link.active::before {
   width: 80%;
   opacity: 0.5;
   animation-delay: 0.2s;
 }
+
 .second-navbar .backend-link.active::after {
   content: '';
   position: absolute;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - 2rem); /* Account for padding */
+  width: calc(100% - 2rem);
   height: 3px;
-  background-color: white;
+  background-color: var(--pure-white);
   border-radius: 3px;
   animation: fadeIn 0.3s ease;
-  /* text-decoration: none;  */
 }
 
 @keyframes pulse {
@@ -156,54 +158,49 @@ body {
     opacity: 1;
   }
 }
+
 @keyframes fadeIn {
   from { opacity: 0; width: 0%; }
   to { opacity: 1; width: 60%; }
 }
+
 .second-navbar .backend-link {
   position: relative;
   transition: all 0.3s ease;
-  /* Ensure consistent padding */
   padding: 0.5rem 1.2rem !important;
-  /* Prevent text wrapping */
   white-space: nowrap;
-  /* Maintain box sizing */
   box-sizing: border-box;
   display: inline-block;
   min-width: fit-content;
   text-decoration: none !important;
 }
+
 .second-navbar .backend-link:hover {
   transform: translateY(-2px);
-  text-shadow: 0 0 5px rgba(255,255,255,0.3);
+  text-shadow: 0 0 5px var(--white-30);
 }
 
 .second-navbar .backend-link:active {
-  color: white !important;
+  color: var(--pure-white) !important;
   font-weight: 600;
-  /* Remove background change if it affects sizing */
   background: transparent !important;
-  /* Add transform that doesn't affect layout */
   transform: translateY(-1px);
-  /* Add these to prevent layout shift */
   padding: 0.5rem 1.2rem !important;
   margin: 0 0.25rem !important;
 }
-/* Second Navbar - Keeping your blue color */
+
+/* Second Navbar */
 .second-navbar-wrapper {
-  background-color: var(--primary-color); /* Blue color */
- 
-/* Second Navbar - Exact match to your navbar.css */
+  background-color: var(--ocean-blue);
   position: fixed;
   top: var(--navbar-height);
   left: 0;
   right: 0;
-  background-color: var(--primary-color);
   height: var(--navbar-height);
   display: flex;
   align-items: center;
   z-index: 1030;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px var(--shadow-10);
 }
 
 .second-navbar {
@@ -223,7 +220,7 @@ body {
 }
 
 .backend-link {
-  color: rgba(255,255,255,0.9) !important;
+  color: var(--white-90) !important;
   padding: 0.5rem 1rem !important;
   white-space: nowrap;
   font-weight: 500;
@@ -234,20 +231,20 @@ body {
 }
 
 .backend-link:hover {
-  background-color: rgba(255,255,255,0.2) !important;
-  color: white !important;
+  background-color: var(--white-20) !important;
+  color: var(--pure-white) !important;
   transform: translateY(-2px);
 }
 
 .backend-link.active {
-  background-color: rgba(255,255,255,0.3) !important;
-  color: white !important;
+  background-color: var(--white-30) !important;
+  color: var(--pure-white) !important;
   font-weight: 600;
 }
 
 .scroll-btn {
-  background-color: rgba(0,0,0,0.2);
-  color: white;
+  background-color: var(--shadow-20);
+  color: var(--pure-white);
   border: none;
   width: 30px;
   height: 30px;
@@ -262,7 +259,7 @@ body {
 }
 
 .scroll-btn:hover {
-  background-color: rgba(0,0,0,0.3);
+  background-color: var(--shadow-30);
   transform: scale(1.1);
 }
 
@@ -273,7 +270,7 @@ body {
   padding-top: calc(var(--navbar-height) * 2 + 20px);
 }
 
-/* Sidebar - Boxes removed as requested */
+/* Sidebar */
 .sidebar {
   position: fixed;
   top: calc(var(--navbar-height) * 2);
@@ -281,9 +278,9 @@ body {
   width: 250px;
   height: calc(100vh - var(--navbar-height) * 2);
   overflow-y: auto;
-  background-color: #f8f9fa;
+  background-color: var(--light-gray);
   padding: 10px 15px;
-  border-right: 1px solid #e1e5eb;
+  border-right: 1px solid var(--border-gray);
 }
 
 .subtopic-container {
@@ -298,36 +295,36 @@ body {
   border-radius: 6px;
   transition: all 0.3s ease;
   cursor: pointer;
-  margin-bottom: 2px; /* Added small bottom margin */
+  margin-bottom: 2px;
 }
+
 .subtopic-wrapper.active {
-  background-color: rgba(52, 152, 219, 0.2);
-  border-left: 3px solid var(--primary-color);
+  background-color: var(--blue-tint-20);
+  border-left: 3px solid var(--ocean-blue);
 }
+
 .subtopic-wrapper.active .subtopic-item {
-  color: var(--primary-color);
+  color: var(--ocean-blue);
   font-weight: 600;
 }
-/* Subtopic items - boxes removed */
+
 .subtopic-item {
   flex-grow: 1;
   padding: 4px 0;
   cursor: pointer;
-  color: #2c3e50;
+  color: var(--midnight-blue);
   font-weight: 500;
   transition: all 0.2s ease;
-  font-size: 0.95rem; /* Slightly smaller font */
+  font-size: 0.95rem;
 }
 
 .subtopic-item:hover {
-  background-color: rgba(52, 152, 219, 0.1);
+  background-color: var(--blue-tint-10);
 }
 
-/* Sub-subtopics - boxes removed */
 .subsubtopic-list {
   margin-left: 15px;
   padding-left: 8px;
-  /* border-left: 2px solid #dee2e6; */
   margin-top: 0.5rem;
   display: none;
 }
@@ -335,27 +332,26 @@ body {
 .subsubtopic-item {
   padding: 4px 8px;
   cursor: pointer;
-  /* flex-grow: 1; */
-  color: #2c3e50;
-  /* font-weight: 500; */
+  color: var(--midnight-blue);
   transition: all 0.2s ease;
   margin: 2px 0;
   border-radius: 3px;
-  font-size: 0.9rem; /* Slightly smaller font */
+  font-size: 0.9rem;
 }
 
 .subsubtopic-item:hover {
-  color: var(--primary-color);
-  background-color: rgba(52, 152, 219, 0.05);
+  color: var(--ocean-blue);
+  background-color: var(--blue-tint-5);
 }
+
 .subsubtopic-item.active {
-  background-color: rgba(52, 152, 219, 0.15);
-  color: var(--primary-color);
+  background-color: var(--blue-tint-15);
+  color: var(--ocean-blue);
   font-weight: 500;
 }
-/* Chevron buttons */
+
 .btn-link {
-  color: #6c757d;
+  color: var(--slate-gray);
   padding: 0 6px;
   transition: all 0.2s ease;
   background: none;
@@ -363,7 +359,7 @@ body {
 }
 
 .btn-link:hover {
-  color: var(--primary-color);
+  color: var(--ocean-blue);
   transform: scale(1.1);
 }
 
@@ -378,10 +374,10 @@ body {
   display: none;
   margin-top: 2rem;
   padding: 1rem;
-  background: #fff;
+  background: var(--pure-white);
   border-radius: 8px;
-  border: 1px solid #ddd;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  border: 1px solid var(--lighter-gray);
+  box-shadow: 0 2px 5px var(--shadow-gray);
 }
 
 .subtopic-title {
@@ -389,7 +385,33 @@ body {
   font-weight: bold;
   text-align: center;
   margin-bottom: 1rem;
-  color: var(--dark-color);
+  color: var(--midnight-blue);
+}
+
+/* Table Styles */
+#displayContent table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  border: 1px solid var(--lighter-gray) !important;
+}
+
+#displayContent table td, 
+#displayContent table th {
+  border: 1px solid var(--lighter-gray) !important;
+  padding: 8px;
+  text-align: left;
+}
+
+#displayContent table th {
+  background-color: var(--light-gray);
+  font-weight: bold;
+}
+
+.mce-content-body table, 
+.mce-content-body td, 
+.mce-content-body th {
+  border: 1px solid var(--lighter-gray) !important;
 }
 
 /* Responsive Adjustments */
@@ -405,8 +427,9 @@ body {
     position: relative;
     top: 0;
     border-right: none;
-    border-bottom: 1px solid #e1e5eb;
+    border-bottom: 1px solid var(--border-gray);
   }
+  
   .navbar .d-flex.me-auto {
     order: -1;
     width: 100%;
@@ -418,6 +441,7 @@ body {
     padding: 0.5rem 0.75rem !important;
     font-size: 0.9rem;
   }
+  
   .subtopic-wrapper {
     padding: 10px 15px;
   }
@@ -436,6 +460,7 @@ body {
   .content {
     padding: 1rem;
   }
+  
   .navbar .form-control {
     padding: 0.4rem 1rem !important;
   }
@@ -443,15 +468,19 @@ body {
   .navbar .btn-outline-success {
     padding: 0 1rem !important;
   }
+  
   .second-navbar .backend-link {
     padding: 0.5rem 0.9rem !important;
   }
+  
   .second-navbar .backend-link.active::after {
     width: calc(100% - 1.8rem);
   }
+  
   .subtopic-item {
     font-size: 0.95rem;
   }
+  
   .sidebar {
     padding: 8px 12px;
   }
@@ -459,37 +488,13 @@ body {
   .subtopic-wrapper {
     padding: 5px 8px;
   }
+  
   .subsubtopic-item {
     padding: 3px 6px;
     font-size: 0.9rem;
   }
 }
-/* Add this to your existing CSS */
-#displayContent table {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 1rem 0;
-  border: 1px solid #dee2e6 !important;
-}
 
-#displayContent table td, 
-#displayContent table th {
-  border: 1px solid #dee2e6 !important;
-  padding: 8px;
-  text-align: left;
-}
-
-#displayContent table th {
-  background-color: #f8f9fa;
-  font-weight: bold;
-}
-
-/* Make sure borders are visible in all cases */
-.mce-content-body table, 
-.mce-content-body td, 
-.mce-content-body th {
-  border: 1px solid #dee2e6 !important;
-}
 @media (max-width: 576px) {
   .navbar .form-control {
     padding: 0.35rem 0.8rem !important;

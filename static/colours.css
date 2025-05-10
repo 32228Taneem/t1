@@ -1,0 +1,29 @@
+:root {
+  /* Primary Colors */
+  --ocean-blue: #3498db;
+  --emerald-green: #2ecc71;
+  --midnight-blue: #2c3e50;
+  --cloud-white: #ecf0f1;
+  --ruby-red: #e74c3c;
+  
+  /* White Variations */
+  --pure-white: #ffffff;
+  --white-90: rgba(255,255,255,0.9);
+  --white-85: rgba(255,255,255,0.85);
+  --white-70: rgba(255,255,255,0.7);
+  --white-40: rgba(255,255,255,0.4);
+  --white-35: rgba(255,255,255,0.35);
+  --white-30: rgba(255,255,255,0.3);
+  --white-25: rgba(255,255,255,0.25);
+  --white-20: rgba(255,255,255,0.2);
+  
+  /* Black Variations */
+  --shadow-10: rgba(0,0,0,0.1);
+  --shadow-15: rgba(0,0,0,0.15);
+  --shadow-20: rgba(0,0,0,0.2);
+  --shadow-30: rgba(0,0,0,0.3);
+  
+  /* Other Colors */
+  --forest-green: #27ae60;
+  --deep-green: #27ae60;
+}

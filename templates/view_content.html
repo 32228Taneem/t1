@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>{{ item_name }} - Subtopics</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
@@ -364,8 +365,8 @@
         const formData = new FormData();
         formData.append('file', blobInfo.blob(), blobInfo.filename());
         
-        // Get CSRF token from your Flask template
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        // Get CSRF token - ensure you have this in your HTML template
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         
         fetch('/upload_image', {
             method: 'POST',
@@ -375,7 +376,11 @@
             }
         })
         .then(response => {
-            if (!response.ok) throw new Error('Upload failed: ' + response.status);
+            if (!response.ok) {
+                return response.json().then(err => { 
+                    throw new Error(err.error || 'Upload failed') 
+                });
+            }
             return response.json();
         })
         .then(data => {
@@ -384,7 +389,7 @@
         })
         .catch(error => {
             console.error('Upload error:', error);
-            failure('Image upload failed. Please try another image.');
+            failure(error.message);
         });
     },
     /* === FILE PICKER (ORIGINAL FUNCTIONALITY) === */

@@ -1,55 +1,52 @@
 /* static/navbar.css */
+@import url('colours.css');
 :root {
-  --primary-color: #3498db;
-  --secondary-color: #2ecc71;
-  --dark-color: #2c3e50;
-  --light-color: #ecf0f1;
-  --danger-color: #e74c3c;
   --navbar-height: 60px;
 }
 
 body {
   padding-top: calc(var(--navbar-height) * 2);
 }
-/* Search Form - Matching your preferred style */
+
+/* Search Form */
 .navbar .form-control {
   border-radius: 20px 0 0 20px !important;
   padding: 0.5rem 1.2rem !important;
-  border: 2px solid rgba(255,255,255,0.4) !important;
-  background-color: rgba(255,255,255,0.25) !important;
-  color: white !important;
+  border: 2px solid var(--white-40) !important;
+  background-color: var(--white-25) !important;
+  color: var(--pure-white) !important;
   transition: all 0.3s ease;
   min-width: 200px;
-  height: auto; /* Let it adapt to navbar height */
+  height: auto;
 }
 
 .navbar .form-control::placeholder {
-  color: rgba(255,255,255,0.7) !important;
+  color: var(--white-70) !important;
 }
 
 .navbar .form-control:focus {
-  background-color: rgba(255,255,255,0.35) !important;
-  border-color: var(--light-color) !important;
+  background-color: var(--white-35) !important;
+  border-color: var(--cloud-white) !important;
   box-shadow: 0 0 0 0.25rem rgba(236, 240, 241, 0.25) !important;
 }
 
 .navbar .btn-outline-success {
   border-radius: 0 20px 20px 0 !important;
-  background-color: var(--secondary-color) !important;
-  border: 2px solid var(--secondary-color) !important;
+  background-color: var(--emerald-green) !important;
+  border: 2px solid var(--emerald-green) !important;
   padding: 0 1.5rem !important;
-  color: white !important;
+  color: var(--pure-white) !important;
   transition: all 0.3s ease;
   font-weight: 500;
-  margin-left: -1px; /* Remove gap between input and button */
+  margin-left: -1px;
 }
 
 .navbar .btn-outline-success:hover {
-  background-color: #27ae60 !important;
-  border-color: #27ae60 !important;
+  background-color: var(--forest-green) !important;
+  border-color: var(--forest-green) !important;
 }
 
-/* Responsive adjustments to match your style */
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .navbar .form-control {
     padding: 0.4rem 1rem !important;
@@ -70,11 +67,12 @@ body {
     padding: 0 0.8rem !important;
   }
 }
-/* Main Navbar */
+
+/* Main Navbar */    
 .navbar {
-  background-color: var(--dark-color);
+  background-color: var(--midnight-blue);
   height: var(--navbar-height);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px var(--shadow-10);
   position: fixed;
   top: 0;
   width: 100%;
@@ -83,61 +81,57 @@ body {
 
 /* Dropdown Fixes */
 .navbar-nav {
-  position: relative; /* Add this to contain dropdowns */
+  position: relative;
 }
 
 .nav-item.dropdown {
-  position: static; /* Changed from relative */
+  position: static;
 }
 
 .dropdown-menu {
   position: absolute;
-  left: auto !important; /* Override any left positioning */
-  right: auto !important; /* Override any right positioning */
-  margin-left: 0; /* Remove any margin that might shift it */
-  transform: none !important; /* Remove any transforms */
+  left: auto !important;
+  right: auto !important;
+  margin-left: 0;
+  transform: none !important;
   z-index: 1050;
   border: none;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 5px 15px var(--shadow-10);
   border-radius: 8px;
-  /* Add these to prevent cutoff */
   max-width: 100vw;
   overflow-y: auto;
 }
 
-/* For right-aligned dropdowns (like user menu) */
 .dropdown-menu-right {
   right: 0;
   left: auto !important;
 }
 
-/* For left-aligned dropdowns */
 .dropdown-menu-left {
   left: 0;
   right: auto !important;
 }
 
-/* Rest of your existing CSS remains the same */
 .navbar-brand {
   font-weight: 700;
-  color: white !important;
+  color: var(--pure-white) !important;
   font-size: 1.25rem;
   transition: all 0.3s ease;
 }
 
 .navbar-brand:hover {
-  color: var(--primary-color) !important;
+  color: var(--ocean-blue) !important;
 }
 
 .nav-link {
-  color: rgba(255,255,255,0.85) !important;
+  color: var(--white-85) !important;
   padding: 0.5rem 1rem !important;
   transition: all 0.2s ease;
   font-weight: 500;
 }
 
 .nav-link:hover {
-  color: white !important;
+  color: var(--pure-white) !important;
   transform: translateY(-2px);
 }
 
@@ -147,34 +141,34 @@ body {
 }
 
 .dropdown-item:hover {
-  background-color: var(--light-color);
+  background-color: var(--cloud-white);
 }
 
 /* Search Form */
 .form-control {
   border-radius: 20px !important;
   padding: 0.5rem 1.2rem !important;
-  border: 2px solid rgba(255,255,255,0.4) !important;
-  background-color: rgba(255,255,255,0.25) !important;
-  color: white !important;
+  border: 2px solid var(--white-40) !important;
+  background-color: var(--white-25) !important;
+  color: var(--pure-white) !important;
   transition: all 0.3s ease;
   min-width: 200px;
 }
 
 .form-control::placeholder {
-  color: rgba(255,255,255,0.7) !important;
+  color: var(--white-70) !important;
 }
 
 .form-control:focus {
-  background-color: rgba(255,255,255,0.35) !important;
-  border-color: var(--light-color) !important;
+  background-color: var(--white-35) !important;
+  border-color: var(--cloud-white) !important;
   box-shadow: 0 0 0 0.25rem rgba(236, 240, 241, 0.25) !important;
-  color: white !important;
+  color: var(--pure-white) !important;
 }
 
 .btn-outline-success {
-  color: var(--light-color) !important;
-  border-color: var(--light-color) !important;
+  color: var(--cloud-white) !important;
+  border-color: var(--cloud-white) !important;
   border-radius: 20px !important;
   padding: 0.5rem 1.2rem !important;
   margin-left: 0.5rem !important;
@@ -183,8 +177,8 @@ body {
 }
 
 .btn-outline-success:hover {
-  background-color: var(--light-color) !important;
-  color: var(--dark-color) !important;
+  background-color: var(--cloud-white) !important;
+  color: var(--midnight-blue) !important;
   transform: none;
 }
 
@@ -194,12 +188,12 @@ body {
   top: var(--navbar-height);
   left: 0;
   right: 0;
-  background-color: var(--primary-color);
+  background-color: var(--ocean-blue);
   height: var(--navbar-height);
   display: flex;
   align-items: center;
   z-index: 1030;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px var(--shadow-10);
 }
 
 .second-navbar {
@@ -219,7 +213,7 @@ body {
 }
 
 .backend-link {
-  color: rgba(255,255,255,0.9) !important;
+  color: var(--white-90) !important;
   padding: 0.5rem 1rem !important;
   white-space: nowrap;
   font-weight: 500;
@@ -229,21 +223,21 @@ body {
 }
 
 .backend-link:hover {
-  background-color: rgba(255,255,255,0.2) !important;
-  color: white !important;
+  background-color: var(--white-20) !important;
+  color: var(--pure-white) !important;
   transform: translateY(-2px);
 }
 
 .backend-link.active {
-  background-color: rgba(255,255,255,0.3) !important;
-  color: white !important;
+  background-color: var(--white-30) !important;
+  color: var(--pure-white) !important;
   font-weight: 600;
 }
 
 /* Scroll Buttons */
 .scroll-btn {
-  background-color: rgba(0,0,0,0.2);
-  color: white;
+  background-color: var(--shadow-20);
+  color: var(--pure-white);
   border: none;
   width: 30px;
   height: 30px;
@@ -258,14 +252,14 @@ body {
 }
 
 .scroll-btn:hover {
-  background-color: rgba(0,0,0,0.3);
+  background-color: var(--shadow-30);
   transform: scale(1.1);
 }
 
 /* Responsive Adjustments */
 @media (max-width: 992px) {
   .navbar-collapse {
-    background-color: var(--dark-color);
+    background-color: var(--midnight-blue);
     padding: 1rem;
     border-radius: 0 0 8px 8px;
     margin-top: 0.5rem;
@@ -281,7 +275,6 @@ body {
     font-size: 0.9rem;
   }
 
-  /* Mobile dropdown adjustments */
   .dropdown-menu {
     position: static !important;
     width: 100%;
@@ -307,31 +300,32 @@ body {
     font-size: 0.9rem;
   }
 }
+
 .navbar-nav.ml-auto {
-    margin-right: 30px; /* Adjust this value to move left/right */
+  margin-right: 30px;
+}
+
+.navbar-right-content {
+  margin-right: 30px;
+}
+
+.ms-auto {
+  margin-right: 30px !important;
+  margin-left: auto !important;
+}
+
+.login-dropdown {
+  margin-right: 20px;
+}
+
+@media (max-width: 576px) {
+  .form-control {
+    min-width: 120px;
+    padding: 0.35rem 0.8rem !important;
   }
   
-  /* If you're using a custom class for the right-aligned items */
-  .navbar-right-content {
-    margin-right: 30px; /* Same adjustment */
+  .btn-outline-success {
+    padding: 0.35rem 0.8rem !important;
+    margin-left: 0.3rem !important;
   }
-  
-  /* For Bootstrap 5 specific adjustment */
-  .ms-auto {
-    margin-right: 30px !important;
-    margin-left: auto !important;
-  }
-  .login-dropdown {
-    margin-right: 20px; /* Separate adjustment if needed */
-  }
-  @media (max-width: 576px) {
-    .form-control {
-      min-width: 120px;
-      padding: 0.35rem 0.8rem !important;
-    }
-    
-    .btn-outline-success {
-      padding: 0.35rem 0.8rem !important;
-      margin-left: 0.3rem !important;
-    }
-  }
+}

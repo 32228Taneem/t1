@@ -346,7 +346,7 @@ def ad_password_update(token):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if not session.get('user'):
+    if not session.get('Admin_mail'):
         if request.method == 'POST':
             aname = request.form['adminName']
             email = request.form['email']
@@ -362,7 +362,7 @@ def login():
                 bname = cursor.fetchone()
 
                 if pwd == bpassword[0].decode('utf-8'):
-                    session['user'] = email
+                    session['Admin_mail'] = email
                     return redirect(url_for('admin_panel'))
                 else:
                     flash('Wrong password')
@@ -384,13 +384,15 @@ def admin_panel():
 
 @app.route('/add_navbar_item', methods=['POST'])
 def add_navbar_item():
-    if session.get('user'):
+    if session.get('Admin_mail'):
         item = request.form['item']
         # adminName=session['user']
-        cursor.execute('select admin_id from admins where admin_email=%s',(session['user'],))
+        cursor.execute('select admin_id from admins where admin_email=%s',(session['Admin_mail'],))
         adminId=cursor.fetchone()[0]
+        session['Admin_id']=adminId
         print(adminId)
-        print(session['user'])
+        print(session['Admin_mail'])
+        print(session['Admin_id'])
         if item:
             try:
                 # Get the current maximum position from the navbar_items table
@@ -401,7 +403,7 @@ def add_navbar_item():
                 new_position = max_position + 1 if max_position is not None else 1
                 
                 # Insert the new item into the navbar_items table with the assigned position
-                cursor.execute('INSERT INTO navbar_items (name, position,admin_id) VALUES (%s,%s, %s)', (item, new_position,adminId))
+                cursor.execute('INSERT INTO navbar_items (name, position,admin_id,created_at) VALUES (%s,%s, %s,CURRENT_TIMESTAMP)', (item, new_position,session['Admin_id']))
                 mytdb.commit()
             except mysql.connector.IntegrityError:
                 flash('Item already exists.')
@@ -466,14 +468,17 @@ def view_content(item_name):
 
 @app.route('/add_subtopic/<item_name>', methods=['POST'])
 def add_subtopic(item_name):
-    if session.get('user'):
+    if session.get('Admin_mail'):
         title = request.form['title']
         content = request.form.get('content')
 
         cursor.execute('SELECT id FROM navbar_items WHERE name=%s', (item_name,))
         nav_id = cursor.fetchone()
+        cursor.execute('select admin_id from admins where admin_email=%s',(session['Admin_mail'],))
+        adminId=cursor.fetchone()[0]
+        session['Admin_id']=adminId
         if nav_id:
-            cursor.execute('INSERT INTO subtopics (title, content, navbar_id) VALUES (%s, %s, %s)', (title, content, nav_id[0]))
+            cursor.execute('INSERT INTO subtopics (title, content, navbar_id,admin_id) VALUES (%s,%s, %s, %s)', (title, content, nav_id[0],session['Admin_id']))
             mytdb.commit()
         return redirect(url_for('view_content', item_name=item_name))
     else:
@@ -481,11 +486,11 @@ def add_subtopic(item_name):
 
 @app.route('/edit_subtopic/<int:sub_id>', methods=['GET', 'POST'])
 def edit_subtopic(sub_id):
-    if session.get('user'):
+    if session.get('Admin_mail'):
         if request.method == 'POST':
             title = request.form['title']
             content = request.form['content']
-            cursor.execute('UPDATE subtopics SET title=%s, content=%s WHERE id=%s', (title, content, sub_id))
+            cursor.execute('UPDATE subtopics SET title=%s, admin_id=%s, content=%s WHERE id=%s', (title, session['Admin_id'], content, sub_id))
             mytdb.commit()
             # Get the item_name for redirecting
             cursor.execute('SELECT navbar_id FROM subtopics WHERE id=%s', (sub_id,))
@@ -504,7 +509,7 @@ def edit_subtopic(sub_id):
 
 @app.route('/delete_navbar_item', methods=['POST'])
 def delete_navbar_item():
-    if session.get('user'):
+    if session.get('Admin_mail'):
         item = request.form['item']
         cursor.execute('DELETE FROM navbar_items WHERE name=%s', (item,))
         mytdb.commit()
@@ -514,7 +519,7 @@ def delete_navbar_item():
 
 @app.route('/delete_subtopic/<int:sub_id>/<item_name>')
 def delete_subtopic(sub_id, item_name):
-    if session.get('user'):
+    if session.get('Admin_mail'):
         cursor.execute('DELETE FROM subtopics WHERE id=%s', (sub_id,))
         mytdb.commit()
         return redirect(url_for('view_content', item_name=item_name))
@@ -524,23 +529,23 @@ def delete_subtopic(sub_id, item_name):
 
 @app.route('/update_navbar_item', methods=['POST'])
 def update_navbar_item():
-    if session.get('user'):
+    if session.get('Admin_mail'):
         old_item = request.form['old_item']
         new_item = request.form['new_item']
-        cursor.execute('UPDATE navbar_items SET name=%s WHERE name=%s', (new_item, old_item))
+        cursor.execute('UPDATE navbar_items SET name=%s,admin_id=%s, WHERE name=%s', (new_item,session['Admin_id'], old_item))
         mytdb.commit()
         return redirect(url_for('admin_panel'))
     return redirect(url_for('login'))
 
 @app.route('/update_navbar_order', methods=['POST'])
 def update_navbar_order():
-    if session.get('user'):
+    if session.get('Admin_mail'):
         order = request.json.get('order')
         if not order:
             return {'status': 'No order provided'}, 400
 
         for position, item_name in enumerate(order, start=1):
-            cursor.execute('UPDATE navbar_items SET position=%s WHERE name=%s', (position, item_name))
+            cursor.execute('UPDATE navbar_items SET position=%s,admin_id=%s, WHERE name=%s', (position,session['Admin_id'], item_name))
 
         mytdb.commit()
         return {'status': 'success'}
@@ -548,7 +553,7 @@ def update_navbar_order():
 
 @app.route('/update_subtopic_order', methods=['POST'])
 def update_subtopic_order():
-    if session.get('user'):
+    if session.get('Admin_mail'):
         order = request.json.get('order')
         print(f"Received order: {order}")  # Log the order
         if not order:
@@ -556,7 +561,7 @@ def update_subtopic_order():
         try:
             for position, sub_id in enumerate(order, start=1):
                 print(f"Updating subtopic {sub_id} to position {position}")  # Log each update
-                cursor.execute('UPDATE subtopics SET position=%s WHERE id=%s', (position, sub_id))
+                cursor.execute('UPDATE subtopics SET position=%s,admin_id=%s WHERE id=%s', (position,session['Admin_id'], sub_id))
             mytdb.commit()
             return {'status': 'success', 'message': 'Order updated successfully'}
         except Exception as e:
@@ -569,7 +574,7 @@ def update_subtopic_order():
 
 @app.route('/logout')
 def logout():
-    if session.get('user'):
+    if session.get('Admin_mail'):
         session.clear()
         return redirect(url_for('login'))
     else:
@@ -601,7 +606,7 @@ def get_sub_subtopics(subtopic_id):
 
 @app.route('/add_sub_subtopic', methods=['POST'])
 def add_sub_subtopic():
-    if session.get('user'):
+    if session.get('Admin_mail'):
         try:
             subtopic_id = request.form.get('parent_subtopic_id')
             title = request.form.get('title')
@@ -611,9 +616,9 @@ def add_sub_subtopic():
                 return jsonify({'success': False, 'error': 'Missing required fields'}), 400
                 
             cursor.execute('''
-                INSERT INTO sub_subtopics (subtopic_id, title, content)
-                VALUES (%s, %s, %s)
-            ''', (subtopic_id, title, content))
+                INSERT INTO sub_subtopics (subtopic_id, title, content,admin_id)
+                VALUES (%s, %s, %s,%s)
+            ''', (subtopic_id, title, content,session['Admin_id']))
             mytdb.commit()
             
             # Get the newly created sub-subtopic
@@ -636,7 +641,7 @@ def add_sub_subtopic():
     
 @app.route('/update_subsubtopic_order', methods=['POST'])
 def update_subsubtopic_order():
-    if session.get('user'):
+    if session.get('Admin_mail'):
         order = request.json.get('order')
         parent_id = request.json.get('parent_id')
         print(f"Received order: {order} for parent {parent_id}")  # Log the order
@@ -665,7 +670,7 @@ def update_subsubtopic_order():
     
 @app.route('/delete_sub_subtopic/<int:subsub_id>', methods=['DELETE'])
 def delete_sub_subtopic(subsub_id):
-    if session.get('user'):
+    if session.get('Admin_mail'):
         try:
             # Get redirect info first
             cursor.execute('''
@@ -697,7 +702,7 @@ def delete_sub_subtopic(subsub_id):
 
 @app.route('/edit_subsubtopic/<int:subsub_id>', methods=['GET', 'POST'])
 def edit_subsubtopic(subsub_id):
-    if session.get('user'):
+    if session.get('Admin_mail'):
         if request.method == 'POST':
             # Handle form submission (UPDATE)
             title = request.form['title']
@@ -706,9 +711,9 @@ def edit_subsubtopic(subsub_id):
             # 1. Update the sub-subtopic
             cursor.execute('''
                 UPDATE sub_subtopics 
-                SET title=%s, content=%s 
+                SET title=%s, content=%s ,admin_id
                 WHERE id=%s
-            ''', (title, content, subsub_id))
+            ''', (title, content,session['Admin_id'], subsub_id))
             mytdb.commit()
             
             # 2. Get navbar_id (EXACTLY like your subtopic route)
