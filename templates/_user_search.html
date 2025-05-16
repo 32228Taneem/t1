@@ -1,0 +1,94 @@
+<!-- templates/_search_form.html -->
+ <!-- In your base template's <head> section -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<style>
+    .search-form {
+        position: relative;
+    }
+    
+    .search-form .form-control {
+        border-radius: 20px 0 0 20px;
+        padding: 0.5rem 1.2rem;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        background-color: rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+        transition: all 0.3s ease;
+        min-width: 200px;
+    }
+    
+    .search-form .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    .search-form .form-control:focus {
+        background-color: rgba(255, 255, 255, 0.35) !important;
+        border-color: #ecf0f1 !important;
+        box-shadow: 0 0 0 0.25rem rgba(236, 240, 241, 0.25) !important;
+        color: #ffffff !important;
+    }
+    
+    .search-form .btn-outline-success {
+        border-radius: 0 20px 20px 0;
+        background-color: #2ecc71;
+        border: 2px solid #2ecc71;
+        padding: 0 1.5rem;
+        color: #ffffff;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .search-form .btn-outline-success:hover {
+        background-color: #27ae60 !important;
+        border-color: #27ae60 !important;
+    }
+    
+    /* Light version styles */
+    .search-form-light .form-control {
+        border: 2px solid #dee2e6;
+        background-color: #f8f9fa;
+        color: #495057;
+    }
+    
+    .search-form-light .form-control:focus {
+        background-color: #ffffff !important;
+        border-color: #86b7fe !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+        color: #495057 !important;
+    }
+    
+    .search-form-light .btn-outline-success {
+        background-color: #2ecc71;
+        border-color: #2ecc71;
+        color: #ffffff;
+    }
+    .user-search-form .btn-outline-success {
+        border-radius: 0 20px 20px 0;
+        background-color: #2ecc71; /* Green color */
+        border: 2px solid #2ecc71;
+        padding: 0 1.5rem;
+        color: #ffffff;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .user-search-form .btn-outline-success:hover {
+        background-color: #27ae60 !important;
+        border-color: #27ae60 !important;
+    }
+</style>
+
+<!-- templates/_search_form.html -->
+<form class="user-search-form d-flex {{ class if class is defined else '' }} {% if light %}search-form-light{% endif %}" 
+      action="#" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input class="form-control me-2" 
+           type="search" 
+           name="search_term" 
+           placeholder="Search knowledge base..." 
+           aria-label="Search"
+           required
+           value="{{ request.form.search_term if request.form.search_term else '' }}">
+    <button class="btn btn-outline-success" type="submit">
+        <i class="bi bi-search"></i>
+    </button>
+</form>

@@ -4,177 +4,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>OTP Verification</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        :root {
+            --primary-blue: #3498db;
+            --dark-blue: #2c3e50;
+            --light-gray: #f8f9fa;
+            --white: #ffffff;
+            --success-green: #2ecc71;
+            --error-red: #e74c3c;
+        }
+        
         body {
-            margin: 7% 0 0 20%;
-            background: url(https://img.freepik.com/free-photo/arrangement-black-friday-shopping-carts-with-copy-space_23-2148667047.jpg);
-            background-repeat: no-repeat;
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-
-        .mainbox {
-            width: 55vw;
-            height: 500px;
-            border: 1px solid rgb(255, 255, 255);
-            border-radius: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
-            flex-direction: row;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            transition: 0.5s;
-        }
-
-        .mainbox:hover {
-            box-shadow: 1px 1px 15px rgb(255, 255, 255);
-        }
-
-        .side1 {
-            width: 30vw;
-            height: 500px;
-            border: 3px solid rgb(68, 255, 0);
-            border-bottom: transparent;
-            border-left: transparent;
-            border-top: transparent;
-            border-radius: 25px 100% 100% 25px;
-        }
-
-        .imgbox {
-            width: auto;
-            height: auto;
-            display: flex;
-            justify-content: center;
-        }
-
-        .imgbox img {
-            margin-top: 15%;
-        }
-
-        form {
-            width: 25vw;
-            height: 500px;
-            padding: 30% 15% 30% 15%;
-            color: white;
-            display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
         }
 
-        a {
-            color: #00FFFF;
-            text-decoration: none;
+        .otp-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        a:hover {
-            color: blue;
-            text-decoration: underline;
+        .otp-header {
+            background-color: var(--dark-blue);
+            color: var(--white);
+            padding: 25px;
+            text-align: center;
+            border-bottom: 4px solid var(--primary-blue);
         }
 
-        .form-control {
-            border: 1px solid rgb(255, 0, 0);
-            border-top: transparent;
-            border-radius: unset;
-            border-left: transparent;
-            border-right: transparent;
-            background: transparent;
-        }
-        input::placeholder {
-            color: rgb(251, 255, 0) !important;
-        }
-        input{
-            transition: background-color 0.3s ease;
-            color: rgb(255, 255, 0) !important;
+        .otp-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
         }
 
-        input:focus {
-            background-color: transparent !important;
-            box-shadow: none !important;
-            border: 1px solid rgb(255, 0, 0) !important;
-            border-top: transparent !important;
-            border-radius: unset;
-            border-left: transparent !important;
-            border-right: transparent !important;
+        .otp-header i {
+            margin-right: 10px;
+            color: var(--primary-blue);
         }
 
-        input:valid {
-            background-color: transparent !important;
+        .otp-form {
+            padding: 30px;
         }
 
-        input:-webkit-autofill,
-        input:-webkit-autofill:hover,
-        input:-webkit-autofill:focus {
-            background-color: transparent !important;
-            -webkit-text-fill-color: rgb(239, 228, 11) !important;
-            transition: background-color 5000s ease-in-out 0s;
+        .form-label {
+            font-weight: 500;
+            color: var(--dark-blue);
+            margin-bottom: 8px;
         }
-        .btn{
-            background-color: white;
+
+        .btn-verify {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--dark-blue);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-top: 20px;
         }
-        @media (max-width:768px) {
-            body{
-                margin: 0;
-                padding: 0;
-                background-attachment: fixed;
-                display: flex;
-                justify-content: center;
+
+        .btn-verify:hover {
+            background-color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+
+        .btn-verify i {
+            margin-right: 8px;
+        }
+
+        .flash-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            padding: 12px 24px;
+            border-radius: 8px;
+            background-color: var(--error-red);
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideDown 0.4s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translate(-50%, -100%);
+                opacity: 0;
             }
-            .imgbox,.side1{
-                display: none;
-            }
-            form{
-                width: 100%;
-            }
-            .mainbox{
-                padding: 0;
-                margin: 0px;
-                height: 450px;
-                width: 500px;
-                margin-top: 10%;
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
             }
         }
-        @media (min-width:1025px) {
-            .imgbox img {
-            margin-top: 9vh;
+
+        .otp-input-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
+
+        .otp-input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 1.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin: 0 5px;
+        }
+
+        .otp-input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        }
+
+        .instructions {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding: 10px;
+                background-attachment: scroll;
+            }
             
+            .otp-container {
+                max-width: 100%;
+            }
+            
+            .otp-form {
+                padding: 20px;
+            }
+            
+            .otp-input {
+                width: 40px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
-{% block content %}
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    {% for message in messages %}
-      <center style="color: white;">{{ message }}</center>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-{% endblock %}
+
 <body>
-    <div class="mainbox">
-        <div class="side1">
-            <div class="imgbox">
-                <img src="https://i.ibb.co/88Xjpt2/BUYROUTE.png" alt="BUYROUT logo" width="300px" height="300px">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-message">
+                {{ messages[0] }}
             </div>
+        {% endif %}
+    {% endwith %}
+    
+    <div class="otp-container">
+        <div class="otp-header">
+            <h2><i class="bi bi-shield-lock"></i> OTP Verification</h2>
         </div>
-        <div class="side2">
-            <form  method="post">
-                <div class="mb-3 row">
-                    <label for="otp" class="col-sm-2 col-form-label">OTP:- </label>
-                    <input type="text" class="form-control" id="otp" placeholder="Enter your OTP"
-                        name="otp" required>
+        
+        <form method="post" class="otp-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="mb-4">
+                <label for="otp" class="form-label">Enter verification code</label>
+                <div class="otp-input-group">
+                    <input type="text" class="otp-input" maxlength="1" pattern="[A-Za-z0-9]" inputmode="text" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="[A-Za-z0-9]" inputmode="text" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="[A-Za-z0-9]" inputmode="text" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="[A-Za-z0-9]" inputmode="text" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="[A-Za-z0-9]" inputmode="text" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="[A-Za-z0-9]" inputmode="text" required>
                 </div>
-                <button class="btn btn-outline-primary">Submit</button>
-            </form>
-        </div>
+                <p class="instructions">Enter the 6-character alphanumeric code (case sensitive)</p>
+                <input type="hidden" id="otp" name="otp">
+            </div>
+            
+            <button type="submit" class="btn btn-verify">
+                <i class="bi bi-check-circle"></i> Verify & Continue
+            </button>
+        </form>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-        crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss flash messages after 5 seconds
+        setTimeout(() => {
+            const flashMsg = document.querySelector('.flash-message');
+            if (flashMsg) {
+                flashMsg.style.transition = 'opacity 0.5s ease';
+                flashMsg.style.opacity = '0';
+                setTimeout(() => flashMsg.remove(), 500);
+            }
+        }, 5000);
+
+        // OTP input handling for alphanumeric codes (case preserved)
+        const otpInputs = document.querySelectorAll('.otp-input');
+        const otpHiddenField = document.getElementById('otp');
+        
+        otpInputs.forEach((input, index) => {
+            // Focus next input when a character is entered
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1) {
+                    if (index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    }
+                }
+                updateOTPValue();
+            });
+            
+            // Handle backspace to move to previous input
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value.length === 0) {
+                    if (index > 0) {
+                        otpInputs[index - 1].focus();
+                    }
+                }
+            });
+        });
+        
+        function updateOTPValue() {
+            let otpValue = '';
+            otpInputs.forEach(input => {
+                otpValue += input.value;
+            });
+            otpHiddenField.value = otpValue;
+        }
+
+        // Focus first input on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            otpInputs[0].focus();
+        });
+    </script>
 </body>
 
 </html>

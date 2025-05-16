@@ -42,48 +42,128 @@
   </div>
 
   <script>
-   tinymce.init({
-    selector: '#editor',
+  // Use the exact same configuration as your main form
+  const tinyMCEConfig = {
     height: 400,
     plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table emoticons',
     toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | link image media table emoticons | forecolor backcolor | preview code',
     menubar: false,
-    images_upload_url: '/upload_image',
-    images_upload_base_path: '/uploads/', // or '/static/uploads/' depending on your path
-    automatic_uploads: true,
-    file_picker_types: 'image',
+    content_css: false,
+    content_style: `
+      /* Table Styles with Visible Borders */
+      table {
+          border-collapse: collapse;
+          width: 100%;
+          margin: 1rem 0;
+          border: 2px solid #000000 !important;
+      }
+      
+      table td, table th {
+          border: 1px solid #000000 !important;
+          padding: 8px;
+          text-align: left;
+      }
+      
+      table th {
+          background-color: #f8f9fa;
+          font-weight: bold;
+      }
+      
+      /* Image Styles */
+      img {
+          max-width: 100%;
+          height: auto;
+      }
+      
+      .mce-item-table, .mce-item-table td, .mce-item-table th {
+          border: 1px solid #000000 !important;
+      }
+    `,
+    images_upload_handler: function (blobInfo, success, failure) {
+      const formData = new FormData();
+      formData.append('file', blobInfo.blob(), blobInfo.filename());
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+      
+      fetch('/upload_image', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': csrfToken
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => {
+            throw new Error(err.error || 'Upload failed');
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!data.location) throw new Error('Invalid server response');
+        success(data.location);
+      })
+      .catch(error => {
+        console.error('Upload error:', error);
+        failure(error.message);
+      });
+    },
     file_picker_callback: function (callback, value, meta) {
-        var input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
+      const input = document.createElement('input');
+      input.setAttribute('type', 'file');
+      input.setAttribute('accept', 'image/*');
+      input.click();
 
-        input.onchange = function () {
-            var file = input.files[0];
-            var formData = new FormData();
-            formData.append('file', file);
+      input.onchange = function () {
+        const file = input.files[0];
+        if (!file) return;
 
-            fetch('/upload_image', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                callback(data.location); // Insert the image URL returned from Flask
-            })
-            .catch(error => {
-                console.error('Error uploading image:', error);
-            });
+        const blobInfo = {
+          blob: () => file,
+          filename: () => file.name,
+          id: () => Date.now().toString()
         };
-    }
-});
 
-
-    function saveContent() {
-      tinymce.triggerSave();
-      return true;
+        tinyMCEConfig.images_upload_handler(
+          blobInfo,
+          function (url) {
+            callback(url, { title: file.name });
+          },
+          function (error) {
+            alert(error);
+          }
+        );
+      };
+    },
+    automatic_uploads: true,
+    images_reuse_filename: true,
+    paste_data_images: true,
+    image_advtab: true,
+    image_caption: true,
+    image_title: true,
+    setup: function (editor) {
+      editor.on('init', function () {
+        console.log('Editor initialized for edit form');
+      });
     }
-  </script>
+  };
+
+  // Initialize TinyMCE when DOM is loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    tinymce.init({
+      selector: '#editor',  // Make sure this matches your textarea ID
+      ...tinyMCEConfig
+    });
+    
+    // If you need to preload content, you can do it here
+    // tinymce.get('editor').setContent('Your content here');
+  });
+
+  function saveContent() {
+    tinymce.triggerSave();
+    return true;
+  }
+</script>
 </body>
 
 </html>

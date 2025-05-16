@@ -5,6 +5,9 @@
   --midnight-blue: #2c3e50;
   --cloud-white: #ecf0f1;
   --ruby-red: #e74c3c;
+  --gradient-teal: #00b09b;
+  --gradient-lime: #96c93d;
+  --warning-orange: #f39c12;
   
   /* White Variations */
   --pure-white: #ffffff;
@@ -22,8 +25,21 @@
   --shadow-15: rgba(0,0,0,0.15);
   --shadow-20: rgba(0,0,0,0.2);
   --shadow-30: rgba(0,0,0,0.3);
-  
+
   /* Other Colors */
   --forest-green: #27ae60;
   --deep-green: #27ae60;
-}
+  /* background: linear-gradient(to right, var(--gradient-teal), var(--gradient-lime)); */
+
+  /* Form Colors */
+  --text-dark: #212529;
+  --border-light: #ced4da;
+  --focus-blue: #86b7fe;
+  --focus-shadow: rgba(13, 110, 253, 0.25);
+  
+  /* Special Cases */
+  --nav-bg: var(--midnight-blue);
+  --nav-hover: #34495e;
+  --danger-hover: #c0392b;
+
+  }

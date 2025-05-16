@@ -139,7 +139,14 @@
             <div class="mb-3">
                 <label for="otp" class="form-label">Enter your OTP</label>
                 <input type="text" class="form-control" id="otp" name="otp" placeholder="6-digit code" required>
+                <!-- <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> -->
             </div>
+            <div class="mb-3">
+    <label for="admin_id" class="form-label">Enter your Admin ID</label>
+    <input type="text" class="form-control" id="admin_id" name="admin_id" 
+           placeholder="Enter Admin ID" required pattern="[0-9]+" title="Please enter numbers only">
+    <small class="text-muted">Enter your numeric Admin ID</small>
+</div>
             
             <button type="submit" class="btn-submit">
                 <i class="bi bi-check-circle"></i> Verify OTP

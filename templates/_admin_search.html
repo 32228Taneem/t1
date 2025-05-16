@@ -1,0 +1,82 @@
+<style>
+    /* Exact replica of your desired search form styling */
+    .admin-search-form {
+        position: relative;
+    }
+    
+    .admin-search-form .form-control {
+        border-radius: 20px 0 0 20px;
+        padding: 0.5rem 1.2rem;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        background-color: rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+        transition: all 0.3s ease;
+        min-width: 200px;
+    }
+    
+    .admin-search-form .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    .admin-search-form .form-control:focus {
+        background-color: rgba(255, 255, 255, 0.35) !important;
+        border-color: #ecf0f1 !important;
+        box-shadow: 0 0 0 0.25rem rgba(236, 240, 241, 0.25) !important;
+        color: #ffffff !important;
+    }
+    
+    .admin-search-form .btn-outline-success {
+        border-radius: 0 20px 20px 0;
+        background-color: #2ecc71;
+        border: 2px solid #2ecc71;
+        padding: 0 1.5rem;
+        color: #ffffff;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .admin-search-form .btn-outline-success:hover {
+        background-color: #27ae60 !important;
+        border-color: #27ae60 !important;
+    }
+</style>
+
+<!-- Admin Search Form (exact match to your desired style) -->
+<form class="admin-search-form d-flex" action="{{ url_for('admin_search') }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input class="form-control me-2" 
+           type="search" 
+           name="search_term" 
+           placeholder="Admin search..." 
+           aria-label="Admin Search"
+           required
+           value="{{ search_term if search_term else '' }}">
+    <button class="btn btn-outline-success" type="submit">
+        <i class="bi bi-search"></i>
+    </button>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Focus search when pressing '/'
+        document.addEventListener('keydown', function(e) {
+            if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                e.preventDefault();
+                const searchInput = document.querySelector('.admin-search-form input[name="search_term"]');
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+        });
+
+        // Clear search term
+        document.querySelectorAll('.admin-search-form [name="search_term"]').forEach(input => {
+            input.addEventListener('search', function() {
+                if (this.value === '' && window.location.pathname.includes('/search')) {
+                    window.location.href = this.form.action.split('?')[0];
+                }
+            });
+        });
+    });
+</script>

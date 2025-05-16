@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Search Results for "{{ search_term }}"</h3>
+    
+    {% if results %}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <p class="text-muted">Showing {{ start }} to {{ end }} of {{ total }} results</p>
+            </div>
+            <div class="col-md-6 text-end">
+                {% include '_search_form.html' %}
+            </div>
+        </div>
+
+        <div class="list-group">
+            {% for item in results %}
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">
+                            <i class="bi bi-{{ 'folder-fill' if item.type == 'navbar' else 'file-earmark-text' }} me-2"></i>
+                            {{ item.title }}
+                        </h5>
+                        <small class="text-muted">{{ item.type|title }}</small>
+                    </div>
+                    {% if item.content %}
+                        <p class="mb-1">{{ item.content|truncate(200) }}</p>
+                    {% endif %}
+                    <a href="{{ item.url }}" class="stretched-link"></a>
+                </div>
+            {% endfor %}
+        </div>
+
+        <nav aria-label="Search results pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for(search_route, page=page-1, search_term=search_term) }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                {% for p in range(1, total_pages + 1) %}
+                    <li class="page-item {% if p == page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for(search_route, page=p, search_term=search_term) }}">{{ p }}</a>
+                    </li>
+                {% endfor %}
+
+                {% if page < total_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for(search_route, page=page+1, search_term=search_term) }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% else %}
+        <div class="alert alert-info mt-3">
+            No results found for "{{ search_term }}"
+            <a href="{{ url_for('home') }}" class="alert-link">Return home</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

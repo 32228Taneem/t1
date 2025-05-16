@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password | ShareTech</title>
+    <title>Password Recovery | ShareTech</title>
     <style>
         /* ============= COLOR VARIABLES ============= */
         :root {
-            /* Main Colors */
+            /* Blues */
             --dark-slate-blue: #2c3e50;
             --royal-blue: #3498db;
             --dark-royal-blue: #2980b9;
@@ -16,9 +16,9 @@
             --light-gray: #f5f7fa;
             --medium-gray: #7f8c8d;
             --border-gray: #ddd;
-            --white: #ffffff;
             
             /* Accents */
+            --white: #ffffff;
             --success-green: #28a745;
             --error-red: #dc3545;
         }
@@ -26,11 +26,12 @@
         /* ============= BASE STYLES ============= */
         body {
             font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: 
+            /* background: 
                 linear-gradient(rgba(var(--light-gray), 0.9), rgba(var(--light-gray), 0.9)),
-                url('https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+                url('https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') !important; */
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
             min-height: 100vh;
             margin: 0;
             display: flex;
@@ -41,12 +42,12 @@
         }
 
         /* ============= CARD CONTAINER ============= */
-        .reset-container {
+        .login-container {
             width: 100%;
             max-width: 420px;
         }
 
-        .reset-card {
+        .recovery-card {
             background: var(--white);
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
@@ -54,14 +55,15 @@
         }
 
         /* ============= HEADER SECTION ============= */
-        .reset-header {
+        .recovery-header {
             background-color: var(--dark-slate-blue);
             color: var(--white);
             padding: 25px;
             text-align: center;
+            position: relative;
         }
 
-        .reset-header h2 {
+        .recovery-header h2 {
             margin: 0;
             font-size: 1.6rem;
             font-weight: 600;
@@ -69,11 +71,13 @@
 
         .logo {
             width: 120px;
-            margin-bottom: 15px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
         }
 
         /* ============= FORM ELEMENTS ============= */
-        .reset-form {
+        .recovery-form {
             padding: 25px;
         }
 
@@ -104,7 +108,7 @@
         }
 
         /* ============= BUTTONS ============= */
-        .btn-reset {
+        .btn-recovery {
             width: 100%;
             padding: 12px;
             background-color: var(--royal-blue);
@@ -114,13 +118,33 @@
             font-size: 1rem;
             font-weight: 500;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 5px;
             transition: all 0.3s ease;
         }
 
-        .btn-reset:hover {
+        .btn-recovery:hover {
             background-color: var(--dark-royal-blue);
             transform: translateY(-2px);
+        }
+
+        /* ============= LINKS ============= */
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--medium-gray);
+            font-size: 0.95rem;
+        }
+
+        .login-link a {
+            color: var(--royal-blue);
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+            color: var(--dark-royal-blue);
         }
 
         /* ============= FLASH MESSAGES ============= */
@@ -148,10 +172,13 @@
         @media (max-width: 768px) {
             .logo {
                 width: 100px;
+                top: 15px;
+                left: 15px;
             }
             
-            .reset-header h2 {
+            .recovery-header h2 {
                 font-size: 1.4rem;
+                padding-left: 60px;
             }
         }
 
@@ -161,7 +188,7 @@
                 background: var(--white);
             }
             
-            .reset-card {
+            .recovery-card {
                 border-radius: 0;
                 box-shadow: none;
                 height: 100vh;
@@ -170,12 +197,24 @@
                 justify-content: center;
             }
             
-            .reset-header {
+            .recovery-header {
                 border-radius: 0;
                 padding: 20px;
             }
             
-            .reset-form {
+            .logo {
+                position: static;
+                margin: 0 auto 15px;
+                display: block;
+            }
+            
+            .recovery-header h2 {
+                padding-left: 0;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .recovery-form {
                 padding: 20px 15px;
             }
             
@@ -183,31 +222,17 @@
                 margin: 1rem;
             }
         }
-
-        @media (max-width: 360px) {
-            .reset-header h2 {
-                font-size: 1.3rem;
-            }
-            
-            .form-control {
-                padding: 10px 12px;
-            }
-            
-            .btn-reset {
-                padding: 10px;
-            }
-        }
     </style>
 </head>
 <body>
-    <div class="reset-container">
-        <div class="reset-card">
-            <div class="reset-header">
+    <div class="login-container">
+        <div class="recovery-card">
+            <div class="recovery-header">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Company Logo" class="logo">
-                <h2>Reset Your Password</h2>
+                <h2>Password Recovery</h2>
             </div>
             
-            <div class="reset-form">
+            <div class="recovery-form">
                 {% with messages = get_flashed_messages() %}
                   {% if messages %}
                     {% for message in messages %}
@@ -220,17 +245,16 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     
                     <div class="form-group">
-                        <label for="npassword" class="form-label">New Password</label>
-                        <input type="password" id="npassword" name="npassword" class="form-control" placeholder="Enter new password" required>
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" id="email" name="uemail" class="form-control" placeholder="Enter your registered email" required>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="cpassword" class="form-label">Confirm Password</label>
-                        <input type="password" id="cpassword" name="cpassword" class="form-control" placeholder="Confirm your password" required>
-                    </div>
-                    
-                    <button type="submit" class="btn-reset">Update Password</button>
+                    <button type="submit" class="btn-recovery">Send Reset Link</button>
                 </form>
+                
+                <div class="login-link">
+                    Remember your password? <a href="{{ url_for('login') }}">Sign in here</a>
+                </div>
             </div>
         </div>
     </div>

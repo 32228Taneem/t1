@@ -329,3 +329,13 @@ body {
     margin-left: 0.3rem !important;
   }
 }
+.nav-link.dropdown-toggle {
+    font-weight: bold;
+    color: #fff !important;
+}
+
+#userDropdown {
+    background-color: #4CAF50;
+    border-radius: 5px;
+    padding: 5px 15px;
+}
