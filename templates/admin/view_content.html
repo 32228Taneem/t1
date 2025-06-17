@@ -36,6 +36,7 @@
     .main-body {
       display: flex;
       height: calc(100vh - 120px);
+      transition: margin-left 0.3s ease;
       /* Subtract navbar height */
     }
 
@@ -47,6 +48,7 @@
       overflow-y: auto;
       padding: 1rem;
       height: calc(100vh - 120px);
+      transition: transform 0.3s ease;
       /* Match the main-body height */
     }
 
@@ -203,12 +205,44 @@
       /* Adjust to match actual height */
       z-index: 1029;
     }
+    /* Sidebar toggle button styles */
+.sidebar-toggle {
+    position: fixed;
+    left: 280px; /* Match sidebar width */
+    /* top: 100px; Below both navbars (60px + 60px) */
+    z-index: 1050;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0 5px 5px 0;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sidebar-toggle:hover {
+    background-color: var(--dark-color);
+}
+
+.sidebar-collapsed {
+    transform: translateX(-280px); /* Match sidebar width */
+    transition: transform 0.3s ease;
+}
+
+.main-body-expanded {
+    margin-left: 0;
+    transition: margin-left 0.3s ease;
+}
   </style>
 </head>
 
 <body>
 
   {% include 'admin/base.html' %}
+<!-- Add this right after the second-navbar-wrapper -->
+<button class="sidebar-toggle" id="sidebarToggle">
+    <i class="bi bi-chevron-left"></i>
+</button>
 
   <div class="main-body">
     <!-- Sidebar -->
@@ -234,6 +268,7 @@
                   <li><a class="dropdown-item text-danger" href="#"
                       onclick="showDeleteModal('{{ subtopic.id }}', '{{ subtopic.title }}', '{{ item_name }}'); return false;">Delete</a>
                   </li>
+                  <li><a class="dropdown-item" href="add_author.html" onclick="showAuthorModal('subtopic', '{{ subtopic.id }}', event)">Add Author</a></li>
                   <li>
                     <a class="dropdown-item text-primary" href="#"
                       onclick="event.stopPropagation(); showSubSubtopicForm('{{ subtopic.id }}'); return false;">
@@ -277,6 +312,7 @@
     Delete
   </a>
                     </li>
+                    <li><a class="dropdown-item" href="add_author.html" onclick="showAuthorModal('subsubtopic', '{{ subsub.id }}', event)">Add Author</a></li>
                   </ul>
                 </div>
               </div>
@@ -285,7 +321,7 @@
           </div>
           {% endfor %}
         </div>
-
+      <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary mb-3">&larr; Back</a>
         <button class="btn btn-success btn-sm w-100 mt-3" onclick="toggleForm()" style="margin-bottom: 30px;">+ Add
           Subtopic</button>
       </div>
@@ -293,8 +329,6 @@
 
     <!-- Content Area -->
     <div class="content">
-      <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary mb-3">&larr; Back</a>
-
       <!-- Add Subtopic Form -->
       <div id="formSection" class="form-section card p-4" style="display: none;">
         <form method="POST" action="{{ url_for('add_subtopic', item_name=item_name) }}"
@@ -376,9 +410,31 @@
       </div>
     </div>
   </div>
+
 </div>
 
   <script>
+    // Sidebar toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const mainBody = document.querySelector('.main-body');
+    const authorModal = new bootstrap.Modal(document.getElementById('authorModal'));
+    sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('sidebar-collapsed');
+        mainBody.classList.toggle('main-body-expanded');
+        
+        // Change the icon based on sidebar state
+        const icon = this.querySelector('i');
+        if (sidebar.classList.contains('sidebar-collapsed')) {
+            icon.classList.replace('bi-chevron-left', 'bi-chevron-right');
+            this.style.left = '0';
+        } else {
+            icon.classList.replace('bi-chevron-right', 'bi-chevron-left');
+            this.style.left = '280px'; // Match sidebar width
+        }
+    });
+});
     // Shared TinyMCE configuration
     const tinyMCEConfig = {
       height: 400,
@@ -995,6 +1051,7 @@ function showAlert(message, type) {
 }
   </script>
 
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
 </body>
 
 </html>

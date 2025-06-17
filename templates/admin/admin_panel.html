@@ -375,7 +375,7 @@
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="old_item" value="{{ item }}">
                                 <div class="mb-3">
-                                    <input type="text" name="new_item" class="form-control" value="{{ item }}" required>
+                                    <input type="text" name="new_item" class="form-control" style="color:black !important" value="{{ item }}" required>
                                 </div>
                                 <div class="d-flex gap-2">
                                     <button type="submit" class="btn btn-warning btn-sm flex-grow-1">
@@ -406,7 +406,8 @@
 
                                         <div class="mb-3">
                                             <label for="deletionReason" class="form-label">Reason for deletion:</label>
-                                            <textarea class="form-control" id="deletionReason" name="reason" rows="3"
+                                        
+                                            <textarea class="form-control" style="color:black !important" id="deletionReason" name="reason" rows="3"
                                                 required></textarea>
                                         </div>
                                     </form>
