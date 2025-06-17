@@ -268,8 +268,6 @@
                   <li><a class="dropdown-item text-danger" href="#"
                       onclick="showDeleteModal('{{ subtopic.id }}', '{{ subtopic.title }}', '{{ item_name }}'); return false;">Delete</a>
                   </li>
-                  <li><a class="dropdown-item" href="add_author.html" onclick="showAuthorModal('subtopic', '{{ subtopic.id }}', event)">Add Author</a></li>
-                  <li>
                     <a class="dropdown-item text-primary" href="#"
                       onclick="event.stopPropagation(); showSubSubtopicForm('{{ subtopic.id }}'); return false;">
                       Add Sub-Subtopic
@@ -307,12 +305,7 @@
                       </a>
                     </li>
                     <li>
-                      <a class="dropdown-item text-danger" href="#"
-     onclick="prepareSubSubtopicDeletion('{{ subsub.id }}', '{{ subsub.title }}'); return false;">
-    Delete
-  </a>
-                    </li>
-                    <li><a class="dropdown-item" href="add_author.html" onclick="showAuthorModal('subsubtopic', '{{ subsub.id }}', event)">Add Author</a></li>
+                      <a class="dropdown-item text-danger" href="#" onclick="prepareSubSubtopicDeletion('{{ subsub.id }}', '{{ subsub.title }}'); return false;"> Delete </a></li>
                   </ul>
                 </div>
               </div>
