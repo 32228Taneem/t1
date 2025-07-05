@@ -322,11 +322,26 @@ body {
   .form-control {
     min-width: 120px;
     padding: 0.35rem 0.8rem !important;
+    font-size: 0.85rem;
   }
   
   .btn-outline-success {
-    padding: 0.35rem 0.8rem !important;
+    /* padding: 0.35rem 0.8rem !important; */
     margin-left: 0.3rem !important;
+    padding: 0 0.6rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .navbar-brand {
+    font-size: 1rem;
+    max-width: 100px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .navbar-toggler {
+    font-size: 1rem;
+    margin-left: 0.5rem;
   }
 }
 .nav-link.dropdown-toggle {
@@ -338,4 +353,49 @@ body {
     background-color: #4CAF50;
     border-radius: 5px;
     padding: 5px 15px;
+}
+@media (max-width: 466px) {
+  .header-flex-wrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .navbar-brand {
+    text-align: center;
+    margin-bottom: 0.25rem;
+  }
+
+  .search-form {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 0.25rem;
+  }
+
+  .navbar-toggler {
+    align-self: center;
+  }
+}
+@media (max-width: 451px) {
+  .navbar-brand {
+    font-size: 0.95rem;
+    margin-right: 0.5rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .search-form input.form-control {
+    min-width: 0;
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem !important;
+  }
+
+  .search-form .btn {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem !important;
+  }
+
+  .navbar-toggler {
+    margin-left: 0.5rem;
+    flex-shrink: 0;
+  }
 }
