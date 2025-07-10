@@ -43,3 +43,43 @@
   --danger-hover: #c0392b;
 
   }
+
+
+/*
+:root {
+  --midnight-blue: #2c3e50;
+  --ocean-blue: #3498db;
+  --dark-ocean-blue: #2980b9;
+  --emerald-green: #2ecc71;
+  --forest-green: #27ae60;
+
+  --pure-white: #ffffff;
+  --white-90: rgba(255, 255, 255, 0.9);
+  --white-85: rgba(255, 255, 255, 0.85);
+  --white-70: rgba(255, 255, 255, 0.7);
+  --white-40: rgba(255, 255, 255, 0.4);
+  --white-35: rgba(255, 255, 255, 0.35);
+  --white-30: rgba(255, 255, 255, 0.3);
+  --white-25: rgba(255, 255, 255, 0.25);
+  --white-20: rgba(255, 255, 255, 0.2);
+  --white-15: rgba(255, 255, 255, 0.15);
+  --white-10: rgba(255, 255, 255, 0.1);
+  --light-gray: #f8f9fa;
+  --lighter-gray: #e0e0e0;
+  --border-gray: #dee2e6;
+  --slate-gray: #7f8c8d;
+  --shadow-gray: rgba(0, 0, 0, 0.1);
+
+  --blue-tint-20: rgba(52, 152, 219, 0.2);
+  --blue-tint-15: rgba(52, 152, 219, 0.15);
+  --blue-tint-10: rgba(52, 152, 219, 0.1);
+  --blue-tint-5: rgba(52, 152, 219, 0.05);
+  --success-green: #28a745;
+  --error-red: #dc3545;
+
+  --shadow-10: rgba(0, 0, 0, 0.1);
+  --shadow-20: rgba(0, 0, 0, 0.2);
+  --shadow-30: rgba(0, 0, 0, 0.3);
+  --shadow-40: rgba(0, 0, 0, 0.4);
+}
+*/

@@ -8,25 +8,64 @@
   <title>{{ item_name }} - Subtopics</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="stylesheet" href="/static/colours.css">
   <script src="https://cdn.tiny.cloud/1/lezf5y9e1y8vwjv3870f06avrgu9855j1octvf69ab6d8hut/tinymce/6/tinymce.min.js"
     referrerpolicy="origin"></script>
 
   <style>
-    /* view_subtopics.html CSS - Using color variables */
-    @import url('/static/colours.css');
-
+    /* ============================================= */
+    /* COLOR VARIABLES - EDIT THESE TO CHANGE THEME */
+    /* ============================================= */
     :root {
+      /* Primary Colors */
+      --midnight-blue: #2c3e50;
+      --ocean-blue: #3498db;
+      --emerald-green: #2ecc71;
+      --pure-white: #ffffff;
+      
+      /* Secondary Colors */
+      --forest-green: #27ae60;
+      --slate-gray: #7f8c8d;
+      --cloud-white: #ecf0f1;
+      
+      /* Shades and Tints */
+      --white-90: rgba(255, 255, 255, 0.9);
+      --white-85: rgba(255, 255, 255, 0.85);
+      --white-70: rgba(255, 255, 255, 0.7);
+      --white-40: rgba(255, 255, 255, 0.4);
+      --white-35: rgba(255, 255, 255, 0.35);
+      --white-30: rgba(255, 255, 255, 0.3);
+      --white-25: rgba(255, 255, 255, 0.25);
+      --white-20: rgba(255, 255, 255, 0.2);
+      --white-15: rgba(255, 255, 255, 0.15);
+      --white-10: rgba(255, 255, 255, 0.1);
+      --blue-tint-20: rgba(52, 152, 219, 0.2);
+      --blue-tint-15: rgba(52, 152, 219, 0.15);
+      --blue-tint-5: rgba(52, 152, 219, 0.05);
+      
+      /* Grays */
+      --light-gray: #f5f5f5;
+      --lighter-gray: #e0e0e0;
+      --border-gray: #d5d5d5;
+      --shadow-gray: rgba(0, 0, 0, 0.1);
+      
+      /* Shadows */
+      --shadow-10: rgba(0, 0, 0, 0.1);
+      --shadow-20: rgba(0, 0, 0, 0.2);
+      --shadow-30: rgba(0, 0, 0, 0.3);
+      
+      /* Layout Variables */
       --navbar-height: 60px;
       --second-navbar-height: 50px;
-      --lighter-gray: #e0e0e0;
-      --light-gray: #f5f5f5;
       --sidebar-width: 250px;
       --sidebar-collapsed-width: 0px;
       --mobile-breakpoint: 992px;
       --search-bar-max-width: 500px;
     }
 
+    /* ============================================= */
+    /* MAIN STYLES */
+    /* ============================================= */
+    
     /* Body and Layout */
     body {
       margin: 0;
@@ -407,7 +446,7 @@
     }
 
     #userDropdown {
-      background-color: #4CAF50;
+      background-color: var(--emerald-green);
       border-radius: 5px;
       padding: 5px 15px;
     }
@@ -450,6 +489,54 @@
       cursor: pointer;
     }
 
+    /* Fullscreen toggle button */
+    .fullscreen-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1100;
+      background-color: var(--ocean-blue);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px var(--shadow-20);
+      transition: all 0.3s ease;
+    }
+
+    .fullscreen-toggle:hover {
+      background-color: var(--midnight-blue);
+      transform: scale(1.1);
+    }
+
+    /* Fullscreen mode styles */
+    body.fullscreen-mode {
+      overflow: hidden;
+    }
+
+    .fullscreen-mode .navbar-fixed-top,
+    .fullscreen-mode .second-navbar-wrapper,
+    .fullscreen-mode .sidebar,
+    .fullscreen-mode .sidebar-toggle {
+      display: none;
+    }
+
+    .fullscreen-mode .main-container {
+      margin-top: 0;
+    }
+
+    .fullscreen-mode .content {
+      min-height: 100vh;
+      padding: 20px;
+      margin-left: 0 !important;
+      overflow-y: auto;
+    }
+
     /* ============================================= */
     /* Responsive Adjustments */
     /* ============================================= */
@@ -482,10 +569,10 @@
       /* Make search bar full width but keep it compact */
       .search-container {
         flex-grow: 1;
-    flex-shrink: 1;
-    min-width: 0; /* allows shrinking */
-    margin: 0 0.5rem;
-    order: 2;
+        flex-shrink: 1;
+        min-width: 0; /* allows shrinking */
+        margin: 0 0.5rem;
+        order: 2;
       }
       
       /* Reduce search input padding */
@@ -496,51 +583,45 @@
       /* Reduce search button padding */
       .navbar .btn-outline-success {
         padding: 0 0.8rem !important;
-    font-size: 0.85rem;
+        font-size: 0.85rem;
       }
 
       .navbar-brand {
-    order: 1;
-    flex-shrink: 0;
-  }
+        order: 1;
+        flex-shrink: 0;
+      }
 
-  .navbar-toggler {
-    order: 3;
-    margin-left: auto;
-  }
+      .navbar-toggler {
+        order: 3;
+        margin-left: auto;
+      }
 
-  .navbar .form-control {
-    padding: 0.4rem 0.8rem !important;
-    font-size: 0.85rem;
-  }
+      .navbar .form-control {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.85rem;
+      }
       
       .navbar-collapse {
         position: fixed;
-  top: var(--navbar-height);
-  left: 0;
-  right: 0;
-  background-color: var(--midnight-blue);
-  z-index: 1050;
-  max-height: calc(100vh - var(--navbar-height));
-  overflow-y: auto;
-  padding: 1rem;
-  box-shadow: 0 10px 15px var(--shadow-20);
-        /* background-color: var(--midnight-blue);
+        top: var(--navbar-height);
+        left: 0;
+        right: 0;
+        background-color: var(--midnight-blue);
+        z-index: 1050;
+        max-height: calc(100vh - var(--navbar-height));
+        overflow-y: auto;
         padding: 1rem;
-        margin-top: 0.5rem;
-        border-radius: 0.25rem;
-        scroll-margin-top: calc(var(--navbar-height) + var(--second-navbar-height));
-  max-height: calc(100vh - var(--navbar-height) - var(--second-navbar-height));
-  overflow-y: auto; */
+        box-shadow: 0 10px 15px var(--shadow-20);
       }
+      
       .navbar-collapse .navbar-nav {
-  flex-direction: column;
-}
-
+        flex-direction: column;
+      }
     }
+    
     .navbar-collapse .nav-link {
-    scroll-margin-top: calc(var(--navbar-height) + var(--second-navbar-height) + 10px);
-  }
+      scroll-margin-top: calc(var(--navbar-height) + var(--second-navbar-height) + 10px);
+    }
 
     @media (max-width: 768px) {
       :root {
@@ -567,7 +648,6 @@
       }
       
       .sidebar-toggle {
-        /* top: calc(var(--navbar-height) + var(--second-navbar-height) + 5px); */
         display: none !important;
       }
       
@@ -592,93 +672,59 @@
       }
     }
 
-    /* @media (max-width: 576px) {
-      :root {
-        --navbar-height: 52px;
-        --second-navbar-height: 44px;
+    @media (max-width: 576px) {
+      .navbar-fixed-top {
+        flex-wrap: nowrap; /* force items in one row */
       }
-      
-      
-      .navbar .form-control {
-        padding: 0.3rem 0.7rem !important;
-        font-size: 0.75rem;
+
+      .container-fluid {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        flex-wrap: nowrap;
       }
-      
-      .navbar .btn-outline-success {
-        padding: 0 0.7rem !important;
-        font-size: 0.85rem;
-      }
-      
-      .sidebar {
-        width: 85%;
-      }
-      
-      .content {
-        padding: 12px;
-      }
-      
-      .subtopic-title {
-        font-size: 1.3rem;
-      }
-      
+
       .navbar-brand {
-        max-width: 120px;
-        font-size: 1.1rem;
+        flex: 0 0 auto;
+        font-size: 1rem;
+        max-width: 100px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
-    } */
-@media (max-width: 576px) {
-  .navbar-fixed-top {
-    flex-wrap: nowrap; /* force items in one row */
-  }
 
-  .container-fluid {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    flex-wrap: nowrap;
-  }
+      .search-container {
+        flex: 1 1 auto;
+        min-width: 0;
+        margin: 0;
+      }
 
-  .navbar-brand {
-    flex: 0 0 auto;
-    font-size: 1rem;
-    max-width: 100px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+      .search-form {
+        display: flex;
+        width: 100%;
+      }
 
-  .search-container {
-    flex: 1 1 auto;
-    min-width: 0;
-    margin: 0;
-  }
+      .navbar .form-control {
+        padding: 0.3rem 0.6rem !important;
+        font-size: 0.8rem;
+        border-radius: 20px 0 0 20px !important;
+      }
 
-  .search-form {
-    display: flex;
-    width: 100%;
-  }
+      .navbar .btn-outline-success {
+        padding: 0 0.6rem !important;
+        font-size: 0.8rem;
+        border-radius: 0 20px 20px 0 !important;
+        white-space: nowrap;
+      }
 
-  .navbar .form-control {
-    padding: 0.3rem 0.6rem !important;
-    font-size: 0.8rem;
-    border-radius: 20px 0 0 20px !important;
-  }
-
-  .navbar .btn-outline-success {
-    padding: 0 0.6rem !important;
-    font-size: 0.8rem;
-    border-radius: 0 20px 20px 0 !important;
-    white-space: nowrap;
-  }
-
-  .navbar-toggler,
-  .mobile-menu-toggle {
-    flex: 0 0 auto;
-    font-size: 1.2rem;
-    margin-left: 0.5rem;
-  }
-}
+      .navbar-toggler,
+      .mobile-menu-toggle {
+        flex: 0 0 auto;
+        font-size: 1.2rem;
+        margin-left: 0.5rem;
+      }
+    }
 
     @media (max-width: 400px) {
       :root {
@@ -713,43 +759,44 @@
       }
     }
 
-@media (min-width: 992px) {
-  .navbar-collapse {
-    position: static;
-    background-color: transparent;
-    box-shadow: none;
-    max-height: none;
-    overflow-y: visible;
-    padding: 0;
-  }
-  
-  .navbar-collapse .navbar-nav {
-    flex-direction: row;
-  }
-  .dropdown-menu {
-    position: absolute !important;
-    background-color: var(--midnight-blue);
-    margin-top: 0;
-    border: 1px solid var(--white-20);
-  }
-}
+    @media (min-width: 992px) {
+      .navbar-collapse {
+        position: static;
+        background-color: transparent;
+        box-shadow: none;
+        max-height: none;
+        overflow-y: visible;
+        padding: 0;
+      }
+      
+      .navbar-collapse .navbar-nav {
+        flex-direction: row;
+      }
+      .dropdown-menu {
+        position: absolute !important;
+        background-color: var(--midnight-blue);
+        margin-top: 0;
+        border: 1px solid var(--white-20);
+      }
+    }
 
-.dropdown-item {
-  color: var(--white-90) !important;
-  padding: 0.5rem 1rem !important;
-}
+    .dropdown-item {
+      color: var(--white-90) !important;
+      padding: 0.5rem 1rem !important;
+    }
 
-.dropdown-item:hover {
-  background-color: var(--white-20) !important;
-  color: var(--pure-white) !important;
-}
-.dropdown-menu {
-  position: static !important;
-  transform: none !important;
-  margin-top: 0.5rem;
-  border: none;
-  background-color: var(--white-10);
-}
+    .dropdown-item:hover {
+      background-color: var(--white-20) !important;
+      color: var(--pure-white) !important;
+    }
+    
+    .dropdown-menu {
+      position: static !important;
+      transform: none !important;
+      margin-top: 0.5rem;
+      border: none;
+      background-color: var(--white-10);
+    }
   </style>
 </head>
 
@@ -768,15 +815,16 @@
       </div>
       
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-  aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-  <span class="navbar-toggler-icon"></span>
-</button>
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+          <!-- <li class="nav-item"><a class="nav-link" href="#">About</a></li>
           <li class="nav-item"><a class="nav-link" href="#">Services</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Contact</a></li> -->
           <!-- User/Admin Status Section -->
           {% if session.get('username') %}
           <!-- Display username and logout button when logged in -->
@@ -811,7 +859,7 @@
     <button class="scroll-btn left-btn">&larr;</button>
     <div class="second-navbar" id="backendNav">
       {% for item in navbar_items %}
-      <a class="nav-link backend-link" href="{{ url_for('view_subtopics', item_name=item[1]) }}">{{ item[1] }}</a>
+      <a class="nav-link backend-link" href="{{ url_for('view_subtopics', item_name=item[1]) }}" data-item-name="{{ item[1] }}">{{ item[1] }}</a>
       {% endfor %}
     </div>
     <button class="scroll-btn right-btn">&rarr;</button>
@@ -863,34 +911,48 @@
     </div>
   </div>
 
-  <script>
-    // Sidebar toggle functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      const navbarToggler = document.querySelector('.navbar-toggler');
-  const navbarCollapse = document.getElementById('navbarNav');
-  
-  navbarToggler.addEventListener('click', function() {
-    if (navbarCollapse.classList.contains('show')) {
-      // When opening the menu, scroll to top to ensure it's fully visible
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }
-  });
-  
-  // Close mobile menu when clicking outside
-  document.addEventListener('click', function(event) {
-    const isClickInsideNavbar = document.querySelector('.navbar').contains(event.target);
-    
-    if (!isClickInsideNavbar && navbarCollapse.classList.contains('show')) {
-      navbarCollapse.classList.remove('show');
-    }
-  });
+  <!-- Fullscreen Toggle Button -->
+  <button class="fullscreen-toggle" id="fullscreenToggle">
+    <i class="bi bi-fullscreen"></i>
+  </button>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // =============================================
+    // MAIN SCRIPT
+    // =============================================
+    
+    // Document ready function
+    document.addEventListener('DOMContentLoaded', function() {
+      // Mobile menu toggle functionality
+      const navbarToggler = document.querySelector('.navbar-toggler');
+      const navbarCollapse = document.getElementById('navbarNav');
+      
+      navbarToggler.addEventListener('click', function() {
+        if (navbarCollapse.classList.contains('show')) {
+          // When opening the menu, scroll to top to ensure it's fully visible
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      });
+      
+      // Close mobile menu when clicking outside
+      document.addEventListener('click', function(event) {
+        const isClickInsideNavbar = document.querySelector('.navbar').contains(event.target);
+        
+        if (!isClickInsideNavbar && navbarCollapse.classList.contains('show')) {
+          navbarCollapse.classList.remove('show');
+        }
+      });
+
+      // Sidebar toggle functionality
       const sidebarToggle = document.getElementById('sidebarToggle');
       const sidebar = document.getElementById('mainSidebar');
       const content = document.getElementById('mainContent');      
+      
       // Initialize sidebar state
       let sidebarCollapsed = false;
       
@@ -916,16 +978,6 @@
       // Desktop sidebar toggle
       sidebarToggle.addEventListener('click', toggleSidebar);
       
-      // Close mobile menu when clicking outside
-      document.addEventListener('click', function(event) {
-        const navbarCollapse = document.getElementById('navbarNav');
-        const isClickInsideNavbar = document.querySelector('.navbar').contains(event.target);
-        
-        if (!isClickInsideNavbar && navbarCollapse.classList.contains('show')) {
-          navbarCollapse.classList.remove('show');
-        }
-      });
-      
       // Auto-close sidebar on mobile when clicking content
       if (window.innerWidth <= 768) {
         content.addEventListener('click', function() {
@@ -946,39 +998,113 @@
           sidebarToggle.style.left = sidebar.offsetWidth + 'px';
         }
       });
+      
+      // =============================================
+      // FULLSCREEN TOGGLE FUNCTIONALITY
+      // =============================================
+      const fullscreenToggle = document.getElementById('fullscreenToggle');
+      let isFullscreen = false;
+      
+      fullscreenToggle.addEventListener('click', function() {
+        isFullscreen = !isFullscreen;
+        
+        if (isFullscreen) {
+          document.body.classList.add('fullscreen-mode');
+          fullscreenToggle.innerHTML = '<i class="bi bi-fullscreen-exit"></i>';
+        } else {
+          document.body.classList.remove('fullscreen-mode');
+          fullscreenToggle.innerHTML = '<i class="bi bi-fullscreen"></i>';
+        }
+      });
+      
+      // =============================================
+      // PREVENT PAGE RELOAD WHEN CLICKING SAME PAGE
+      // =============================================
+      const backendLinks = document.querySelectorAll('.backend-link');
+      
+      backendLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          const currentPath = window.location.pathname;
+          const targetPath = this.getAttribute('href');
+          const itemName = this.getAttribute('data-item-name');
+          
+          // Check if we're already on this page
+          if (currentPath.includes(itemName)) {
+            e.preventDefault();
+            // Just update the active state
+            updateActiveNavLink(this);
+          }
+        });
+      });
+      
+      function updateActiveNavLink(clickedLink) {
+        document.querySelectorAll('.backend-link').forEach(link => {
+          link.classList.remove('active');
+        });
+        clickedLink.classList.add('active');
+      }
+      
+      // Highlight active navbar link on page load
+      const currentPath = window.location.pathname;
+      const secondNavLinks = document.querySelectorAll('.second-navbar .backend-link');
+
+      secondNavLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active');
+          // Scroll to show active link
+          link.scrollIntoView({
+            block: 'nearest',
+            inline: 'center'
+          });
+        }
+      });
     });
 
+    // =============================================
+    // SUBTOPIC FUNCTIONS
+    // =============================================
+    
     function handleSubtopicClick(element) {
-  const title = element.dataset.title;
-  const content = element.dataset.content;
-
-  const displayTitle = document.getElementById('displayTitle');
-  const displayContent = document.getElementById('displayContent');
-  const displayArea = document.getElementById('displayArea');
-
-  displayTitle.innerText = title;
-  displayContent.innerHTML = content;
-  displayArea.style.display = 'block';
-
-  // Scroll with offset to avoid being hidden under fixed navbars
-  const yOffset = -1 * (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-height')) + 
-                        parseInt(getComputedStyle(document.documentElement).getPropertyValue('--second-navbar-height')) + 20);
-  const y = displayArea.getBoundingClientRect().top + window.scrollY + yOffset;
-
-  window.scrollTo({ top: y, behavior: 'smooth' });
-
-  // Highlight active item
-  document.querySelectorAll('.subtopic-wrapper, .subsubtopic-item').forEach(el => {
-    el.classList.remove('active');
-  });
-  element.closest('.subtopic-wrapper').classList.add('active');
-
-  // Auto-close sidebar on mobile
-  if (window.innerWidth <= 768) {
-    document.getElementById('sidebarToggle').click();
-  }
+      // Collapse sidebar for all screen sizes
+const sidebar = document.getElementById('mainSidebar');
+if (!sidebar.classList.contains('sidebar-collapsed')) {
+  document.getElementById('sidebarToggle').click();
 }
+      const title = element.dataset.title;
+      const content = element.dataset.content;
 
+      const displayTitle = document.getElementById('displayTitle');
+      const displayContent = document.getElementById('displayContent');
+      const displayArea = document.getElementById('displayArea');
+
+      displayTitle.innerText = title;
+      displayContent.innerHTML = content;
+      displayArea.style.display = 'block';
+
+      // Scroll with offset to avoid being hidden under fixed navbars
+      const yOffset = -1 * (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-height')) + 
+                        parseInt(getComputedStyle(document.documentElement).getPropertyValue('--second-navbar-height')) + 20);
+      const y = displayArea.getBoundingClientRect().top + window.scrollY + yOffset;
+
+      window.scrollTo({ top: y, behavior: 'smooth' });
+
+      // Highlight active item
+      document.querySelectorAll('.subtopic-wrapper, .subsubtopic-item').forEach(el => {
+        el.classList.remove('active');
+      });
+      element.closest('.subtopic-wrapper').classList.add('active');
+
+      // Auto-close sidebar on mobile
+      // if (window.innerWidth <= 768) {
+      //   document.getElementById('sidebarToggle').click();
+      // } else {
+      //   // Collapse sidebar on desktop when clicking an item
+      //   const sidebar = document.getElementById('mainSidebar');
+      //   if (!sidebar.classList.contains('sidebar-collapsed')) {
+      //     document.getElementById('sidebarToggle').click();
+      //   }
+      // }
+    }
 
     function toggleSubSubtopics(subtopicId, event) {
       event.stopPropagation();
@@ -995,6 +1121,11 @@
     }
 
     function showSubSubtopic(event, element) {
+      // Collapse sidebar for all screen sizes
+const sidebar = document.getElementById('mainSidebar');
+if (!sidebar.classList.contains('sidebar-collapsed')) {
+  document.getElementById('sidebarToggle').click();
+}
       event.stopPropagation();
       const target = element.closest('.subsubtopic-item');
       const title = target.dataset.title;
@@ -1012,9 +1143,15 @@
       target.closest('.subtopic-wrapper').classList.add('active');
       
       // Auto-close sidebar on mobile
-      if (window.innerWidth <= 768) {
-        document.getElementById('sidebarToggle').click();
-      }
+      // if (window.innerWidth <= 768) {
+      //   document.getElementById('sidebarToggle').click();
+      // } else {
+      //   // Collapse sidebar on desktop when clicking an item
+      //   const sidebar = document.getElementById('mainSidebar');
+      //   if (!sidebar.classList.contains('sidebar-collapsed')) {
+      //     document.getElementById('sidebarToggle').click();
+      //   }
+      // }
     }
 
     // Navbar scroll buttons
@@ -1027,25 +1164,6 @@
       const secondNavbar = document.getElementById('backendNav');
       secondNavbar.scrollBy({ left: 200, behavior: 'smooth' });
     });
-    
-    // Highlight active navbar link
-    document.addEventListener('DOMContentLoaded', function() {
-      const currentPath = window.location.pathname;
-      const secondNavLinks = document.querySelectorAll('.second-navbar .backend-link');
-
-      secondNavLinks.forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
-          link.classList.add('active');
-          // Scroll to show active link
-          link.scrollIntoView({
-            block: 'nearest',
-            inline: 'center'
-          });
-        }
-      });
-    });
   </script>
-  
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

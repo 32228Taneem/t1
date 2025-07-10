@@ -146,9 +146,12 @@ def jwt_required(f):
     return decorated_function
 
 # Route: /
+@app.route('/')
+def base():
+    return render_template('index.html')
 # Purpose: Displays the homepage with navigation bar items added by admin
 # Functionality: Fetches navbar items from database and renders welcome.html template
-@app.route('/')
+@app.route('/home')
 def home():
     # Fetches navigation bar items (id and name) from the database, ordered by position
     cursor.execute('SELECT id, name FROM navbar_items ORDER BY position ASC')
