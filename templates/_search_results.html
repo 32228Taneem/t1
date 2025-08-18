@@ -1,0 +1,92 @@
+<div id="searchResults">
+    {% if results.error %}
+        <div class="search-error">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ results.error }}
+        </div>
+    {% elif results.query and not (results.navbar_items or results.subtopics or results.sub_subtopics) %}
+        <div class="no-results">
+            <i class="fas fa-search"></i>
+            No results found for "{{ results.query }}"
+        </div>
+    {% else %}
+        {% if results.navbar_items %}
+        <div class="result-section">
+            <div class="result-section-title">
+                <i class="fas fa-folder-open"></i>
+                Categories
+                <span class="result-count">{{ results.navbar_items|length }}/3</span>
+            </div>
+            {% for item in results.navbar_items %}
+            <div class="search-result-item" 
+                 data-type="category" 
+                 data-id="{{ item.id }}" 
+                 data-name="{{ item.name }}">
+                <i class="fas fa-folder search-result-icon"></i>
+                <div class="search-result-text">
+                    <div class="search-result-title">{{ item.name }}</div>
+                    <div class="search-result-meta">Main Category</div>
+                </div>
+                <i class="fas fa-chevron-right result-arrow"></i>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if results.subtopics %}
+        <div class="result-section">
+            <div class="result-section-title">
+                <i class="fas fa-file-alt"></i>
+                Topics
+                <span class="result-count">{{ results.subtopics|length }}/3</span>
+            </div>
+            {% for item in results.subtopics %}
+            <div class="search-result-item" 
+                 data-type="subtopic" 
+                 data-id="{{ item.id }}" 
+                 data-category="{{ item.category }}">
+                <i class="fas fa-file-alt search-result-icon"></i>
+                <div class="search-result-text">
+                    <div class="search-result-title">{{ item.title }}</div>
+                    <div class="search-result-meta">In: {{ item.category }}</div>
+                </div>
+                <i class="fas fa-chevron-right result-arrow"></i>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if results.sub_subtopics %}
+        <div class="result-section">
+            <div class="result-section-title">
+                <i class="fas fa-file-code"></i>
+                Sub-Topics
+                <span class="result-count">{{ results.sub_subtopics|length }}/3</span>
+            </div>
+            {% for item in results.sub_subtopics %}
+            <div class="search-result-item" 
+                 data-type="sub-subtopic" 
+                 data-id="{{ item.id }}" 
+                 data-category="{{ item.category }}"
+                 data-parent="{{ item.parent }}">
+                <i class="fas fa-file search-result-icon"></i>
+                <div class="search-result-text">
+                    <div class="search-result-title">{{ item.title }}</div>
+                    <div class="search-result-meta">
+                        In: {{ item.category }} > {{ item.parent }}
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right result-arrow"></i>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="search-footer">
+            <div class="search-tip">
+                <i class="fas fa-lightbulb"></i>
+                Tip: Use exact phrases for better results
+            </div>
+        </div>
+    {% endif %}
+</div>

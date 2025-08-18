@@ -1,4 +1,4 @@
-from flask import Flask,render_template,url_for,redirect,request,flash,session,jsonify,send_from_directory,g,json
+from flask import Flask,render_template,url_for,redirect,request,flash,session,jsonify,send_from_directory,g,json,Blueprint
 from otp import genotp
 from cmail import sendmail
 from tokens import encode,decode
@@ -15,6 +15,7 @@ from mysql.connector import IntegrityError
 from mysql.connector.errors import DatabaseError
 from datetime import datetime, timedelta
 from functools import wraps
+from flask_caching import Cache
 import logging
 logging.basicConfig(level=logging.DEBUG)
 import jwt
@@ -26,6 +27,9 @@ import time
 RESULTS_PER_PAGE = 10
 
 app = Flask(__name__)
+cache = Cache(config={'CACHE_TYPE': 'SimpleCache'})
+cache.init_app(app)
+search_bp = Blueprint('search', __name__)
 logger = logging.getLogger(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'
 app.secret_key = 'tech$tan111'  # Required for session and flash
@@ -146,12 +150,12 @@ def jwt_required(f):
     return decorated_function
 
 # Route: /
-@app.route('/')
-def base():
-    return render_template('index.html')
+# @app.route('/')
+# def base():
+#     return render_template('index.html')
 # Purpose: Displays the homepage with navigation bar items added by admin
 # Functionality: Fetches navbar items from database and renders welcome.html template
-@app.route('/home')
+@app.route('/')
 def home():
     # Fetches navigation bar items (id and name) from the database, ordered by position
     cursor.execute('SELECT id, name FROM navbar_items ORDER BY position ASC')
@@ -258,7 +262,7 @@ def login():
                     else:
                         flash('No content available yet', 'info')
                         # Redirects to home if no default item exists
-                        return redirect(url_for('home'))
+                        return redirect(url_for('base'))
                 else:
                     flash('Invalid credentials', 'error')
                     return redirect(url_for('login'))
@@ -522,7 +526,7 @@ def logout():
     # Removes all session data to end user/admin session
     session.clear()
     # Redirects to the homepage
-    return redirect(url_for('home'))
+    return redirect(url_for('base'))
 
 # Route: /admin_panel
 # Purpose: Displays the admin panel for authorized admins
@@ -917,7 +921,7 @@ def view_subtopics(item_name):
         })
     
     # Renders user view template with navbar items, subtopics, and username
-    return render_template('user/view_subtopics.html' , item_name = item_name, subtopics=subtopics, navbar_items=navbar_items, username=username)  # None if not logged in
+    return render_template('user/view_subtopics.html' , item_name = item_name, subtopics=subtopics, navbar_items=navbar_items, username=username,scroll_to=request.args.get('scroll_to'))  # None if not logged in
 
 # Route: /add_subtopic/<item_name>
 # Purpose: Allows admins to add subtopics to a specific navbar item via form submission
@@ -1597,11 +1601,12 @@ def uploaded_file(filename):
   
 
 
+# Route: /profile
 @app.route('/profile')
 @jwt_required
 def profile():
     try:
-        # Get current user (not admin)
+        # Get current user from JWT
         user_id = g.current_user.get('user_id')
         if not user_id:
             flash("Please log in", "warning")
@@ -1621,25 +1626,35 @@ def profile():
 
         username, email, profile_pic, join_date = user
 
+        # Fetch navbar items
+        cursor.execute('SELECT id, name FROM navbar_items ORDER BY position ASC')
+        navbar_items = cursor.fetchall()
+
         # Render profile with edit button
-        return render_template('/user/profile.html',
+        return render_template('user/profile.html',
             username=username,
             email=email,
-            profile_pic=profile_pic or 'default.jpg',  # Fallback image
-            join_date=join_date.strftime('%d %b %Y')
+            profile_pic=profile_pic if profile_pic and profile_pic != 'default.jpg' else 'images/default.jpg',
+            join_date=join_date.strftime('%d %b %Y'),
+            token=request.cookies.get('access_token'),
+            navbar_items=navbar_items  # Make sure this is passed
         )
 
     except Exception as e:
         print(f"Profile error: {str(e)}")
         flash("Error loading profile", "error")
-        return redirect(url_for('home'))
+        return redirect(url_for('base'))
 
+# Route: /edit_profile
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @jwt_required
 def edit_profile():
     user_id = g.current_user.get('user_id')
     if not user_id:
         return redirect(url_for('login'))
+    # Get navbar items
+    cursor.execute('SELECT id, name FROM navbar_items ORDER BY position ASC')
+    navbar_items = cursor.fetchall()
 
     if request.method == 'POST':
         try:
@@ -1647,12 +1662,12 @@ def edit_profile():
             username = request.form.get('username', '').strip()
             email = request.form.get('email', '').strip()
             
-            # Handle profile picture upload with timestamp
+            # Handle profile picture upload
             profile_pic = None
             if 'profile_pic' in request.files:
                 file = request.files['profile_pic']
                 if file and allowed_file(file.filename):
-                    # Generate unique filename with timestamp
+                    # Generate unique filename
                     timestamp = int(time.time())
                     ext = file.filename.rsplit('.', 1)[1].lower()
                     filename = f"user_{user_id}_{timestamp}.{ext}"
@@ -1669,11 +1684,24 @@ def edit_profile():
             ''', (username, email, profile_pic, user_id))
             mytdb.commit()
 
-            flash("Profile updated!", "success")
+            # Update JWT token with new username if changed
+            if username != g.current_user.get('username'):
+                new_token = create_jwt_token({
+                    'user_id': user_id,
+                    'email': email,
+                    'username': username,
+                    'user_type': 'user'
+                })
+                response = redirect(url_for('profile'))
+                response.set_cookie('access_token', new_token, httponly=True, secure=True)
+                return response
+
+            flash("Profile updated successfully!", "success")
             return redirect(url_for('profile'))
 
         except Exception as e:
             mytdb.rollback()
+            print(f"Error updating profile: {str(e)}")
             flash("Error updating profile", "error")
             return redirect(url_for('edit_profile'))
 
@@ -1681,6 +1709,91 @@ def edit_profile():
         # GET: Show edit form
         cursor.execute('SELECT username, user_email, profile_pic FROM usercreate WHERE user_id = %s', (user_id,))
         user = cursor.fetchone()
-        return render_template('/user/edit_profile.html', user=user)
+        if request.args.get('deleted'):
+            flash("Profile picture deleted successfully", "success")
+        return render_template('user/edit_profile.html', 
+                             user=user,
+                             token=request.cookies.get('access_token'),
+                             navbar_items=navbar_items)
+    
+    
+@app.route('/delete_profile_pic', methods=['POST'])
+@jwt_required
+def delete_profile_pic():
+    try:
+        user_id = g.current_user.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+
+        # Get current profile pic filename
+        cursor.execute('SELECT profile_pic FROM usercreate WHERE user_id = %s', (user_id,))
+        current_pic = cursor.fetchone()[0]
+
+        # Only delete if it's not the default
+        if current_pic and current_pic != 'default.jpg':
+            # Delete the file
+            pic_path = os.path.join(app.config['UPLOAD_FOLDER'], current_pic)
+            if os.path.exists(pic_path):
+                os.remove(pic_path)
+
+            # Update database to set to default
+            cursor.execute('''
+                UPDATE usercreate 
+                SET profile_pic = 'default.jpg'
+                WHERE user_id = %s
+            ''', (user_id,))
+            mytdb.commit()
+
+        return jsonify({'success': True, 'redirect': url_for('edit_profile')})
+
+    except Exception as e:
+        mytdb.rollback()
+        print(f"Error deleting profile pic: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/search')
+def search():
+    query = request.args.get('query', '').strip().lower()
+    
+    if not query:
+        return render_template('_search_results.html', results={'query': query})
+
+    try:
+        results = {
+            'query': query,
+            'navbar_items': [],
+            'subtopics': [],
+            'sub_subtopics': []
+        }
+
+        # Search navbar items
+        cursor.execute('SELECT id, name FROM navbar_items WHERE name LIKE %s LIMIT 3', 
+                      [f'%{query}%'])
+        results['navbar_items'] = [{'id': row[0], 'name': row[1]} for row in cursor.fetchall()]
+
+        # Search subtopics
+        cursor.execute('''SELECT s.id, s.title, n.name as category 
+                       FROM subtopics s
+                       JOIN navbar_items n ON s.navbar_id = n.id
+                       WHERE s.title LIKE %s LIMIT 3''', 
+                     [f'%{query}%'])
+        results['subtopics'] = [{'id': row[0], 'title': row[1], 'category': row[2]} 
+                              for row in cursor.fetchall()]
+
+        # Search sub-subtopics
+        cursor.execute('''SELECT ss.id, ss.title, s.title as parent, n.name as category
+                       FROM sub_subtopics ss
+                       JOIN subtopics s ON ss.subtopic_id = s.id
+                       JOIN navbar_items n ON s.navbar_id = n.id
+                       WHERE ss.title LIKE %s LIMIT 3''',
+                     [f'%{query}%'])
+        results['sub_subtopics'] = [{'id': row[0], 'title': row[1], 'parent': row[2], 'category': row[3]} 
+                                  for row in cursor.fetchall()]
+
+        return render_template('_search_results.html', results=results)
+
+    except Exception as e:
+        print(f"Search error: {str(e)}")
+        return render_template('_search_results.html', results={'error': 'Search failed'})
 
 app.run(use_reloader=True, debug=True)

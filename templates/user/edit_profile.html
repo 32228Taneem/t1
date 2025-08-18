@@ -5,126 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2ecc71;
-            --dark-color: #2c3e50;
-            --light-color: #ecf0f1;
-        }
-        
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding-top: 20px;
-        }
-        
         .edit-profile-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .edit-profile-card {
-            background: white;
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
             border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
         }
-        
-        .profile-picture-preview {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
+        .profile-preview {
+            width: 120px;
+            height: 120px;
             object-fit: cover;
-            margin: 0 auto 20px;
-            display: block;
-            border: 5px solid #eee;
+            border-radius: 50%;
+            border: 3px solid #ddd;
         }
-        
-        .form-label {
-            font-weight: 600;
-            color: var(--dark-color);
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        
-        .btn-secondary {
-            margin-left: 10px;
-        }
-        
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .edit-profile-card {
-                padding: 20px;
-            }
-            
-            .profile-picture-preview {
-                width: 120px;
-                height: 120px;
-            }
-        }
-        
         @media (max-width: 576px) {
             .edit-profile-container {
-                padding: 10px;
-            }
-            
-            .profile-picture-preview {
-                width: 100px;
-                height: 100px;
-            }
-            
-            .btn-secondary {
-                margin-left: 0;
-                margin-top: 10px;
-                display: block;
-                width: 100%;
+                padding: 1rem;
+                margin: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    {% include 'navbar.html' %}
     
-    <div class="edit-profile-container">
-        <div class="edit-profile-card">
-            <h2 class="text-center mb-4">Edit Profile</h2>
-            
-            <form method="POST" enctype="multipart/form-data">
-                <div class="text-center mb-4">
-                    <img id="profilePreview" src="{{ url_for('static', filename='uploads/' + user[2]) }}" class="profile-picture-preview" alt="Current Profile Picture">
-                </div>
-                
-                <div class="mb-3">
-                    <label for="profilePic" class="form-label">Profile Picture</label>
+    
+    <div class="container edit-profile-container">
+        <h2 class="mb-4">Edit Profile</h2>
+        
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            <div class="mb-4 text-center">
+                <img id="profilePreview" 
+                     src="{{ url_for('static', filename='uploads/' + user[2]) if user[2] else url_for('static', filename='images/default.jpg') }}" 
+                     alt="Current Profile" 
+                     class="profile-preview mb-2">
+                <div class="form-group">
+                    <label for="profilePic" class="form-label">Change Profile Picture</label>
                     <input type="file" class="form-control" id="profilePic" name="profile_pic" accept="image/*">
                 </div>
-                
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" value="{{ user[0] }}" required>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{ user[1] }}" required>
-                </div>
-                
-                <div class="d-flex flex-wrap">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <a href="{{ url_for('profile') }}" class="btn btn-secondary">Cancel</a>
-                </div>
-            </form>
-        </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" 
+                       value="{{ user[0] }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="email" name="email" 
+                       value="{{ user[1] }}" required>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('profile') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
     </div>
-
+<div class="mb-4 text-center">
+    <img id="profilePreview" 
+         src="{{ url_for('static', filename='uploads/' + user[2]) if user[2] else url_for('static', filename='images/default.jpg') }}" 
+         alt="Current Profile" 
+         class="profile-preview mb-2">
+    <div class="form-group">
+        <label for="profilePic" class="form-label">Change Profile Picture</label>
+        <input type="file" class="form-control" id="profilePic" name="profile_pic" accept="image/*">
+    </div>
+    {% if user[2] and user[2] != 'default.jpg' %}
+    <div class="mt-2">
+        <button type="button" class="btn btn-danger btn-sm" id="deleteProfilePic">Delete Profile Picture</button>
+    </div>
+    {% endif %}
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Preview profile picture before upload
+        // Profile image preview
         document.getElementById('profilePic').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -135,8 +94,49 @@
                 reader.readAsDataURL(file);
             }
         });
+
+        // JWT handling for form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const token = "{{ token }}";
+            const formData = new FormData(this);
+            
+            fetch("{{ url_for('edit_profile') }}", {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+            
+            e.preventDefault();
+        });
     </script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.getElementById('deleteProfilePic')?.addEventListener('click', function() {
+        if (confirm('Are you sure you want to delete your profile picture?')) {
+            fetch("{{ url_for('delete_profile_pic') }}", {
+                method: 'POST', 
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>

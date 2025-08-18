@@ -1,32 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>{{ item_name }} - Subtopics</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-  <script src="https://cdn.tiny.cloud/1/lezf5y9e1y8vwjv3870f06avrgu9855j1octvf69ab6d8hut/tinymce/6/tinymce.min.js"
-    referrerpolicy="origin"></script>
-
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/htmx.org@1.9.0"></script>
   <style>
-    /* ============================================= */
-    /* COLOR VARIABLES - EDIT THESE TO CHANGE THEME */
-    /* ============================================= */
     :root {
       /* Primary Colors */
       --midnight-blue: #2c3e50;
       --ocean-blue: #3498db;
       --emerald-green: #2ecc71;
       --pure-white: #ffffff;
-      
       /* Secondary Colors */
       --forest-green: #27ae60;
       --slate-gray: #7f8c8d;
       --cloud-white: #ecf0f1;
-      
       /* Shades and Tints */
       --white-90: rgba(255, 255, 255, 0.9);
       --white-85: rgba(255, 255, 255, 0.85);
@@ -41,259 +33,289 @@
       --blue-tint-20: rgba(52, 152, 219, 0.2);
       --blue-tint-15: rgba(52, 152, 219, 0.15);
       --blue-tint-5: rgba(52, 152, 219, 0.05);
-      
       /* Grays */
       --light-gray: #f5f5f5;
       --lighter-gray: #e0e0e0;
       --border-gray: #d5d5d5;
       --shadow-gray: rgba(0, 0, 0, 0.1);
-      
-      /* Shadows */
-      --shadow-10: rgba(0, 0, 0, 0.1);
-      --shadow-20: rgba(0, 0, 0, 0.2);
-      --shadow-30: rgba(0, 0, 0, 0.3);
-      
       /* Layout Variables */
-      --navbar-height: 60px;
-      --second-navbar-height: 50px;
-      --sidebar-width: 250px;
+      --navbar-1-height: 64px;
+      --navbar-2-height: 48px;
+      --navbar-3-height: 48px;
+      --combined-nav-height: calc(var(--navbar-1-height) + var(--navbar-2-height) + var(--navbar-3-height));
+      --sidebar-width: 280px;
       --sidebar-collapsed-width: 0px;
-      --mobile-breakpoint: 992px;
-      --search-bar-max-width: 500px;
+      --mobile-breakpoint: 768px;
     }
 
-    /* ============================================= */
-    /* MAIN STYLES */
-    /* ============================================= */
-    
-    /* Body and Layout */
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      background-color: var(--light-gray);
     }
 
-    /* Main container that holds everything except navbars */
-    .main-container {
+    /* Navbar 1 (Topmost) */
+    .navbar-1 {
       display: flex;
-      flex-direction: column;
-      flex: 1;
-      margin-top: calc(var(--navbar-height) + var(--second-navbar-height));
-    }
-
-    /* First Navbar */
-    .navbar-fixed-top {
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 5%;
       background-color: var(--midnight-blue);
-      height: var(--navbar-height);
-      padding: 0 1rem;
+      box-shadow: 0 2px 10px var(--shadow-gray);
+      color: var(--pure-white);
       position: fixed;
       top: 0;
       width: 100%;
-      z-index: 1040;
-      box-shadow: 0 2px 10px var(--shadow-10);
+      z-index: 1000;
+      height: var(--navbar-1-height);
+      flex-wrap: nowrap;
+    }
+
+    .logo-container {
       display: flex;
       align-items: center;
-      flex-wrap: wrap;
+      flex-shrink: 0;
+      gap: 12px;
+      order: 2;
     }
 
-    /* Navbar text/links */
-    .navbar-brand {
-      font-weight: 700;
-      color: var(--pure-white) !important;
-      font-size: 1.25rem;
+    .logo-container:hover {
+      transform: scale(1.05);
+    }
+
+    .logo {
+      height: 48px;
+      width: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--cloud-white);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       transition: all 0.3s ease;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 200px;
     }
 
-    .navbar-brand:hover {
-      color: var(--ocean-blue) !important;
+    .logo:hover {
+      transform: scale(1.15);
+      filter: drop-shadow(0 0 10px rgba(52, 152, 219, 0.8));
     }
 
-    .nav-link {
-      color: var(--white-85) !important;
-      padding: 0.5rem 1rem !important;
-      transition: all 0.2s ease;
+    .company-name {
+      font-weight: 600;
+      font-size: 1.4rem;
+      color: var(--cloud-white);
+    }
+
+    .nav-1-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      order: 4;
+    }
+
+    .nav-1-links a {
+      color: var(--cloud-white);
+      text-decoration: none;
       font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
     }
 
-    .nav-link:hover {
-      color: var(--pure-white) !important;
-      transform: translateY(-2px);
+    .nav-1-links a:hover {
+      background-color: var(--white-20);
     }
 
-    /* Search bar container */
-    .search-container {
-      flex-grow: 1;
-      max-width: var(--search-bar-max-width);
-      margin: 0 1rem;
-      transition: all 0.3s ease;
-    }
-
-    /* Search form */
-    .search-form {
-      display: flex;
-      width: 100%;
-    }
-
-    .navbar .form-control {
-      border-radius: 20px 0 0 20px !important;
-      padding: 0.5rem 1.2rem !important;
-      border: 2px solid var(--white-40) !important;
-      background-color: var(--white-25) !important;
-      color: var(--pure-white) !important;
-      transition: all 0.3s ease;
-      width: 100%;
-    }
-
-    .navbar .form-control::placeholder {
-      color: var(--white-70) !important;
-    }
-
-    .navbar .form-control:focus {
-      background-color: var(--white-35) !important;
-      border-color: var(--cloud-white) !important;
-      box-shadow: 0 0 0 0.25rem rgba(236, 240, 241, 0.25) !important;
-      color: var(--pure-white) !important;
-    }
-
-    .navbar .btn-outline-success {
-      border-radius: 0 20px 20px 0 !important;
-      background-color: var(--emerald-green) !important;
-      border: 2px solid var(--emerald-green) !important;
-      padding: 0 1.5rem !important;
-      color: var(--pure-white) !important;
-      transition: all 0.3s ease;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-
-    .navbar .btn-outline-success:hover {
-      background-color: var(--forest-green) !important;
-      border-color: var(--forest-green) !important;
-    }
-
-    /* Second Navbar */
-    .second-navbar-wrapper {
-      background-color: var(--ocean-blue);
-      position: fixed;
-      top: var(--navbar-height);
-      left: 0;
-      right: 0;
-      height: var(--second-navbar-height);
-      display: flex;
-      align-items: center;
-      z-index: 1030;
-      box-shadow: 0 2px 5px var(--shadow-10);
-      overflow: hidden;
-    }
-
-    .second-navbar {
-      display: flex;
-      overflow-x: auto;
-      scroll-behavior: smooth;
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-      flex-grow: 1;
-      height: 100%;
-      align-items: center;
-      padding: 0 1rem;
-    }
-
-    .second-navbar::-webkit-scrollbar {
+    .menu-toggle {
+      background: none;
+      border: none;
+      color: var(--cloud-white);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 10px;
+      order: 1;
       display: none;
     }
 
-    .backend-link {
-      color: var(--white-90) !important;
-      padding: 0.5rem 1rem !important;
-      white-space: nowrap;
-      font-weight: 500;
-      transition: all 0.2s ease;
-      border-radius: 4px;
-      margin: 0 0.25rem;
-      text-decoration: none;
-      flex-shrink: 0;
+    /* Navbar 2 (Middle) */
+    .navbar-2 {
+      display: flex;
+      justify-content: center;
+      padding: 10px 0;
+      background-color: var(--ocean-blue);
+      box-shadow: 0 2px 8px var(--shadow-gray);
+      position: fixed;
+      top: var(--navbar-1-height);
+      width: 100%;
+      height: var(--navbar-2-height);
+      z-index: 999;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
     }
 
-    .backend-link:hover {
-      background-color: var(--white-20) !important;
-      color: var(--pure-white) !important;
-      transform: translateY(-2px);
+    .navbar-2::-webkit-scrollbar {
+      display: none;
     }
 
-    .backend-link.active {
-      background: linear-gradient(to right,
-          var(--white-15),
-          var(--white-30),
-          var(--white-15)) !important;
-      color: var(--pure-white) !important;
-      font-weight: 600;
-      position: relative;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px var(--shadow-10);
-      text-decoration: none !important;
+    .nav-2-links {
+      display: flex;
+      gap: 24px;
+      padding: 0 20px;
+      max-width: 1200px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: nowrap;
     }
 
-    .backend-link.active::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 2rem);
-      height: 3px;
-      background-color: var(--pure-white);
-      border-radius: 3px;
-    }
-
-    .scroll-btn {
-      background-color: var(--shadow-20);
+    .nav-2-links a {
       color: var(--pure-white);
-      border: none;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1rem;
+      padding: 6px 12px;
+      border-radius: 5px;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .nav-2-links a:hover {
+      transform: translateY(-2px);
+      background-color: var(--white-20);
+    }
+
+    /* Navbar 3 (Bottom with scrollable items) */
+    .navbar-3-container {
+      position: fixed;
+      top: calc(var(--navbar-1-height) + var(--navbar-2-height));
+      width: 100%;
+      height: var(--navbar-3-height);
+      background-color: var(--ocean-blue);
+      z-index: 998;
       display: flex;
       align-items: center;
+    }
+
+    .navbar-3 {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      padding: 8px 20px;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .navbar-3::-webkit-scrollbar {
+      display: none;
+    }
+
+    .nav-3-links {
+      display: flex;
+      gap: 12px;
       justify-content: center;
+      align-items: center;
+    }
+
+    .nav-3-links a {
+      color: var(--pure-white);
+      text-decoration: none;
+      font-weight: 500;
+      white-space: nowrap;
+      padding: 6px 12px;
+      border-radius: 15px;
+      background: var(--white-20);
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .nav-3-links a:hover {
+      background-color: var(--white-35);
+      transform: scale(1.05);
+    }
+
+    .nav-3-links a.active {
+      background: var(--white-40);
+      font-weight: bold;
+    }
+
+    /* Scroll buttons for navbar 3 */
+    .scroll-btn {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 36px;
+      background: rgba(0, 0, 0, 0.2);
+      border: none;
+      color: var(--pure-white);
+      font-size: 1.1rem;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: background-color 0.3s ease;
       z-index: 1;
-      margin: 0 0.5rem;
-      flex-shrink: 0;
     }
 
     .scroll-btn:hover {
-      background-color: var(--shadow-30);
-      transform: scale(1.1);
+      background-color: rgba(0, 0, 0, 0.4);
     }
 
-    /* Main Content Layout */
-    .main-body {
-      display: flex;
-      flex: 1;
+    .scroll-btn.left {
+      left: 0;
+    }
+
+    .scroll-btn.right {
+      right: 0;
+    }
+
+    .dropdown {
       position: relative;
-      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      background-color: var(--pure-white);
+      min-width: 160px;
+      box-shadow: 0 8px 16px var(--shadow-gray);
+      border-radius: 5px;
+      z-index: 1001;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    .dropdown-content a {
+      color: var(--midnight-blue);
+      padding: 10px 15px;
+      text-decoration: none;
+      display: block;
+      transition: background-color 0.3s ease;
+    }
+
+    .dropdown-content a:hover {
+      background-color: var(--light-gray);
+    }
+
+    /* Main Container */
+    .main-container {
+      margin-top: var(--combined-nav-height);
+      display: flex;
+      min-height: calc(100vh - var(--combined-nav-height));
     }
 
     /* Sidebar */
     .sidebar {
       width: var(--sidebar-width);
-      height: calc(100vh - var(--navbar-height) - var(--second-navbar-height));
+      height: calc(100vh - var(--combined-nav-height));
       overflow-y: auto;
       background-color: var(--light-gray);
       padding: 15px;
       border-right: 1px solid var(--border-gray);
       transition: all 0.3s ease;
       position: sticky;
-      top: calc(var(--navbar-height) + var(--second-navbar-height));
-      flex-shrink: 0;
+      top: var(--combined-nav-height);
     }
 
     .sidebar-collapsed {
@@ -303,9 +325,47 @@
       overflow: hidden;
     }
 
+    /* Sidebar Toggle Button */
+    .sidebar-toggle {
+      position: fixed;
+      left: var(--sidebar-width);
+      top: calc(var(--combined-nav-height) + 10px);
+      z-index: 1001;
+      background-color: var(--ocean-blue);
+      color: white;
+      border: none;
+      border-radius: 0 5px 5px 0;
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-toggle:hover {
+      background-color: var(--midnight-blue);
+    }
+
+    .sidebar-collapsed + .sidebar-toggle {
+      left: 0;
+    }
+
+    .sidebar-collapsed + .sidebar-toggle i {
+      transform: rotate(180deg);
+    }
+
+    /* Content Area */
+    .content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      min-height: calc(100vh - var(--combined-nav-height));
+      background: var(--light-gray);
+    }
+
+    /* Subtopic Styles */
     .subtopic-container {
       margin-bottom: 4px;
       transition: all 0.2s ease;
+      display: block;
     }
 
     .subtopic-wrapper {
@@ -338,10 +398,6 @@
       font-size: 0.95rem;
     }
 
-    .subtopic-item:hover {
-      color: var(--ocean-blue);
-    }
-
     .subsubtopic-list {
       margin-left: 15px;
       padding-left: 8px;
@@ -359,137 +415,13 @@
       font-size: 0.9rem;
     }
 
-    .subsubtopic-item:hover {
-      color: var(--ocean-blue);
-      background-color: var(--blue-tint-5);
-    }
-
     .subsubtopic-item.active {
       background-color: var(--blue-tint-15);
       color: var(--ocean-blue);
       font-weight: 500;
     }
 
-    .btn-link {
-      color: var(--slate-gray);
-      padding: 0 6px;
-      transition: all 0.2s ease;
-      background: none;
-      border: none;
-    }
-
-    .btn-link:hover {
-      color: var(--ocean-blue);
-      transform: scale(1.1);
-    }
-
-    /* Content Display Area */
-    .content {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      min-height: calc(100vh - var(--navbar-height) - var(--second-navbar-height));
-      transition: all 0.3s ease;
-    }
-
-    .content-expanded {
-      margin-left: 0;
-    }
-
-    #displayArea {
-      display: none;
-      margin-top: 2rem;
-      padding: 1rem;
-      background: var(--pure-white);
-      border-radius: 8px;
-      border: 1px solid var(--lighter-gray);
-      box-shadow: 0 2px 5px var(--shadow-gray);
-    }
-
-    .subtopic-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 1rem;
-      color: var(--midnight-blue);
-    }
-
-    /* Table Styles */
-    #displayContent table {
-      border-collapse: collapse;
-      width: 100%;
-      margin: 1rem 0;
-      border: 1px solid var(--lighter-gray) !important;
-    }
-
-    #displayContent table td,
-    #displayContent table th {
-      border: 1px solid var(--lighter-gray) !important;
-      padding: 8px;
-      text-align: left;
-    }
-
-    #displayContent table th {
-      background-color: var(--light-gray);
-      font-weight: bold;
-    }
-
-    .mce-content-body table,
-    .mce-content-body td,
-    .mce-content-body th {
-      border: 1px solid var(--lighter-gray) !important;
-    }
-
-    .nav-link.dropdown-toggle {
-      font-weight: bold;
-      color: #fff !important;
-    }
-
-    #userDropdown {
-      background-color: var(--emerald-green);
-      border-radius: 5px;
-      padding: 5px 15px;
-    }
-
-    /* Sidebar toggle button styles */
-    .sidebar-toggle {
-      position: fixed;
-      left: var(--sidebar-width);
-      top: calc(var(--navbar-height) + var(--second-navbar-height) + 10px);
-      z-index: 1050;
-      background-color: var(--ocean-blue);
-      color: white;
-      border: none;
-      border-radius: 0 5px 5px 0;
-      padding: 8px 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .sidebar-toggle:hover {
-      background-color: var(--midnight-blue);
-    }
-
-    .sidebar-collapsed + .sidebar-toggle {
-      left: 0;
-    }
-
-    .sidebar-collapsed + .sidebar-toggle i {
-      transform: rotate(180deg);
-    }
-
-    /* Mobile menu toggle button */
-    .mobile-menu-toggle {
-      display: none;
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      margin-right: 1rem;
-      cursor: pointer;
-    }
-
-    /* Fullscreen toggle button */
+    /* Fullscreen Mode */
     .fullscreen-toggle {
       position: fixed;
       bottom: 20px;
@@ -505,7 +437,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 2px 10px var(--shadow-20);
+      box-shadow: 0 2px 10px var(--shadow-gray);
       transition: all 0.3s ease;
     }
 
@@ -514,397 +446,485 @@
       transform: scale(1.1);
     }
 
-    /* Fullscreen mode styles */
-    body.fullscreen-mode {
-      overflow: hidden;
-    }
-
-    .fullscreen-mode .navbar-fixed-top,
-    .fullscreen-mode .second-navbar-wrapper,
+    .fullscreen-mode .navbar-1,
+    .fullscreen-mode .navbar-2,
+    .fullscreen-mode .navbar-3-container,
     .fullscreen-mode .sidebar,
     .fullscreen-mode .sidebar-toggle {
-      display: none;
+      display: none !important;
     }
 
     .fullscreen-mode .main-container {
-      margin-top: 0;
+      margin-top: 0 !important;
+      height: 100vh;
     }
 
     .fullscreen-mode .content {
-      min-height: 100vh;
-      padding: 20px;
       margin-left: 0 !important;
+      padding: 20px;
+      height: 100%;
+    }
+
+    /* Display Area */
+    #displayArea {
+      display: none;
+      margin-top: 1rem;
+    }
+
+    .subtopic-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: left;
+      margin-bottom: 1rem;
+      color: var(--midnight-blue);
+    }
+
+    .sidebar-nav-toggle[data-collapsed="true"] ~ .subtopic-container {
+      display: none;
+    }
+
+    /* Search-specific styles */
+    .search-container {
+      flex-grow: 1;
+      min-width: 150px;
+      max-width: 600px;
+      margin: 0 10px;
+      order: 3;
+    }
+
+    .search-form {
+      position: relative;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 15px 10px 40px;
+      border-radius: 25px;
+      border: 1px solid var(--slate-gray);
+      font-size: 16px;
+      box-sizing: border-box;
+      background-color: var(--pure-white);
+      color: var(--midnight-blue);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      color: var(--slate-gray);
+      z-index: 2;
+    }
+
+    .search-loading {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--slate-gray);
+      display: none;
+    }
+
+    .htmx-request .search-loading {
+      display: block;
+    }
+
+    @keyframes spin {
+      100% {
+        transform: translateY(-50%) rotate(360deg);
+      }
+    }
+
+    .search-results-dropdown {
+      position: absolute;
+      width: 100%;
+      max-height: 400px;
       overflow-y: auto;
+      background: white;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      display: none;
+      margin-top: 5px;
     }
 
-    /* ============================================= */
-    /* Responsive Adjustments */
-    /* ============================================= */
-
-    @media (max-width: 1200px) {
-      :root {
-        --sidebar-width: 220px;
-      }
-      
-      .sidebar-toggle {
-        left: var(--sidebar-width);
-      }
-      
-      /* Slightly reduce search bar max width */
-      .search-container {
-        max-width: 450px;
-      }
+    .search-results-dropdown.show {
+      display: block;
     }
 
+    .search-result-item {
+      padding: 10px 15px;
+      border-bottom: 1px solid var(--lighter-gray);
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .search-result-item:hover {
+      background-color: var(--light-gray);
+    }
+
+    .search-result-title {
+      font-weight: 500;
+      color: var(--midnight-blue);
+    }
+
+    .search-result-meta {
+      font-size: 0.8rem;
+      color: var(--slate-gray);
+      margin-top: 3px;
+    }
+
+    .no-results {
+      padding: 15px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--slate-gray);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Responsive Styles */
     @media (max-width: 992px) {
-      :root {
-        --navbar-height: 60px;
-        --second-navbar-height: 50px;
-      }
-      
-      .mobile-menu-toggle {
-        display: block;
-      }
-      
-      /* Make search bar full width but keep it compact */
-      .search-container {
-        flex-grow: 1;
-        flex-shrink: 1;
-        min-width: 0; /* allows shrinking */
-        margin: 0 0.5rem;
-        order: 2;
-      }
-      
-      /* Reduce search input padding */
-      .navbar .form-control {
-        padding: 0.4rem 1rem !important;
-      }
-      
-      /* Reduce search button padding */
-      .navbar .btn-outline-success {
-        padding: 0 0.8rem !important;
-        font-size: 0.85rem;
-      }
-
-      .navbar-brand {
-        order: 1;
-        flex-shrink: 0;
-      }
-
-      .navbar-toggler {
-        order: 3;
-        margin-left: auto;
-      }
-
-      .navbar .form-control {
-        padding: 0.4rem 0.8rem !important;
-        font-size: 0.85rem;
-      }
-      
-      .navbar-collapse {
-        position: fixed;
-        top: var(--navbar-height);
-        left: 0;
-        right: 0;
-        background-color: var(--midnight-blue);
-        z-index: 1050;
-        max-height: calc(100vh - var(--navbar-height));
-        overflow-y: auto;
-        padding: 1rem;
-        box-shadow: 0 10px 15px var(--shadow-20);
-      }
-      
-      .navbar-collapse .navbar-nav {
-        flex-direction: column;
-      }
-    }
-    
-    .navbar-collapse .nav-link {
-      scroll-margin-top: calc(var(--navbar-height) + var(--second-navbar-height) + 10px);
-    }
-
-    @media (max-width: 768px) {
-      :root {
-        --navbar-height: 56px;
-        --second-navbar-height: 46px;
-      }
-      
       .sidebar {
         position: fixed;
-        top: calc(var(--navbar-height) + var(--second-navbar-height));
+        top: var(--combined-nav-height);
         left: 0;
         bottom: 0;
-        z-index: 1020;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        z-index: 997;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
       }
-      
+
       .sidebar-collapsed {
         transform: translateX(-100%);
       }
-      
+
       .content {
         margin-left: 0;
         padding: 15px;
       }
-      
+
       .sidebar-toggle {
-        display: none !important;
+        top: calc(var(--combined-nav-height) + 5px);
+        padding: 6px 8px;
+        background-color: var(--midnight-blue);
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
       }
-      
-      .navbar-brand {
-        max-width: 160px;
+
+      .sidebar-collapsed + .sidebar-toggle {
+        left: 0;
+        background-color: var(--ocean-blue);
       }
-      
-      /* Further reduce search bar elements */
-      .navbar .form-control {
-        padding: 0.35rem 0.8rem !important;
+    }
+
+    @media (max-width: 768px) {
+      :root {
+        --navbar-1-height: 56px;
+        --navbar-2-height: 44px;
+        --navbar-3-height: 44px;
+      }
+
+      .navbar-1 {
+        padding: 8px 15px;
+        flex-wrap: nowrap;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .logo-container {
+        flex: 0 0 auto;
+        margin-right: 10px;
+      }
+
+      .logo {
+        height: 40px;
+        width: 40px;
+      }
+
+      .company-name {
+        font-size: 1.2rem;
+      }
+
+      .search-container {
+        flex-grow: 1;
+        min-width: 0;
+        margin: 0 5px;
+      }
+
+      .search-input {
+        padding: 8px 15px 8px 35px;
+        font-size: 14px;
+      }
+
+      .search-icon {
+        left: 10px;
+      }
+
+      .nav-1-links {
+        display: none;
+        position: fixed;
+        top: var(--navbar-1-height);
+        left: 0;
+        width: 100%;
+        background: var(--midnight-blue);
+        flex-direction: column;
+        padding: 15px;
+        z-index: 1001;
+        box-shadow: 0 4px 8px var(--shadow-gray);
+        transition: all 0.3s ease;
+      }
+
+      .nav-1-links.active {
+        display: flex;
+      }
+
+      .nav-1-links a {
+        padding: 12px 15px;
+        width: 100%;
+        text-align: left;
+        font-size: 1rem;
+        border-bottom: 1px solid var(--white-20);
+      }
+
+      .nav-1-links .dropdown {
+        width: 100%;
+      }
+
+      .nav-1-links .dropdown-content {
+        position: relative;
+        width: 100%;
+        background: var(--white-10);
+        box-shadow: none;
+        margin-top: 5px;
+      }
+
+      .nav-1-links .dropdown-content a {
+        color: var(--cloud-white);
+        padding: 10px 25px;
+      }
+
+      .navbar-2 {
+        padding: 8px 0;
+      }
+
+      .nav-2-links {
+        gap: 16px;
+        flex-direction: row;
+      }
+
+      .nav-2-links a {
+        font-size: 0.95rem;
+        padding: 5px 10px;
+      }
+
+      .nav-2-links .combined-link {
+        font-size: 1rem;
+        padding: 6px 10px;
+      }
+
+      .navbar-3 {
+        padding: 8px 40px;
+      }
+
+      .nav-3-links {
+        gap: 10px;
+      }
+
+      .nav-3-links a {
+        padding: 5px 10px;
         font-size: 0.9rem;
       }
-      
-      .navbar .btn-outline-success {
-        padding: 0 0.8rem !important;
-        font-size: 0.9rem;
-      }
-      
-      .second-navbar .backend-link {
-        padding: 0.5rem 0.8rem !important;
-        font-size: 0.9rem;
+
+      .scroll-btn {
+        display: block;
       }
     }
 
     @media (max-width: 576px) {
-      .navbar-fixed-top {
-        flex-wrap: nowrap; /* force items in one row */
+      :root {
+        --navbar-1-height: 50px;
+        --navbar-2-height: 40px;
+        --navbar-3-height: 40px;
       }
 
-      .container-fluid {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.5rem;
-        flex-wrap: nowrap;
+      .navbar-1 {
+        padding: 8px 12px;
       }
 
-      .navbar-brand {
-        flex: 0 0 auto;
-        font-size: 1rem;
-        max-width: 100px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+      .logo {
+        height: 36px;
+        width: 36px;
+      }
+
+      .company-name {
+        font-size: 1.1rem;
       }
 
       .search-container {
-        flex: 1 1 auto;
-        min-width: 0;
-        margin: 0;
+        margin: 0 5px;
       }
 
-      .search-form {
-        display: flex;
-        width: 100%;
+      .search-input {
+        padding: 6px 12px 6px 30px;
+        font-size: 13px;
       }
 
-      .navbar .form-control {
-        padding: 0.3rem 0.6rem !important;
-        font-size: 0.8rem;
-        border-radius: 20px 0 0 20px !important;
+      .search-icon {
+        left: 8px;
       }
 
-      .navbar .btn-outline-success {
-        padding: 0 0.6rem !important;
-        font-size: 0.8rem;
-        border-radius: 0 20px 20px 0 !important;
-        white-space: nowrap;
+      .nav-2-links a {
+        font-size: 0.9rem;
+        padding: 4px 8px;
       }
 
-      .navbar-toggler,
-      .mobile-menu-toggle {
-        flex: 0 0 auto;
-        font-size: 1.2rem;
-        margin-left: 0.5rem;
+      .nav-3-links a {
+        font-size: 0.85rem;
+        padding: 4px 8px;
       }
-    }
 
-    @media (max-width: 400px) {
-      :root {
-        --navbar-height: 48px;
-      }
-      
-      /* Smallest search bar size */
-      .navbar .form-control {
-        padding: 0.25rem 0.6rem !important;
-        font-size: 0.8rem;
-      }
-      
-      .navbar .btn-outline-success {
-        padding: 0 0.6rem !important;
-        font-size: 0.8rem;
-      }
-      
-      .navbar-brand {
-        max-width: 120px;
+      .scroll-btn {
+        width: 30px;
         font-size: 1rem;
       }
-      
-      .second-navbar .backend-link {
-        padding: 0.4rem 0.6rem !important;
-        font-size: 0.85rem;
-      }
-      
-      .scroll-btn {
-        width: 26px;
-        height: 26px;
-        font-size: 0.8rem;
-      }
     }
 
-    @media (min-width: 992px) {
-      .navbar-collapse {
-        position: static;
-        background-color: transparent;
-        box-shadow: none;
-        max-height: none;
-        overflow-y: visible;
-        padding: 0;
+    @media (max-width: 480px) {
+      .search-container {
+        min-width: 120px;
       }
-      
-      .navbar-collapse .navbar-nav {
-        flex-direction: row;
-      }
-      .dropdown-menu {
-        position: absolute !important;
-        background-color: var(--midnight-blue);
-        margin-top: 0;
-        border: 1px solid var(--white-20);
-      }
-    }
 
-    .dropdown-item {
-      color: var(--white-90) !important;
-      padding: 0.5rem 1rem !important;
-    }
+      .search-input {
+        padding: 6px 10px 6px 28px;
+        font-size: 12px;
+      }
 
-    .dropdown-item:hover {
-      background-color: var(--white-20) !important;
-      color: var(--pure-white) !important;
-    }
-    
-    .dropdown-menu {
-      position: static !important;
-      transform: none !important;
-      margin-top: 0.5rem;
-      border: none;
-      background-color: var(--white-10);
+      .search-icon {
+        left: 6px;
+      }
+
+      .company-name {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
-
 <body>
-
   <!-- First Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-fixed-top">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="{{ url_for('home') }}">Company Name</a>
-      
-      <div class="search-container">
-        <form class="search-form">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
+  <nav class="navbar-1">
+    <button class="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="logo-container">
+      <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Company Logo" class="logo">
+      <span class="company-name logo-text">Televerse</span>
+    </div>
+    <div class="search-container">
+      <form id="searchForm" class="search-form">
+        <div class="input-group">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" name="query" class="form-control search-input" placeholder="Search courses, topics..."
+                 hx-get="{{ url_for('search') }}" hx-trigger="input changed delay:100ms" hx-target="#searchResultsContainer"
+                 hx-swap="innerHTML" hx-indicator=".search-loading" autocomplete="off" aria-label="Search">
+          <div class="search-loading htmx-indicator">
+            <i class="fas fa-spinner fa-spin"></i>
+          </div>
+        </div>
+        <div id="searchResultsContainer" class="search-results-dropdown">
+          <div class="no-results" style="display: none;">
+            <i class="fas fa-search"></i>
+            <p>No results found</p>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="nav-1-links" id="navLinks">
+      <a href="{{url_for('home')}}">Home</a>
+      <a href="#">Services</a>
+      <a href="#">Contact</a>
+      {% if session.get('username') %}
+      <div class="dropdown">
+        <a href="#">{{ session['username'] }}</a>
+        <div class="dropdown-content">
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
       </div>
-      
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Home</a></li>
-          <!-- <li class="nav-item"><a class="nav-link" href="#">About</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Services</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Contact</a></li> -->
-          <!-- User/Admin Status Section -->
-          {% if session.get('username') %}
-          <!-- Display username and logout button when logged in -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
-              aria-expanded="false">
-              {% if session.get('admin_temp') %}
-              Admin: {{ session['admin_temp']['admin_name'] }}
-              {% else %}
-              {{ session['username'] }}
-              {% endif %}
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="userDropdown">
-              <li><a class="dropdown-item" href="{{ url_for('profile') }}">Profile</a></li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
-            </ul>
-          </li>
-          {% else %}
-          <!-- Display login button when not logged in -->
-          <li class="nav-item"><a class="nav-link" href="{{url_for('login')}}">Login</a></li>
-          {% endif %}
-        </ul>
-      </div>
+      {% else %}
+      <a href="{{url_for('login')}}">Login</a>
+      {% endif %}
     </div>
   </nav>
 
-  <!-- Second Fixed Navbar for Backend Items -->
-  <div class="second-navbar-wrapper">
-    <button class="scroll-btn left-btn">&larr;</button>
-    <div class="second-navbar" id="backendNav">
-      {% for item in navbar_items %}
-      <a class="nav-link backend-link" href="{{ url_for('view_subtopics', item_name=item[1]) }}" data-item-name="{{ item[1] }}">{{ item[1] }}</a>
-      {% endfor %}
+  <!-- Second Navbar -->
+  <nav class="navbar-2">
+    <div class="nav-2-links">
+      <a href="#" class="combined-link">Calculator Hub</a>
+      <a href="#">Quiz Hub</a>
+      <a href="#">Courses</a>
     </div>
-    <button class="scroll-btn right-btn">&rarr;</button>
+  </nav>
+
+  <!-- Third Navbar -->
+  <div class="navbar-3-container">
+    <button class="scroll-btn left" onclick="scrollNav(-100, 'navbar-3')">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <nav class="navbar-3" id="navbar-3">
+      <div class="nav-3-links">
+        {% for item in navbar_items %}
+        <a href="{{ url_for('view_subtopics', item_name=item[1]) }}">{{ item[1] }}</a>
+        {% endfor %}
+      </div>
+    </nav>
+    <button class="scroll-btn right" onclick="scrollNav(100, 'navbar-3')">
+      <i class="fas fa-chevron-right"></i>
+    </button>
   </div>
 
   <!-- Main Container -->
   <div class="main-container">
     <!-- Sidebar Toggle Button -->
     <button class="sidebar-toggle" id="sidebarToggle">
-      <i class="bi bi-chevron-right"></i>
+      <i class="bi bi-chevron-left"></i>
     </button>
 
-    <div class="main-body">
-      <!-- Sidebar -->
-      <div class="sidebar" id="mainSidebar">
-        <h5 class="text-primary">{{ item_name }} Subtopics</h5>
-        {% for sub in subtopics %}
-        <div class="subtopic-container">
-          <div class="subtopic-wrapper">
-            <div class="subtopic-item" data-title="{{ sub.title }}" data-content="{{ sub.content | e }}"
-              onclick="handleSubtopicClick(this)">
-              {{ sub.title }}
-            </div>
-
-            {% if sub.sub_subtopics %}
-            <button class="btn btn-sm btn-link ms-2" onclick="toggleSubSubtopics('{{ sub.id }}', event)">
-              <i class="bi bi-chevron-down" id="arrow-{{ sub.id }}"></i>
-            </button>
-            {% endif %}
+    <!-- Sidebar -->
+    <div class="sidebar" id="mainSidebar">
+      <h5 class="text-primary">{{ item_name }} Subtopics</h5>
+      {% for sub in subtopics %}
+      <div class="subtopic-container">
+        <div class="subtopic-wrapper" id="subtopic-{{ sub.id }}">
+          <div class="subtopic-item" data-title="{{ sub.title }}" data-content="{{ sub.content | e }}"
+               onclick="handleSubtopicClick(this)">
+            {{ sub.title }}
           </div>
-
-          <div id="subsubtopics-{{ sub.id }}" class="subsubtopic-list">
-            {% for subsub in sub.sub_subtopics %}
-            <div class="subsubtopic-item" data-title="{{ subsub.title }}" data-content="{{ subsub.content }}"
-              onclick="showSubSubtopic(event, this)">
-              {{ subsub.title }}
-            </div>
-            {% endfor %}
-          </div>
+          {% if sub.sub_subtopics %}
+          <button class="btn btn-sm btn-link ms-2" onclick="toggleSubSubtopics('{{ sub.id }}', event)">
+            <i class="bi bi-chevron-down" id="arrow-{{ sub.id }}"></i>
+          </button>
+          {% endif %}
         </div>
-        {% endfor %}
+        <div id="subsubtopics-{{ sub.id }}" class="subsubtopic-list">
+          {% for subsub in sub.sub_subtopics %}
+          <div class="subsubtopic-item" id="sub-subtopic-{{ subsub.id }}" data-title="{{ subsub.title }}"
+               data-content="{{ subsub.content }}" onclick="showSubSubtopic(event, this)">
+            {{ subsub.title }}
+          </div>
+          {% endfor %}
+        </div>
       </div>
+      {% endfor %}
+    </div>
 
-      <!-- Content Area -->
-      <div class="content" id="mainContent">
+    <!-- Content Area -->
+    <div class="content" id="mainContent">
+      <div id="displayArea">
         <div class="subtopic-title" id="displayTitle"></div>
         <div id="displayContent" class="rich-content-container"></div>
       </div>
@@ -916,194 +936,158 @@
     <i class="bi bi-fullscreen"></i>
   </button>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  
   <script>
-    // =============================================
-    // MAIN SCRIPT
-    // =============================================
-    
-    // Document ready function
     document.addEventListener('DOMContentLoaded', function() {
-      // Mobile menu toggle functionality
-      const navbarToggler = document.querySelector('.navbar-toggler');
-      const navbarCollapse = document.getElementById('navbarNav');
-      
-      navbarToggler.addEventListener('click', function() {
-        if (navbarCollapse.classList.contains('show')) {
-          // When opening the menu, scroll to top to ensure it's fully visible
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-          });
-        }
-      });
-      
-      // Close mobile menu when clicking outside
-      document.addEventListener('click', function(event) {
-        const isClickInsideNavbar = document.querySelector('.navbar').contains(event.target);
-        
-        if (!isClickInsideNavbar && navbarCollapse.classList.contains('show')) {
-          navbarCollapse.classList.remove('show');
-        }
-      });
-
-      // Sidebar toggle functionality
-      const sidebarToggle = document.getElementById('sidebarToggle');
+      // Mobile menu toggle
+      const menuToggle = document.querySelector('.menu-toggle');
+      const navLinks = document.querySelector('.nav-1-links');
       const sidebar = document.getElementById('mainSidebar');
-      const content = document.getElementById('mainContent');      
-      
-      // Initialize sidebar state
-      let sidebarCollapsed = false;
-      
-      // Toggle sidebar function
-      function toggleSidebar() {
-        sidebarCollapsed = !sidebarCollapsed;
-        if (sidebarCollapsed) {
-          sidebar.classList.add('sidebar-collapsed');
-          content.classList.add('content-expanded');
-          sidebarToggle.innerHTML = '<i class="bi bi-chevron-left"></i>';
-          sidebarToggle.style.left = '0';
-        } else {
-          sidebar.classList.remove('sidebar-collapsed');
-          content.classList.remove('content-expanded');
-          sidebarToggle.innerHTML = '<i class="bi bi-chevron-right"></i>';
-          sidebarToggle.style.left = sidebar.offsetWidth + 'px';
-        }
-      }
-      
-      // Set initial position of toggle button
-      sidebarToggle.style.left = sidebar.offsetWidth + 'px';
-      
-      // Desktop sidebar toggle
-      sidebarToggle.addEventListener('click', toggleSidebar);
-      
-      // Auto-close sidebar on mobile when clicking content
-      if (window.innerWidth <= 768) {
-        content.addEventListener('click', function() {
-          if (!sidebarCollapsed) {
-            toggleSidebar();
-          }
-        });
-      }
-      
-      // Handle window resize
-      window.addEventListener('resize', function() {
-        if (window.innerWidth > 768 && sidebarCollapsed) {
-          toggleSidebar(); // Auto-expand sidebar when resizing to larger screen
-        }
-        
-        // Update toggle button position
-        if (!sidebarCollapsed) {
-          sidebarToggle.style.left = sidebar.offsetWidth + 'px';
-        }
-      });
-      
-      // =============================================
-      // FULLSCREEN TOGGLE FUNCTIONALITY
-      // =============================================
-      const fullscreenToggle = document.getElementById('fullscreenToggle');
-      let isFullscreen = false;
-      
-      fullscreenToggle.addEventListener('click', function() {
-        isFullscreen = !isFullscreen;
-        
-        if (isFullscreen) {
-          document.body.classList.add('fullscreen-mode');
-          fullscreenToggle.innerHTML = '<i class="bi bi-fullscreen-exit"></i>';
-        } else {
-          document.body.classList.remove('fullscreen-mode');
-          fullscreenToggle.innerHTML = '<i class="bi bi-fullscreen"></i>';
-        }
-      });
-      
-      // =============================================
-      // PREVENT PAGE RELOAD WHEN CLICKING SAME PAGE
-      // =============================================
-      const backendLinks = document.querySelectorAll('.backend-link');
-      
-      backendLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-          const currentPath = window.location.pathname;
-          const targetPath = this.getAttribute('href');
-          const itemName = this.getAttribute('data-item-name');
-          
-          // Check if we're already on this page
-          if (currentPath.includes(itemName)) {
-            e.preventDefault();
-            // Just update the active state
-            updateActiveNavLink(this);
-          }
-        });
-      });
-      
-      function updateActiveNavLink(clickedLink) {
-        document.querySelectorAll('.backend-link').forEach(link => {
-          link.classList.remove('active');
-        });
-        clickedLink.classList.add('active');
-      }
-      
-      // Highlight active navbar link on page load
-      const currentPath = window.location.pathname;
-      const secondNavLinks = document.querySelectorAll('.second-navbar .backend-link');
+      const sidebarToggle = document.getElementById('sidebarToggle');
 
-      secondNavLinks.forEach(link => {
+      if (sidebar && sidebarToggle) {
+        sidebarToggle.style.left = sidebar.offsetWidth + 'px';
+      }
+
+      // Highlight active nav-3 link
+      const currentPath = window.location.pathname;
+      document.querySelectorAll('.nav-3-links a').forEach(link => {
         if (link.getAttribute('href') === currentPath) {
           link.classList.add('active');
-          // Scroll to show active link
-          link.scrollIntoView({
-            block: 'nearest',
-            inline: 'center'
-          });
         }
       });
+
+      // Menu toggle functionality
+      if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', function() {
+          const isExpanded = navLinks.classList.toggle('active');
+          this.setAttribute('aria-expanded', isExpanded);
+          this.querySelector('i').classList.toggle('fa-bars');
+          this.querySelector('i').classList.toggle('fa-times');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!e.target.closest('.navbar-1') && navLinks.classList.contains('active')) {
+            navLinks.classList.remove('active');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            menuToggle.querySelector('i').classList.add('fa-bars');
+            menuToggle.querySelector('i').classList.remove('fa-times');
+          }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+          if (window.innerWidth > 768) {
+            navLinks.classList.remove('active');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            menuToggle.querySelector('i').classList.add('fa-bars');
+            menuToggle.querySelector('i').classList.remove('fa-times');
+          }
+        });
+      }
+
+      // Close sidebar when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.sidebar') && !e.target.closest('.sidebar-toggle') && !sidebar.classList.contains('sidebar-collapsed')) {
+          toggleSidebar();
+        }
+      });
+
+      // Search functionality
+      const searchInput = document.querySelector('.search-input');
+      const searchResults = document.getElementById('searchResultsContainer');
+
+      if (searchInput && searchResults) {
+        const toggleResults = (show) => {
+          searchResults.classList.toggle('show', show);
+          if (!show) searchResults.innerHTML = '';
+        };
+
+        searchInput.addEventListener('input', function() {
+          toggleResults(this.value.trim().length > 0);
+        });
+
+        searchInput.addEventListener('focus', function() {
+          if (this.value.trim().length > 0) toggleResults(true);
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.search-container')) toggleResults(false);
+        });
+
+        document.addEventListener('click', (e) => {
+          const resultItem = e.target.closest('.search-result-item');
+          if (!resultItem) return;
+
+          const { type, id, name, category } = resultItem.dataset;
+          const baseUrl = '/view_subtopics';
+
+          const routes = {
+            'category': `${baseUrl}/${name}`,
+            'subtopic': `${baseUrl}/${category}#subtopic-${id}`,
+            'sub-subtopic': `${baseUrl}/${category}#sub-subtopic-${id}`
+          };
+
+          if (routes[type]) window.location.href = routes[type];
+        });
+      }
     });
 
-    // =============================================
-    // SUBTOPIC FUNCTIONS
-    // =============================================
-    
+    // Sidebar toggle functionality
+    function toggleSidebar() {
+      const sidebar = document.getElementById('mainSidebar');
+      const content = document.getElementById('mainContent');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+
+      sidebar.classList.toggle('sidebar-collapsed');
+      content.classList.toggle('content-expanded');
+
+      if (sidebar.classList.contains('sidebar-collapsed')) {
+        sidebarToggle.innerHTML = '<i class="bi bi-chevron-right"></i>';
+        sidebarToggle.style.left = '0';
+      } else {
+        sidebarToggle.innerHTML = '<i class="bi bi-chevron-left"></i>';
+        sidebarToggle.style.left = sidebar.offsetWidth + 'px';
+      }
+    }
+
+    // Fullscreen toggle functionality
+    let isFullscreen = false;
+
+    function toggleFullscreen() {
+      isFullscreen = !isFullscreen;
+
+      if (isFullscreen) {
+        document.documentElement.classList.add('fullscreen-mode');
+        document.body.classList.add('fullscreen-mode');
+        document.getElementById('fullscreenToggle').innerHTML = '<i class="bi bi-fullscreen-exit"></i>';
+      } else {
+        document.documentElement.classList.remove('fullscreen-mode');
+        document.body.classList.remove('fullscreen-mode');
+        document.getElementById('fullscreenToggle').innerHTML = '<i class="bi bi-fullscreen"></i>';
+      }
+    }
+
+    // Subtopic functions
     function handleSubtopicClick(element) {
-      // Collapse sidebar for all screen sizes
-const sidebar = document.getElementById('mainSidebar');
-if (!sidebar.classList.contains('sidebar-collapsed')) {
-  document.getElementById('sidebarToggle').click();
-}
       const title = element.dataset.title;
       const content = element.dataset.content;
+      const subtopicId = element.closest('.subtopic-wrapper').id.replace('subtopic-', '');
 
-      const displayTitle = document.getElementById('displayTitle');
-      const displayContent = document.getElementById('displayContent');
-      const displayArea = document.getElementById('displayArea');
+      document.getElementById('displayTitle').innerText = title;
+      document.getElementById('displayContent').innerHTML = content;
+      document.getElementById('displayArea').style.display = 'block';
+      history.pushState(null, null, `#subtopic-${subtopicId}`);
 
-      displayTitle.innerText = title;
-      displayContent.innerHTML = content;
-      displayArea.style.display = 'block';
-
-      // Scroll with offset to avoid being hidden under fixed navbars
-      const yOffset = -1 * (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-height')) + 
-                        parseInt(getComputedStyle(document.documentElement).getPropertyValue('--second-navbar-height')) + 20);
-      const y = displayArea.getBoundingClientRect().top + window.scrollY + yOffset;
-
-      window.scrollTo({ top: y, behavior: 'smooth' });
-
-      // Highlight active item
       document.querySelectorAll('.subtopic-wrapper, .subsubtopic-item').forEach(el => {
         el.classList.remove('active');
       });
       element.closest('.subtopic-wrapper').classList.add('active');
 
-      // Auto-close sidebar on mobile
-      // if (window.innerWidth <= 768) {
-      //   document.getElementById('sidebarToggle').click();
-      // } else {
-      //   // Collapse sidebar on desktop when clicking an item
-      //   const sidebar = document.getElementById('mainSidebar');
-      //   if (!sidebar.classList.contains('sidebar-collapsed')) {
-      //     document.getElementById('sidebarToggle').click();
-      //   }
-      // }
+      const sidebar = document.getElementById('mainSidebar');
+      if (!sidebar.classList.contains('sidebar-collapsed')) {
+        toggleSidebar();
+      }
     }
 
     function toggleSubSubtopics(subtopicId, event) {
@@ -1121,49 +1105,59 @@ if (!sidebar.classList.contains('sidebar-collapsed')) {
     }
 
     function showSubSubtopic(event, element) {
-      // Collapse sidebar for all screen sizes
-const sidebar = document.getElementById('mainSidebar');
-if (!sidebar.classList.contains('sidebar-collapsed')) {
-  document.getElementById('sidebarToggle').click();
-}
       event.stopPropagation();
       const target = element.closest('.subsubtopic-item');
       const title = target.dataset.title;
       const content = target.dataset.content;
+      const subsubtopicId = target.id.replace('sub-subtopic-', '');
 
       document.getElementById('displayTitle').innerText = title;
       document.getElementById('displayContent').innerHTML = content;
       document.getElementById('displayArea').style.display = 'block';
-      
-      // Highlight active items
+      history.pushState(null, null, `#sub-subtopic-${subsubtopicId}`);
+
       document.querySelectorAll('.subtopic-wrapper, .subsubtopic-item').forEach(el => {
         el.classList.remove('active');
       });
       target.classList.add('active');
       target.closest('.subtopic-wrapper').classList.add('active');
-      
-      // Auto-close sidebar on mobile
-      // if (window.innerWidth <= 768) {
-      //   document.getElementById('sidebarToggle').click();
-      // } else {
-      //   // Collapse sidebar on desktop when clicking an item
-      //   const sidebar = document.getElementById('mainSidebar');
-      //   if (!sidebar.classList.contains('sidebar-collapsed')) {
-      //     document.getElementById('sidebarToggle').click();
-      //   }
-      // }
+
+      const sidebar = document.getElementById('mainSidebar');
+      if (!sidebar.classList.contains('sidebar-collapsed')) {
+        toggleSidebar();
+      }
     }
 
-    // Navbar scroll buttons
-    document.querySelector('.left-btn').addEventListener('click', function() {
-      const secondNavbar = document.getElementById('backendNav');
-      secondNavbar.scrollBy({ left: -200, behavior: 'smooth' });
+    // Navbar scrolling
+    function scrollNav(amount, navId) {
+      const nav = document.getElementById(navId);
+      nav.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+
+    // Event listeners
+    document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+    document.getElementById('fullscreenToggle').addEventListener('click', toggleFullscreen);
+
+    document.addEventListener('keydown', function(e) {
+      if (isFullscreen && e.key === 'Escape') {
+        toggleFullscreen();
+      }
     });
 
-    document.querySelector('.right-btn').addEventListener('click', function() {
-      const secondNavbar = document.getElementById('backendNav');
-      secondNavbar.scrollBy({ left: 200, behavior: 'smooth' });
-    });
+    if (window.location.hash) {
+      const element = document.querySelector(window.location.hash);
+      if (element) {
+        if (element.classList.contains('subtopic-wrapper')) {
+          const subtopicItem = element.querySelector('.subtopic-item');
+          if (subtopicItem) {
+            handleSubtopicClick(subtopicItem);
+          }
+        } else if (element.classList.contains('subsubtopic-item')) {
+          showSubSubtopic({ stopPropagation: () => {} }, element);
+        }
+      }
+    }
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

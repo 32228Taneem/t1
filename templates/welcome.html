@@ -1,123 +1,1360 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Navbar</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="static/navbar.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Courses - Company Name</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.9.0"></script>
+    <style>
+        :root {
+            /* Primary Colors */
+            --midnight-blue: #2c3e50;
+            --ocean-blue: #3498db;
+            --emerald-green: #2ecc71;
+            --pure-white: #ffffff;
+            /* Secondary Colors */
+            --forest-green: #27ae60;
+            --slate-gray: #7f8c8d;
+            --cloud-white: #ecf0f1;
+            /* Shades and Tints */
+            --white-90: rgba(255, 255, 255, 0.9);
+            --white-85: rgba(255, 255, 255, 0.85);
+            --white-70: rgba(255, 255, 255, 0.7);
+            --white-40: rgba(255, 255, 255, 0.4);
+            --white-35: rgba(255, 255, 255, 0.35);
+            --white-30: rgba(255, 255, 255, 0.3);
+            --white-25: rgba(255, 255, 255, 0.25);
+            --white-20: rgba(255, 255, 255, 0.2);
+            --white-15: rgba(255, 255, 255, 0.15);
+            --white-10: rgba(255, 255, 255, 0.1);
+            --blue-tint-20: rgba(52, 152, 219, 0.2);
+            --blue-tint-15: rgba(52, 152, 219, 0.15);
+            --blue-tint-5: rgba(52, 152, 219, 0.05);
+            /* Grays */
+            --light-gray: #f5f5f5;
+            --lighter-gray: #e0e0e0;
+            --border-gray: #d5d5d5;
+            --shadow-gray: rgba(0, 0, 0, 0.1);
+            /* Layout Variables */
+            --navbar-1-height: 64px;
+            --navbar-2-height: 48px;
+            --navbar-3-height: 48px;
+            --combined-nav-height: calc(var(--navbar-1-height) + var(--navbar-2-height) + var(--navbar-3-height));
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 0px;
+            --mobile-breakpoint: 768px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, var(--cloud-white), #f8f9fa);
+            color: var(--midnight-blue);
+        }
+
+        /* Navbar 1 (Topmost) */
+        .navbar-1 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 5%;
+            background-color: var(--midnight-blue);
+            box-shadow: 0 2px 10px var(--shadow-gray);
+            color: var(--pure-white);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            height: var(--navbar-1-height);
+            flex-wrap: nowrap;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            gap: 12px;
+            order: 2;
+        }
+
+        .logo-container:hover {
+            transform: scale(1.05);
+        }
+
+        .logo {
+            height: 48px;
+            width: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--cloud-white);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.15);
+            filter: drop-shadow(0 0 10px rgba(52, 152, 219, 0.8));
+        }
+
+        .company-name {
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: var(--cloud-white);
+        }
+
+        .nav-1-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            order: 4;
+        }
+
+        .nav-1-links a {
+            color: var(--cloud-white);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-1-links a:hover {
+            background-color: var(--white-20);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--cloud-white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 10px;
+            order: 1;
+            display: none;
+        }
+
+        /* Navbar 2 (Middle) */
+        .navbar-2 {
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            background-color: var(--ocean-blue);
+            box-shadow: 0 2px 8px var(--shadow-gray);
+            position: fixed;
+            top: var(--navbar-1-height);
+            width: 100%;
+            height: var(--navbar-2-height);
+            z-index: 999;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+        }
+
+        .navbar-2::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-2-links {
+            display: flex;
+            gap: 24px;
+            padding: 0 20px;
+            max-width: 1200px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        .nav-2-links a {
+            color: var(--pure-white);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 6px 12px;
+            border-radius: 5px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .nav-2-links a:hover {
+            transform: translateY(-2px);
+            background-color: var(--white-20);
+        }
+
+        /* Navbar 3 (Bottom with scrollable items) */
+        .navbar-3-container {
+            position: fixed;
+            top: calc(var(--navbar-1-height) + var(--navbar-2-height));
+            width: 100%;
+            height: var(--navbar-3-height);
+            background-color: var(--ocean-blue);
+            z-index: 998;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-3 {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            padding: 8px 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .navbar-3::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-3-links {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .nav-3-links a {
+            color: var(--pure-white);
+            text-decoration: none;
+            font-weight: 500;
+            white-space: nowrap;
+            padding: 6px 12px;
+            border-radius: 15px;
+            background: var(--white-20);
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .nav-3-links a:hover {
+            background-color: var(--white-35);
+            transform: scale(1.05);
+        }
+
+        .nav-3-links a.active {
+            background: var(--white-40);
+            font-weight: bold;
+        }
+
+        .scroll-btn {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 36px;
+            background: rgba(0, 0, 0, 0.2);
+            border: none;
+            color: var(--pure-white);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            z-index: 1;
+        }
+
+        .scroll-btn:hover {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .scroll-btn.left {
+            left: 0;
+        }
+
+        .scroll-btn.right {
+            right: 0;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: var(--pure-white);
+            min-width: 160px;
+            box-shadow: 0 8px 16px var(--shadow-gray);
+            border-radius: 5px;
+            z-index: 1001;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content a {
+            color: var(--midnight-blue);
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--light-gray);
+        }
+
+        /* Search-specific styles */
+        .search-container {
+            flex-grow: 1;
+            min-width: 150px;
+            max-width: 600px;
+            margin: 0 10px;
+            order: 3;
+        }
+
+        .search-form {
+            position: relative;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border-radius: 25px;
+            border: 1px solid var(--slate-gray);
+            font-size: 16px;
+            box-sizing: border-box;
+            background-color: var(--pure-white);
+            color: var(--midnight-blue);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--ocean-blue);
+            box-shadow: 0 0 5px var(--blue-tint-20);
+            outline: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            color: var(--slate-gray);
+            z-index: 2;
+        }
+
+        .search-loading {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--slate-gray);
+            display: none;
+        }
+
+        .htmx-request .search-loading {
+            display: block;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: translateY(-50%) rotate(360deg);
+            }
+        }
+
+        .search-results-dropdown {
+            position: absolute;
+            width: 100%;
+            max-height: 400px;
+            overflow-y: auto;
+            background: var(--pure-white);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px var(--shadow-gray);
+            z-index: 1000;
+            display: none;
+            margin-top: 2px;
+            padding: 0;
+        }
+
+        .search-results-dropdown.show {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--lighter-gray);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .search-result-item:hover {
+            background-color: var(--light-gray);
+        }
+
+        .search-result-title {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--midnight-blue);
+        }
+
+        .search-result-meta {
+            font-size: 0.8rem;
+            color: var(--slate-gray);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .search-result-meta i {
+            font-size: 0.9rem;
+            color: var(--ocean-blue);
+        }
+
+        .result-type {
+            font-size: 0.75rem;
+            color: var(--slate-gray);
+            background: var(--blue-tint-5);
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .no-results {
+            padding: 12px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--slate-gray);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .no-results i {
+            font-size: 1.2rem;
+            color: var(--slate-gray);
+        }
+
+        /* Education Banner */
+        .education-banner {
+            position: relative;
+            background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--emerald-green) 100%);
+            color: var(--pure-white);
+            padding: 6rem 2rem;
+            text-align: center;
+            overflow: hidden;
+            border-bottom: 2px solid var(--white-20);
+        }
+
+        .banner-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle, var(--white-20) 1px, transparent 1px);
+            background-size: 25px 25px;
+            opacity: 0.15;
+            animation: pattern-move 20s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes pattern-move {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }
+
+        .banner-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .banner-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.5px;
+        }
+
+        .banner-subtitle {
+            font-size: 1.4rem;
+            font-weight: 400;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+            line-height: 1.7;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .banner-cta {
+            display: inline-block;
+            background: linear-gradient(90deg, var(--ocean-blue), var(--emerald-green));
+            color: var(--pure-white);
+            padding: 16px 48px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        .banner-cta:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            background: linear-gradient(90deg, var(--emerald-green), var(--ocean-blue));
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .banner-decor {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 3rem;
+            color: var(--white-20);
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: var(--combined-nav-height);
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            background: var(--pure-white);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px var(--shadow-gray);
+        }
+
+        .course-card, .feature-card {
+            flex: 1 1 300px;
+            max-width: 300px;
+            background: var(--pure-white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px var(--shadow-gray);
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .course-card h3, .feature-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--midnight-blue);
+        }
+
+        .course-card p, .feature-card p {
+            color: var(--slate-gray);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Course Grid Section */
+        .course-grid {
+            max-width: 1200px;
+            margin: 0 auto 4rem;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .course-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+        }
+
+        .course-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            background-color: var(--slate-gray);
+            width: 100%;
+        }
+
+        .course-content {
+            padding: 2rem;
+        }
+
+        .course-title {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--midnight-blue);
+            font-weight: 700;
+        }
+
+        .course-desc {
+            color: var(--slate-gray);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--slate-gray);
+        }
+
+        .course-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 4rem 1rem;
+            background: var(--pure-white);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--midnight-blue);
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .features-grid {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        .feature-card {
+            background: var(--pure-white);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+            flex: 0 0 300px;
+            min-width: 300px;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--ocean-blue);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--midnight-blue);
+        }
+
+        .feature-card p {
+            color: var(--slate-gray);
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--midnight-blue);
+            color: var(--pure-white);
+            padding: 4rem 1rem 2rem;
+            position: relative;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            padding: 0 1rem;
+        }
+
+        .footer-column h3 {
+            color: var(--pure-white);
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .footer-column ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-column li {
+            margin-bottom: 1rem;
+        }
+
+        .footer-column a {
+            color: var(--white-70);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: inline-block;
+            padding: 0.3rem 0;
+        }
+
+        .footer-column a:hover {
+            color: var(--pure-white);
+            transform: translateX(5px);
+        }
+
+        .footer-bottom {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--white-20);
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--white-70);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .navbar-1 {
+                padding: 10px 15px;
+                flex-wrap: nowrap;
+            }
+
+            .search-container {
+                order: 3;
+                margin: 0 5px;
+                flex-grow: 1;
+                min-width: 0;
+            }
+
+            .logo-container {
+                flex: 0 0 auto;
+                margin-right: 10px;
+            }
+
+            .nav-1-links {
+                flex: 1;
+                justify-content: flex-end;
+            }
+
+            .banner-title {
+                font-size: 2.4rem;
+            }
+
+            .banner-subtitle {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --navbar-1-height: 56px;
+                --navbar-2-height: 44px;
+                --navbar-3-height: 44px;
+            }
+
+            .navbar-1 {
+                padding: 8px 15px;
+                flex-wrap: nowrap;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .logo {
+                height: 40px;
+                width: 40px;
+            }
+
+            .company-name {
+                font-size: 1.2rem;
+            }
+
+            .search-container {
+                margin: 0 5px;
+            }
+
+            .search-input {
+                padding: 8px 15px 8px 35px;
+                font-size: 14px;
+            }
+
+            .search-icon {
+                left: 10px;
+            }
+
+            .nav-1-links {
+                display: none;
+                position: fixed;
+                top: var(--navbar-1-height);
+                left: 0;
+                width: 100%;
+                background: var(--midnight-blue);
+                flex-direction: column;
+                padding: 15px;
+                z-index: 1001;
+                box-shadow: 0 4px 8px var(--shadow-gray);
+                transition: all 0.3s ease;
+            }
+
+            .nav-1-links.active {
+                display: flex;
+            }
+
+            .nav-1-links a {
+                padding: 12px 15px;
+                width: 100%;
+                text-align: left;
+                font-size: 1rem;
+                border-bottom: 1px solid var(--white-20);
+            }
+
+            .nav-1-links .dropdown {
+                width: 100%;
+            }
+
+            .nav-1-links .dropdown-content {
+                position: relative;
+                width: 100%;
+                background: var(--white-10);
+                box-shadow: none;
+                margin-top: 5px;
+            }
+
+            .nav-1-links .dropdown-content a {
+                color: var(--cloud-white);
+                padding: 10px 25px;
+            }
+
+            .navbar-2 {
+                padding: 8px 0;
+            }
+
+            .nav-2-links {
+                gap: 16px;
+                flex-direction: row;
+            }
+
+            .nav-2-links a {
+                font-size: 0.95rem;
+                padding: 5px 10px;
+            }
+
+            .nav-2-links .combined-link {
+                font-size: 1rem;
+                padding: 6px 10px;
+            }
+
+            .navbar-3 {
+                padding: 8px 40px;
+            }
+
+            .nav-3-links {
+                gap: 10px;
+            }
+
+            .nav-3-links a {
+                padding: 5px 10px;
+                font-size: 0.9rem;
+            }
+
+            .scroll-btn {
+                display: block;
+            }
+
+            .education-banner {
+                padding: 3rem 1.5rem;
+            }
+
+            .banner-title {
+                font-size: 2.2rem;
+            }
+
+            .banner-subtitle {
+                font-size: 1.1rem;
+                padding: 0 1rem;
+            }
+
+            .course-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+
+            .features-grid {
+                flex-direction: column;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .footer-column {
+                text-align: center;
+            }
+
+            .course-card, .feature-card {
+                flex: 1 1 100%;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            :root {
+                --navbar-1-height: 50px;
+                --navbar-2-height: 40px;
+                --navbar-3-height: 40px;
+            }
+
+            .navbar-1 {
+                padding: 8px 12px;
+            }
+
+            .logo {
+                height: 36px;
+                width: 36px;
+            }
+
+            .company-name {
+                font-size: 1.1rem;
+            }
+
+            .search-container {
+                margin: 0 5px;
+            }
+
+            .search-input {
+                padding: 6px 12px 6px 30px;
+                font-size: 13px;
+            }
+
+            .search-icon {
+                left: 8px;
+            }
+
+            .nav-2-links a {
+                font-size: 0.9rem;
+                padding: 4px 8px;
+            }
+
+            .nav-3-links a {
+                font-size: 0.85rem;
+                padding: 4px 8px;
+            }
+
+            .scroll-btn {
+                width: 30px;
+                font-size: 1rem;
+            }
+
+            .education-banner {
+                padding: 2.5rem 1rem;
+            }
+
+            .banner-title {
+                font-size: 1.8rem;
+            }
+
+            .banner-subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-container {
+                min-width: 120px;
+            }
+
+            .search-input {
+                padding: 6px 10px 6px 28px;
+                font-size: 12px;
+            }
+
+            .search-icon {
+                left: 6px;
+            }
+
+            .company-name {
+                font-size: 1rem;
+            }
+
+            .banner-title {
+                font-size: 1.6rem;
+            }
+
+            .banner-cta {
+                padding: 12px 24px;
+                font-size: 1rem;
+            }
+
+            .course-card {
+                min-height: auto;
+            }
+        }
+    </style>
 </head>
-
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-{% for message in messages %}
-<h2>{{ message }}</h2>
-{% endfor %}
-{% endif %}
-{% endwith %}
-
 <body>
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <div class="d-flex align-items-center justify-content-between w-100 gap-2 flex-nowrap">
-    <a class="navbar-brand flex-shrink-0" href="{{ url_for('home') }}">Company Name</a>
-    
-    <form class="d-flex flex-grow-1 search-form" style="min-width: 0;">
-        <input class="form-control me-1" type="search" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success" type="submit">Search</button>
-    </form>
-
-    <button class="navbar-toggler flex-shrink-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-</div>
-
-
-            
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-
-                    <!-- Static Navbar Items like Home, About, Services, Contact -->
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Home</a></li>
-                    <!-- <li class="nav-item"><a class="nav-link" href="#">About</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Services</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Contact</a></li> -->
-                    {% if session.get('username') %}
-                        <!-- Display username and logout button when logged in -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                {% if session.get('admin_temp') %}
-                                    Admin: {{ session['admin_temp']['admin_name'] }}
-                                {% else %}
-                                    {{ session['username'] }}
-                                {% endif %}
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('profile') }}">Profile</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <!-- Display login button when not logged in -->
-                        <li class="nav-item"><a class="nav-link" href="{{url_for('login')}}">Login</a></li>
-                    {% endif %}
-                </ul>
+    <!-- First Navbar -->
+    <nav class="navbar-1">
+        <button class="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Company Logo" class="logo">
+            <span class="company-name logo-text">Televerse</span>
+        </div>
+        <div class="search-container">
+            <form id="searchForm" class="search-form">
+                <div class="input-group">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" name="query" class="form-control search-input" placeholder="Search courses, topics..."
+                           hx-get="{{ url_for('search') }}" hx-trigger="input changed delay:100ms" hx-target="#searchResultsContainer"
+                           hx-swap="innerHTML" hx-indicator=".search-loading" autocomplete="off" aria-label="Search">
+                    <div class="search-loading htmx-indicator">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </div>
+                <div id="searchResultsContainer" class="search-results-dropdown">
+                    <div class="no-results" style="display: none;">
+                        <i class="fas fa-search"></i>
+                        <p>No results found</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="nav-1-links" id="navLinks">
+            <!-- <a href="{{url_for('home')}}">Home</a> -->
+            <a href="#">Services</a>
+            <a href="#">Contact</a>
+            {% if session.get('username') %}
+            <div class="dropdown">
+                <a href="#">{{ session['username'] }}</a>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('profile') }}">Profile</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </div>
             </div>
-
-
-            <!-- Second Fixed Navbar for Backend Items -->
-<div class="second-navbar-wrapper">
-    <button class="scroll-btn left-btn">&larr;</button>
-    <div class="second-navbar" id="backendNav">
-        {% for item in navbar_items %}
-        <a class="nav-link backend-link" href="{{ url_for('view_subtopics', item_name=item[1]) }}">{{ item[1] }}</a>
-        {% endfor %}
-    </div>
-    <button class="scroll-btn right-btn">&rarr;</button>
-</div>
-
-
+            {% else %}
+            <a href="{{url_for('login')}}">Login</a>
+            {% endif %}
         </div>
     </nav>
 
+    <!-- Second Navbar -->
+    <nav class="navbar-2">
+        <div class="nav-2-links">
+            <a href="#" class="combined-link">Calculator Hub</a>
+            <a href="#">Quiz Hub</a>
+            <a href="#">Courses</a>
+        </div>
+    </nav>
+
+    <!-- Third Navbar -->
+    <div class="navbar-3-container">
+        <button class="scroll-btn left" onclick="scrollNav(-100, 'navbar-3')">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <nav class="navbar-3" id="navbar-3">
+            <div class="nav-3-links">
+                {% for item in navbar_items %}
+                <a href="{{ url_for('view_subtopics', item_name=item[1]) }}">{{ item[1] }}</a>
+                {% endfor %}
+            </div>
+        </nav>
+        <button class="scroll-btn right" onclick="scrollNav(100, 'navbar-3')">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <section class="education-banner">
+        <div class="banner-pattern"></div>
+        <div class="banner-content">
+            <h1 class="banner-title">Unlock Your Learning Potential</h1>
+            <p class="banner-subtitle">Discover interactive courses, quizzes, and calculators designed to make learning engaging and effective for every student.</p>
+            <a href="#" class="banner-cta">Explore Courses</a>
+            <div class="banner-decor"><i class="fas fa-graduation-cap"></i></div>
+        </div>
+    </section>
+
+    <div class="main-content">
+        <section class="course-grid">
+            <div class="course-card">
+                <div class="course-image" style="background-image: url('https://images.pexels.com/photos/6238050/pexels-photo-6238050.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');"></div>
+                <div class="course-content">
+                    <h3 class="course-title">Mathematics Fundamentals</h3>
+                    <p class="course-desc">Master the basics of algebra, geometry, and calculus with our interactive lessons.</p>
+                    <div class="course-meta">
+                        <span><i class="fas fa-book-open"></i> 12 Lessons</span>
+                        <span><i class="fas fa-user-graduate"></i> Beginner</span>
+                    </div>
+                </div>
+            </div>
+            <div class="course-card">
+                <div class="course-image" style="background-image: url('https://images.pexels.com/photos/256381/pexels-photo-256381.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');"></div>
+                <div class="course-content">
+                    <h3 class="course-title">Physics Basics</h3>
+                    <p class="course-desc">Explore the fundamentals of motion, energy, and forces with engaging exercises.</p>
+                    <div class="course-meta">
+                        <span><i class="fas fa-book-open"></i> 10 Lessons</span>
+                        <span><i class="fas fa-user-graduate"></i> Beginner</span>
+                    </div>
+                </div>
+            </div>
+            <div class="course-card">
+                <div class="course-image" style="background-image: url('https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');"></div>
+                <div class="course-content">
+                    <h3 class="course-title">Chemistry Essentials</h3>
+                    <p class="course-desc">Learn the basics of chemical reactions and elements with interactive labs.</p>
+                    <div class="course-meta">
+                        <span><i class="fas fa-book-open"></i> 11 Lessons</span>
+                        <span><i class="fas fa-user-graduate"></i> Beginner</span>
+                    </div>
+                </div>
+            </div>
+            <div class="course-card">
+                <div class="course-image" style="background-image: url('https://images.pexels.com/photos/3938023/pexels-photo-3938023.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');"></div>
+                <div class="course-content">
+                    <h3 class="course-title">Biology Introduction</h3>
+                    <p class="course-desc">Discover the basics of cells, genetics, and ecosystems with visual aids.</p>
+                    <div class="course-meta">
+                        <span><i class="fas fa-book-open"></i> 10 Lessons</span>
+                        <span><i class="fas fa-user-graduate"></i> Beginner</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features-section">
+            <div class="features-container">
+                <h2 class="section-title">Why Choose Our Platform?</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                        <h3>Expert Instructors</h3>
+                        <p>Learn from industry professionals with years of teaching experience.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-laptop-code"></i></div>
+                        <h3>Interactive Content</h3>
+                        <p>Engaging lessons with practical examples and real-world applications.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-headset"></i></div>
+                        <h3>24/7 Support</h3>
+                        <p>Get help whenever you need it from our dedicated support team.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="testimonials-section">
+            <div class="testimonials-container">
+                <h2 class="section-title">What Our Users Say</h2>
+                <div style="display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;">
+                    <div class="feature-card">
+                        <p>"Amazing platform! The courses are well-structured and engaging."</p>
+                        <p style="color: var(--midnight-blue); font-weight: 600; margin-top: 1rem;">- John D.</p>
+                    </div>
+                    <div class="feature-card">
+                        <p>"Great support and interactive content. Highly recommend!"</p>
+                        <p style="color: var(--midnight-blue); font-weight: 600; margin-top: 1rem;">- Sarah K.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>About Us</h3>
+                <ul>
+                    <li><a href="#">Our Mission</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Careers</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">FAQs</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Contact</h3>
+                <ul>
+                    <li><a href="#">Support</a></li>
+                    <li><a href="#">Email Us</a></li>
+                    <li><a href="#">Live Chat</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2025 Company Name. All rights reserved.
+        </div>
+    </footer>
+
     <script>
-        const leftBtn = document.querySelector('.left-btn');
-        const rightBtn = document.querySelector('.right-btn');
-        const nav = document.getElementById('backendNav');
-        const links = document.querySelectorAll('.backend-link');
-    
-        leftBtn.addEventListener('click', () => {
-            nav.scrollBy({ left: -200, behavior: 'smooth' });
-        });
-    
-        rightBtn.addEventListener('click', () => {
-            nav.scrollBy({ left: 200, behavior: 'smooth' });
-        });
-    
-        // Highlight active link (basic example)
-        links.forEach(link => {
-            link.addEventListener('click', () => {
-                links.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-1-links');
+
+            // Highlight active nav-3 link
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.nav-3-links a').forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
             });
+
+            // Menu toggle functionality
+            if (menuToggle && navLinks) {
+                menuToggle.addEventListener('click', function() {
+                    const isExpanded = navLinks.classList.toggle('active');
+                    this.setAttribute('aria-expanded', isExpanded);
+                    this.querySelector('i').classList.toggle('fa-bars');
+                    this.querySelector('i').classList.toggle('fa-times');
+                });
+
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.navbar-1') && navLinks.classList.contains('active')) {
+                        navLinks.classList.remove('active');
+                        menuToggle.setAttribute('aria-expanded', 'false');
+                        menuToggle.querySelector('i').classList.add('fa-bars');
+                        menuToggle.querySelector('i').classList.remove('fa-times');
+                    }
+                });
+
+                // Handle window resize
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 768) {
+                        navLinks.classList.remove('active');
+                        menuToggle.setAttribute('aria-expanded', 'false');
+                        menuToggle.querySelector('i').classList.add('fa-bars');
+                        menuToggle.querySelector('i').classList.remove('fa-times');
+                    }
+                });
+            }
+
+            // Search functionality
+            const searchInput = document.querySelector('.search-input');
+            const searchResults = document.getElementById('searchResultsContainer');
+
+            if (searchInput && searchResults) {
+                const toggleResults = (show) => {
+                    searchResults.classList.toggle('show', show);
+                    if (!show) searchResults.innerHTML = '';
+                };
+
+                searchInput.addEventListener('input', function() {
+                    toggleResults(this.value.trim().length > 0);
+                });
+
+                searchInput.addEventListener('focus', function() {
+                    if (this.value.trim().length > 0) toggleResults(true);
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.search-container')) toggleResults(false);
+                });
+
+                // Handle HTMX response to format search results
+                document.body.addEventListener('htmx:afterSwap', function(e) {
+                    if (e.target.id === 'searchResultsContainer') {
+                        const results = e.target.children;
+                        if (results.length > 0 && !e.target.querySelector('.no-results').style.display) {
+                            toggleResults(true);
+                        }
+                        Array.from(results).forEach(item => {
+                            if (item.classList.contains('search-result-item')) {
+                                const type = item.dataset.type;
+                                let iconClass = 'fas fa-folder';
+                                if (type === 'subtopic') iconClass = 'fas fa-book';
+                                else if (type === 'sub-subtopic') iconClass = 'fas fa-file-alt';
+                                const meta = item.querySelector('.search-result-meta');
+                                if (meta && !meta.querySelector('.result-type')) {
+                                    const typeElement = document.createElement('span');
+                                    typeElement.className = 'result-type';
+                                    typeElement.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+                                    meta.prepend(typeElement);
+                                }
+                            }
+                        });
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    const resultItem = e.target.closest('.search-result-item');
+                    if (!resultItem) return;
+
+                    const { type, id, name, category } = resultItem.dataset;
+                    const baseUrl = '/view_subtopics';
+
+                    const routes = {
+                        'category': `${baseUrl}/${name}`,
+                        'subtopic': `${baseUrl}/${category}#subtopic-${id}`,
+                        'sub-subtopic': `${baseUrl}/${category}#sub-subtopic-${id}`
+                    };
+
+                    if (routes[type]) window.location.href = routes[type];
+                });
+            }
+
+            // Navbar scrolling
+            window.scrollNav = function(amount, navId) {
+                const nav = document.getElementById(navId);
+                nav.scrollBy({ left: amount, behavior: 'smooth' });
+            };
         });
     </script>
-    
-    <script>
-        function scrollSecondNavbar(amount) {
-            const container = document.getElementById('secondNavbar');
-            container.scrollBy({ left: amount, behavior: 'smooth' });
-        }
-    </script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
