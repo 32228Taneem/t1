@@ -1602,11 +1602,11 @@ def uploaded_file(filename):
 
 
 # Route: /profile
+# Update the profile route to include user_id
 @app.route('/profile')
 @jwt_required
 def profile():
     try:
-        # Get current user from JWT
         user_id = g.current_user.get('user_id')
         if not user_id:
             flash("Please log in", "warning")
@@ -1630,20 +1630,19 @@ def profile():
         cursor.execute('SELECT id, name FROM navbar_items ORDER BY position ASC')
         navbar_items = cursor.fetchall()
 
-        # Render profile with edit button
         return render_template('user/profile.html',
             username=username,
             email=email,
-            profile_pic=profile_pic if profile_pic and profile_pic != 'default.jpg' else 'images/default.jpg',
+            profile_pic=profile_pic if profile_pic else 'default.jpg',
             join_date=join_date.strftime('%d %b %Y'),
-            token=request.cookies.get('access_token'),
-            navbar_items=navbar_items  # Make sure this is passed
+            user_id=user_id,
+            navbar_items=navbar_items
         )
 
     except Exception as e:
         print(f"Profile error: {str(e)}")
         flash("Error loading profile", "error")
-        return redirect(url_for('base'))
+        return redirect(url_for('home'))
 
 # Route: /edit_profile
 @app.route('/edit_profile', methods=['GET', 'POST'])
@@ -1717,13 +1716,16 @@ def edit_profile():
                              navbar_items=navbar_items)
     
     
+# Add these routes to your app.py
+
 @app.route('/delete_profile_pic', methods=['POST'])
 @jwt_required
 def delete_profile_pic():
     try:
         user_id = g.current_user.get('user_id')
         if not user_id:
-            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+            flash('Please log in first', 'error')
+            return redirect(url_for('login'))
 
         # Get current profile pic filename
         cursor.execute('SELECT profile_pic FROM usercreate WHERE user_id = %s', (user_id,))
@@ -1743,13 +1745,17 @@ def delete_profile_pic():
                 WHERE user_id = %s
             ''', (user_id,))
             mytdb.commit()
+            flash('Profile picture deleted successfully', 'success')
+        else:
+            flash('No custom profile picture to delete', 'info')
 
-        return jsonify({'success': True, 'redirect': url_for('edit_profile')})
+        return redirect(url_for('edit_profile', deleted=True))
 
     except Exception as e:
         mytdb.rollback()
         print(f"Error deleting profile pic: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        flash('Error deleting profile picture', 'error')
+        return redirect(url_for('edit_profile'))
 
 @app.route('/search')
 def search():
@@ -1796,4 +1802,4 @@ def search():
         print(f"Search error: {str(e)}")
         return render_template('_search_results.html', results={'error': 'Search failed'})
 
-app.run(use_reloader=True, debug=True)
+app.run(use_reloader=True, debug=True, host='0.0.0.0', port=5000)

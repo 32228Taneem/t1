@@ -1,0 +1,161 @@
+<!-- from:main public_html/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/">
+    <title>Calculator Page</title>
+    <link rel="stylesheet" href="calculator_styles.css">
+    <!-- Add Poppins font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Box A: Header -->
+    <div id="box-a">
+        <div class="header-left">
+            <a href="index.html">
+                <!-- <div class="logo"></div> -->
+                 <div id="box-a">
+  <img class="logo" src="assets/logo_bg.png" alt="Logo">
+</div>
+
+            </a>
+            <h1>Calculator Hub</h1>
+        </div>
+        <!-- Search Box -->
+        <div class="search-container">
+            <input type="text" id="search-box" placeholder="Search calculators..." oninput="searchCalculators()" aria-label="Search for calculators">
+            <div id="search-results" class="search-results"></div>
+        </div>
+        <div class="header-right"></div> <!-- Spacer for centering -->
+    </div>
+
+    <!-- Box E: Domain Selector (Moved outside sidebar) -->
+    <div id="box-e">
+        <div class="domain-buttons">
+            <button onclick="filterCalculators('All Domains')" class="active">All Domains</button>
+            <button onclick="filterCalculators('Telecom')">Telecom</button>
+            <button onclick="filterCalculators('Networking')">Networking</button>
+            <!-- <button onclick="filterCalculators('SAP')">SAP</button> -->
+            <button onclick="filterCalculators('Others')">Others</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">    
+        <!-- Toggle Button for Box B on Mobile -->
+        <div class="toggle-box-b" onclick="toggleBoxB()">
+            <span>☰ Calculators</span>
+        </div>
+        <!-- Sidebar Container for Box B only -->
+        <div class="sidebar-container">
+            <!-- Box B: Calculator List -->
+            <div id="box-b">
+                <ul id="calculator-list">
+                    <!-- Calculators will be populated dynamically -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- Box C: Calculator Form -->
+<!-- Box C: Calculator Form with Logs inside -->
+<div id="box-c">
+    <div id="calculator-content">
+        <!-- Welcome section will be loaded from welcome.html -->
+    </div>
+    <div class="info-icon" onclick="showPopup()">i</div>
+    <!-- Moved Box D inside Box C -->
+    <div id="box-d"></div>
+</div>
+
+    <!-- Pop-up -->
+    <div class="popup" id="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closePopup()">×</span>
+            <p id="popup-text"></p>
+        </div>
+    </div>
+
+    <script src="calculators.js"></script>
+    <script src="calculator_core.js"></script>
+    <script>
+        // Toggle Box B visibility on mobile
+        function toggleBoxB() {
+            const sidebar = document.querySelector('.sidebar-container');
+            sidebar.classList.toggle('visible-mobile');
+        }
+
+        // Initialize the page based on the URL
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load logs.html into Box D
+            fetch('calculator_logs.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('box-d').innerHTML = data;
+                    document.getElementById('box-d').classList.add('hidden');
+                    console.log('Initial load - Ensuring Box D is hidden');
+                })
+                .catch(error => {
+                    console.error('Error loading calculator_logs.html:', error);
+                    document.getElementById('box-d').innerHTML = '<p>Error loading logs section.</p>';
+                });
+
+            // Check the URL to see if a calculator is specified
+            const path = window.location.pathname;
+            const calcMatch = path.match(/^\/calculator\/(.+)/);
+            
+            if (calcMatch) {
+                const calcId = calcMatch[1];
+                // Ensure calculators object is loaded before accessing
+                if (typeof calculators !== 'undefined' && calcId in calculators) {
+                    showCalculator(calcId); // Load the specified calculator
+                    filterCalculators(calculators[calcId].domain); // Filter by domain
+                    return; // Exit to prevent loading welcome.html
+                }
+            }
+
+            // If no valid calculator ID or no calculator specified, load welcome.html
+            fetch('calculator_welcome.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('calculator-content').innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('Error loading welcome.html:', error);
+                    document.getElementById('calculator-content').innerHTML = '<p>Error loading welcome section.</p>';
+                });
+
+            // Populate calculator list for the default domain
+            filterCalculators('All Domains');
+        });
+    </script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Existing head content -->
+    <link rel="stylesheet" href="calculator_styles.css">
+</head>
+<body>
+    <!-- Existing content (e.g., calculator sidebar, content area) -->
+    
+    <!-- Custom Modal -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <span id="closeModal" class="close">&times;</span>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+
+    <script src="calculators.js"></script>
+</body>
+</html>
+
+
+</body>
+</html>
+
+
+

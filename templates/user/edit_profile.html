@@ -3,88 +3,426 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Edit Profile - Televerse</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.9.0"></script>
     <style>
-        .edit-profile-container {
-            max-width: 600px;
-            margin: 2rem auto;
-            padding: 2rem;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            border-radius: 10px;
+        :root {
+            --midnight-blue: #2c3e50;
+            --ocean-blue: #3498db;
+            --emerald-green: #2ecc71;
+            --pure-white: #ffffff;
+            --cloud-white: #ecf0f1;
+            --slate-gray: #7f8c8d;
+            --light-gray: #f5f5f5;
+            --lighter-gray: #e0e0e0;
+            --shadow-gray: rgba(0, 0, 0, 0.1);
+            --navbar-1-height: 64px;
+            --navbar-2-height: 48px;
+            --navbar-3-height: 48px;
+            --combined-nav-height: calc(var(--navbar-1-height) + var(--navbar-2-height) + var(--navbar-3-height));
         }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, var(--cloud-white), #f8f9fa);
+            color: var(--midnight-blue);
+        }
+
+        .navbar-1 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 5%;
+            background-color: var(--midnight-blue);
+            box-shadow: 0 2px 10px var(--shadow-gray);
+            color: var(--pure-white);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            height: var(--navbar-1-height);
+            flex-wrap: nowrap;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            gap: 12px;
+            order: 2;
+        }
+
+        .logo {
+            height: 48px;
+            width: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--cloud-white);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .company-name {
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: var(--cloud-white);
+        }
+
+        .nav-1-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            order: 4;
+        }
+
+        .nav-1-links a {
+            color: var(--cloud-white);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-container {
+            flex-grow: 1;
+            min-width: 150px;
+            max-width: 600px;
+            margin: 0 10px;
+            order: 3;
+        }
+
+        .search-form {
+            position: relative;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border-radius: 25px;
+            border: 1px solid var(--slate-gray);
+            font-size: 16px;
+            box-sizing: border-box;
+            background-color: var(--pure-white);
+            color: var(--midnight-blue);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            color: var(--slate-gray);
+            z-index: 2;
+        }
+
+        .search-loading {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--slate-gray);
+            display: none;
+        }
+
+        .search-results-dropdown {
+            position: absolute;
+            width: 100%;
+            max-height: 400px;
+            overflow-y: auto;
+            background: var(--pure-white);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px var(--shadow-gray);
+            z-index: 1000;
+            display: none;
+            margin-top: 2px;
+            padding: 0;
+        }
+
+        .navbar-2 {
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            background-color: var(--ocean-blue);
+            box-shadow: 0 2px 8px var(--shadow-gray);
+            position: fixed;
+            top: var(--navbar-1-height);
+            width: 100%;
+            height: var(--navbar-2-height);
+            z-index: 999;
+            overflow-x: auto;
+        }
+
+        .nav-2-links {
+            display: flex;
+            gap: 24px;
+            padding: 0 20px;
+            max-width: 1200px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        .navbar-3-container {
+            position: fixed;
+            top: calc(var(--navbar-1-height) + var(--navbar-2-height));
+            width: 100%;
+            height: var(--navbar-3-height);
+            background-color: var(--ocean-blue);
+            z-index: 998;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-3 {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 8px 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-3-links {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .nav-3-links a {
+            color: var(--pure-white);
+            text-decoration: none;
+            font-weight: 500;
+            white-space: nowrap;
+            padding: 6px 12px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .edit-profile-main-content {
+            margin-top: var(--combined-nav-height);
+            padding: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .edit-profile-container {
+            background: var(--pure-white);
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+
         .profile-preview {
-            width: 120px;
-            height: 120px;
+            width: 150px;
+            height: 150px;
             object-fit: cover;
             border-radius: 50%;
-            border: 3px solid #ddd;
+            border: 5px solid var(--pure-white);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
         }
+
+        .profile-preview:hover {
+            transform: scale(1.05);
+        }
+
+        .form-control:focus {
+            border-color: var(--ocean-blue);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--ocean-blue), var(--emerald-green));
+            border: none;
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --navbar-1-height: 56px;
+                --navbar-2-height: 44px;
+                --navbar-3-height: 44px;
+            }
+
+            .edit-profile-main-content {
+                padding: 1rem;
+            }
+
+            .edit-profile-container {
+                padding: 1.5rem;
+            }
+
+            .profile-preview {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
         @media (max-width: 576px) {
+            .profile-preview {
+                width: 100px;
+                height: 100px;
+            }
+            
             .edit-profile-container {
                 padding: 1rem;
-                margin: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    
-    
-    <div class="container edit-profile-container">
-        <h2 class="mb-4">Edit Profile</h2>
-        
-        <form method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-
-            <div class="mb-4 text-center">
-                <img id="profilePreview" 
-                     src="{{ url_for('static', filename='uploads/' + user[2]) if user[2] else url_for('static', filename='images/default.jpg') }}" 
-                     alt="Current Profile" 
-                     class="profile-preview mb-2">
-                <div class="form-group">
-                    <label for="profilePic" class="form-label">Change Profile Picture</label>
-                    <input type="file" class="form-control" id="profilePic" name="profile_pic" accept="image/*">
+    <!-- Navigation bars (same as profile.html) -->
+    <nav class="navbar-1">
+        <button class="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Company Logo" class="logo">
+            <span class="company-name">Televerse</span>
+        </div>
+        <div class="search-container">
+            <form id="searchForm" class="search-form">
+                <div class="input-group">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" name="query" class="form-control search-input" placeholder="Search courses, topics..."
+                           hx-get="{{ url_for('search') }}" hx-trigger="input changed delay:100ms" hx-target="#searchResultsContainer"
+                           hx-swap="innerHTML" hx-indicator=".search-loading" autocomplete="off" aria-label="Search">
+                    <div class="search-loading htmx-indicator">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </div>
+                <div id="searchResultsContainer" class="search-results-dropdown"></div>
+            </form>
+        </div>
+        <div class="nav-1-links" id="navLinks">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="#">Services</a>
+            <a href="#">Contact</a>
+            {% if session.get('username') %}
+            <div class="dropdown">
+                <a href="#">{{ session['username'] }}</a>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('profile') }}">Profile</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
                 </div>
             </div>
-            
-            <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" name="username" 
-                       value="{{ user[0] }}" required>
+            {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <nav class="navbar-2">
+        <div class="nav-2-links">
+            <a target="_blank" href="http://localhost:5001" class="combined-link">Calculator Hub</a>
+            <a href="#">Quiz Hub</a>
+            <a href="#">Courses</a>
+        </div>
+    </nav>
+
+    <div class="navbar-3-container">
+        <button class="scroll-btn left" onclick="scrollNav(-100, 'navbar-3')">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <nav class="navbar-3" id="navbar-3">
+            <div class="nav-3-links">
+                {% for item in navbar_items %}
+                <a href="{{ url_for('view_subtopics', item_name=item[1]) }}">{{ item[1] }}</a>
+                {% endfor %}
             </div>
+        </nav>
+        <button class="scroll-btn right" onclick="scrollNav(100, 'navbar-3')">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <!-- Edit Profile Content -->
+    <main class="edit-profile-main-content">
+        <div class="edit-profile-container">
+            <h2 class="mb-4 text-center">Edit Profile</h2>
             
-            <div class="mb-3">
-                <label for="email" class="form-label">Email address</label>
-                <input type="email" class="form-control" id="email" name="email" 
-                       value="{{ user[1] }}" required>
-            </div>
-            
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <a href="{{ url_for('profile') }}" class="btn btn-secondary me-md-2">Cancel</a>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-            </div>
-        </form>
-    </div>
-<div class="mb-4 text-center">
-    <img id="profilePreview" 
-         src="{{ url_for('static', filename='uploads/' + user[2]) if user[2] else url_for('static', filename='images/default.jpg') }}" 
-         alt="Current Profile" 
-         class="profile-preview mb-2">
-    <div class="form-group">
-        <label for="profilePic" class="form-label">Change Profile Picture</label>
-        <input type="file" class="form-control" id="profilePic" name="profile_pic" accept="image/*">
-    </div>
-    {% if user[2] and user[2] != 'default.jpg' %}
-    <div class="mt-2">
-        <button type="button" class="btn btn-danger btn-sm" id="deleteProfilePic">Delete Profile Picture</button>
-    </div>
-    {% endif %}
-</div>
+            <form method="POST" enctype="multipart/form-data" action="{{ url_for('edit_profile') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                <div class="mb-4 text-center">
+                    <img id="profilePreview" 
+                         src="{{ url_for('static', filename='uploads/' + user[2]) if user[2] and user[2] != 'default.jpg' else url_for('static', filename='images/default.jpg') }}" 
+                         alt="Current Profile" 
+                         class="profile-preview mb-3">
+                    
+                    <div class="mb-3">
+                        <label for="profilePic" class="form-label">Change Profile Picture</label>
+                        <input type="file" class="form-control" id="profilePic" name="profile_pic" accept="image/*">
+                    </div>
+                    
+                    {% if user[2] and user[2] != 'default.jpg' %}
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-danger" id="deleteProfilePic">
+                            <i class="fas fa-trash me-2"></i>Delete Profile Picture
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" 
+                           value="{{ user[0] }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           value="{{ user[1] }}" required>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a href="{{ url_for('profile') }}" class="btn btn-secondary me-md-2">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Profile image preview
-        document.getElementById('profilePic').addEventListener('change', function(e) {
+        document.getElementById('profilePic')?.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
@@ -95,48 +433,44 @@
             }
         });
 
-        // JWT handling for form submission
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const token = "{{ token }}";
-            const formData = new FormData(this);
-            
-            fetch("{{ url_for('edit_profile') }}", {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-            
-            e.preventDefault();
+        // Delete profile picture
+        document.getElementById('deleteProfilePic')?.addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete your profile picture?')) {
+                // Create a form and submit it instead of using fetch/JSON
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = "{{ url_for('delete_profile_pic') }}";
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = "{{ csrf_token() }}";
+                form.appendChild(csrfInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+
+        // Navigation and search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-1-links');
+
+            if (menuToggle && navLinks) {
+                menuToggle.addEventListener('click', function() {
+                    const isExpanded = navLinks.classList.toggle('active');
+                    this.setAttribute('aria-expanded', isExpanded);
+                    this.querySelector('i').classList.toggle('fa-bars');
+                    this.querySelector('i').classList.toggle('fa-times');
+                });
+            }
+
+            window.scrollNav = function(amount, navId) {
+                const nav = document.getElementById(navId);
+                nav.scrollBy({ left: amount, behavior: 'smooth' });
+            };
         });
     </script>
-    <script>
-    document.getElementById('deleteProfilePic')?.addEventListener('click', function() {
-        if (confirm('Are you sure you want to delete your profile picture?')) {
-            fetch("{{ url_for('delete_profile_pic') }}", {
-                method: 'POST', 
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': "{{ csrf_token() }}"
-                },
-                body: JSON.stringify({})
-            })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                }
-            });
-        }
-    });
-</script>
 </body>
 </html>
