@@ -10,15 +10,21 @@
   <script src="https://unpkg.com/htmx.org@1.9.0"></script>
   <style>
     :root {
-      /* Primary Colors */
-      --midnight-blue: #2c3e50;
-      --ocean-blue: #3498db;
-      --emerald-green: #2ecc71;
+      /* Updated Primary Colors */
+      --midnight-blue: #1a1a2e;
+      --ocean-blue: #16213e;
+      --emerald-green: #0f3460;
       --pure-white: #ffffff;
-      /* Secondary Colors */
-      --forest-green: #27ae60;
-      --slate-gray: #7f8c8d;
-      --cloud-white: #ecf0f1;
+      
+      /* Updated Secondary Colors */
+      --forest-green: #0d2857;
+      --slate-gray: #4a4a68;
+      --cloud-white: #e6e9f0;
+      
+      /* Updated Accent Colors */
+      --accent-primary: #e94560;
+      --accent-secondary: #533483;
+      
       /* Shades and Tints */
       --white-90: rgba(255, 255, 255, 0.9);
       --white-85: rgba(255, 255, 255, 0.85);
@@ -30,14 +36,17 @@
       --white-20: rgba(255, 255, 255, 0.2);
       --white-15: rgba(255, 255, 255, 0.15);
       --white-10: rgba(255, 255, 255, 0.1);
-      --blue-tint-20: rgba(52, 152, 219, 0.2);
-      --blue-tint-15: rgba(52, 152, 219, 0.15);
-      --blue-tint-5: rgba(52, 152, 219, 0.05);
+      
+      --accent-tint-20: rgba(233, 69, 96, 0.2);
+      --accent-tint-15: rgba(233, 69, 96, 0.15);
+      --accent-tint-5: rgba(233, 69, 96, 0.05);
+      
       /* Grays */
-      --light-gray: #f5f5f5;
-      --lighter-gray: #e0e0e0;
-      --border-gray: #d5d5d5;
+      --light-gray: #f0f2f5;
+      --lighter-gray: #e1e5eb;
+      --border-gray: #d1d6de;
       --shadow-gray: rgba(0, 0, 0, 0.1);
+      
       /* Layout Variables */
       --navbar-1-height: 64px;
       --navbar-2-height: 48px;
@@ -96,7 +105,7 @@
 
     .logo:hover {
       transform: scale(1.15);
-      filter: drop-shadow(0 0 10px rgba(52, 152, 219, 0.8));
+      filter: drop-shadow(0 0 10px var(--accent-tint-20));
     }
 
     .company-name {
@@ -235,7 +244,7 @@
     }
 
     .nav-3-links a.active {
-      background: var(--white-40);
+      background: var(--accent-tint-20);
       font-weight: bold;
     }
 
@@ -331,7 +340,7 @@
       left: var(--sidebar-width);
       top: calc(var(--combined-nav-height) + 10px);
       z-index: 1001;
-      background-color: var(--ocean-blue);
+      background-color: var(--accent-primary);
       color: white;
       border: none;
       border-radius: 0 5px 5px 0;
@@ -341,7 +350,7 @@
     }
 
     .sidebar-toggle:hover {
-      background-color: var(--midnight-blue);
+      background-color: var(--accent-secondary);
     }
 
     .sidebar-collapsed + .sidebar-toggle {
@@ -379,12 +388,12 @@
     }
 
     .subtopic-wrapper.active {
-      background-color: var(--blue-tint-20);
-      border-left: 3px solid var(--ocean-blue);
+      background-color: var(--accent-tint-20);
+      border-left: 3px solid var(--accent-primary);
     }
 
     .subtopic-wrapper.active .subtopic-item {
-      color: var(--ocean-blue);
+      color: var(--accent-primary);
       font-weight: 600;
     }
 
@@ -416,8 +425,8 @@
     }
 
     .subsubtopic-item.active {
-      background-color: var(--blue-tint-15);
-      color: var(--ocean-blue);
+      background-color: var(--accent-tint-15);
+      color: var(--accent-primary);
       font-weight: 500;
     }
 
@@ -427,7 +436,7 @@
       bottom: 20px;
       right: 20px;
       z-index: 1100;
-      background-color: var(--ocean-blue);
+      background-color: var(--accent-primary);
       color: white;
       border: none;
       border-radius: 50%;
@@ -442,7 +451,7 @@
     }
 
     .fullscreen-toggle:hover {
-      background-color: var(--midnight-blue);
+      background-color: var(--accent-secondary);
       transform: scale(1.1);
     }
 
@@ -512,6 +521,12 @@
       color: var(--midnight-blue);
     }
 
+    .search-input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 5px var(--accent-tint-20);
+      outline: none;
+    }
+
     .search-icon {
       position: absolute;
       left: 15px;
@@ -543,9 +558,9 @@
       width: 100%;
       max-height: 400px;
       overflow-y: auto;
-      background: white;
+      background: var(--pure-white);
       border-radius: 0 0 8px 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px var(--shadow-gray);
       z-index: 1000;
       display: none;
       margin-top: 5px;
@@ -616,7 +631,7 @@
 
       .sidebar-collapsed + .sidebar-toggle {
         left: 0;
-        background-color: var(--ocean-blue);
+        background-color: var(--accent-primary);
       }
     }
 
@@ -776,6 +791,7 @@
 
       .search-icon {
         left: 8px;
+        font-size: 0.9rem;
       }
 
       .nav-2-links a {
@@ -806,6 +822,7 @@
 
       .search-icon {
         left: 6px;
+        font-size: 0.8rem;
       }
 
       .company-name {
@@ -971,7 +988,7 @@
             navLinks.classList.remove('active');
             menuToggle.setAttribute('aria-expanded', 'false');
             menuToggle.querySelector('i').classList.add('fa-bars');
-            menuToggle.querySelector('i').classList.remove('fa-times');
+            menuToggle.querySelector('i').classnelist.remove('fa-times');
           }
         });
 

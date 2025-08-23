@@ -11,15 +11,43 @@
     <script src="https://unpkg.com/htmx.org@1.9.0"></script>
     <style>
         :root {
-            --midnight-blue: #2c3e50;
-            --ocean-blue: #3498db;
-            --emerald-green: #2ecc71;
+            /* Updated Primary Colors */
+            --midnight-blue: #1a1a2e;
+            --ocean-blue: #16213e;
+            --emerald-green: #0f3460;
             --pure-white: #ffffff;
-            --cloud-white: #ecf0f1;
-            --slate-gray: #7f8c8d;
-            --light-gray: #f5f5f5;
-            --lighter-gray: #e0e0e0;
+            
+            /* Updated Secondary Colors */
+            --forest-green: #0d2857;
+            --slate-gray: #4a4a68;
+            --cloud-white: #e6e9f0;
+            
+            /* Updated Accent Colors */
+            --accent-primary: #e94560;
+            --accent-secondary: #533483;
+            
+            /* Shades and Tints */
+            --white-90: rgba(255, 255, 255, 0.9);
+            --white-85: rgba(255, 255, 255, 0.85);
+            --white-70: rgba(255, 255, 255, 0.7);
+            --white-40: rgba(255, 255, 255, 0.4);
+            --white-35: rgba(255, 255, 255, 0.35);
+            --white-30: rgba(255, 255, 255, 0.3);
+            --white-25: rgba(255, 255, 255, 0.25);
+            --white-20: rgba(255, 255, 255, 0.2);
+            --white-15: rgba(255, 255, 255, 0.15);
+            --white-10: rgba(255, 255, 255, 0.1);
+            
+            --accent-tint-20: rgba(233, 69, 96, 0.2);
+            --accent-tint-15: rgba(233, 69, 96, 0.15);
+            --accent-tint-5: rgba(233, 69, 96, 0.05);
+            
+            /* Grays */
+            --light-gray: #f0f2f5;
+            --lighter-gray: #e1e5eb;
+            --border-gray: #d1d6de;
             --shadow-gray: rgba(0, 0, 0, 0.1);
+            
             --navbar-1-height: 64px;
             --navbar-2-height: 48px;
             --navbar-3-height: 48px;
@@ -31,7 +59,7 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: linear-gradient(to bottom, var(--cloud-white), #f8f9fa);
+            background: linear-gradient(to bottom, var(--cloud-white), #f5f7fa);
             color: var(--midnight-blue);
         }
 
@@ -90,6 +118,21 @@
             transition: background-color 0.3s ease;
         }
 
+        .nav-1-links a:hover {
+            background-color: var(--white-20);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--cloud-white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 10px;
+            order: 1;
+            display: none;
+        }
+
         .search-container {
             flex-grow: 1;
             min-width: 150px;
@@ -117,6 +160,12 @@
             background-color: var(--pure-white);
             color: var(--midnight-blue);
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 5px var(--accent-tint-20);
+            outline: none;
         }
 
         .search-icon {
@@ -149,6 +198,7 @@
             padding: 0;
         }
 
+        /* Second Navbar - Fixed styling to match original */
         .navbar-2 {
             display: flex;
             justify-content: center;
@@ -161,6 +211,13 @@
             height: var(--navbar-2-height);
             z-index: 999;
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+        }
+
+        .navbar-2::-webkit-scrollbar {
+            display: none;
         }
 
         .nav-2-links {
@@ -173,6 +230,23 @@
             flex-wrap: nowrap;
         }
 
+        .nav-2-links a {
+            color: var(--pure-white);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 6px 12px;
+            border-radius: 5px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .nav-2-links a:hover {
+            transform: translateY(-2px);
+            background-color: var(--white-20);
+        }
+
+        /* Third Navbar */
         .navbar-3-container {
             position: fixed;
             top: calc(var(--navbar-1-height) + var(--navbar-2-height));
@@ -188,10 +262,15 @@
             display: flex;
             overflow-x: auto;
             scroll-behavior: smooth;
+            scrollbar-width: none;
             padding: 8px 20px;
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
+        }
+
+        .navbar-3::-webkit-scrollbar {
+            display: none;
         }
 
         .nav-3-links {
@@ -208,8 +287,76 @@
             white-space: nowrap;
             padding: 6px 12px;
             border-radius: 15px;
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--white-20);
             transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .nav-3-links a:hover {
+            background-color: var(--white-35);
+            transform: scale(1.05);
+        }
+
+        .nav-3-links a.active {
+            background: var(--accent-tint-20);
+            font-weight: bold;
+        }
+
+        .scroll-btn {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 36px;
+            background: rgba(0, 0, 0, 0.2);
+            border: none;
+            color: var(--pure-white);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            z-index: 1;
+        }
+
+        .scroll-btn:hover {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .scroll-btn.left {
+            left: 0;
+        }
+
+        .scroll-btn.right {
+            right: 0;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: var(--pure-white);
+            min-width: 160px;
+            box-shadow: 0 8px 16px var(--shadow-gray);
+            border-radius: 5px;
+            z-index: 1001;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content a {
+            color: var(--midnight-blue);
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--light-gray);
         }
 
         .edit-profile-main-content {
@@ -242,22 +389,40 @@
         }
 
         .form-control:focus {
-            border-color: var(--ocean-blue);
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 0.2rem var(--accent-tint-20);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--ocean-blue), var(--emerald-green));
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             border: none;
             padding: 10px 30px;
             border-radius: 25px;
             font-weight: 600;
             transition: all 0.3s ease;
+            color: var(--pure-white);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+            box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+            color: var(--pure-white);
+        }
+
+        .btn-secondary {
+            background: var(--slate-gray);
+            border: none;
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: var(--pure-white);
+        }
+
+        .btn-secondary:hover {
+            background: var(--midnight-blue);
+            color: var(--pure-white);
         }
 
         .btn-danger {
@@ -266,6 +431,12 @@
             padding: 8px 20px;
             border-radius: 20px;
             font-weight: 600;
+            color: var(--pure-white);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c82333, #dc3545);
+            color: var(--pure-white);
         }
 
         @media (max-width: 768px) {
@@ -273,6 +444,111 @@
                 --navbar-1-height: 56px;
                 --navbar-2-height: 44px;
                 --navbar-3-height: 44px;
+            }
+
+            .navbar-1 {
+                padding: 8px 15px;
+                flex-wrap: nowrap;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .logo {
+                height: 40px;
+                width: 40px;
+            }
+
+            .company-name {
+                font-size: 1.2rem;
+            }
+
+            .search-container {
+                margin: 0 5px;
+            }
+
+            .search-input {
+                padding: 8px 15px 8px 35px;
+                font-size: 14px;
+            }
+
+            .search-icon {
+                left: 10px;
+            }
+
+            .nav-1-links {
+                display: none;
+                position: fixed;
+                top: var(--navbar-1-height);
+                left: 0;
+                width: 100%;
+                background: var(--midnight-blue);
+                flex-direction: column;
+                padding: 15px;
+                z-index: 1001;
+                box-shadow: 0 4px 8px var(--shadow-gray);
+                transition: all 0.3s ease;
+            }
+
+            .nav-1-links.active {
+                display: flex;
+            }
+
+            .nav-1-links a {
+                padding: 12px 15px;
+                width: 100%;
+                text-align: left;
+                font-size: 1rem;
+                border-bottom: 1px solid var(--white-20);
+            }
+
+            .nav-1-links .dropdown {
+                width: 100%;
+            }
+
+            .nav-1-links .dropdown-content {
+                position: relative;
+                width: 100%;
+                background: var(--white-10);
+                box-shadow: none;
+                margin-top: 5px;
+            }
+
+            .nav-1-links .dropdown-content a {
+                color: var(--cloud-white);
+                padding: 10px 25px;
+            }
+
+            .navbar-2 {
+                padding: 8px 0;
+            }
+
+            .nav-2-links {
+                gap: 16px;
+                flex-direction: row;
+            }
+
+            .nav-2-links a {
+                font-size: 0.95rem;
+                padding: 5px 10px;
+            }
+
+            .navbar-3 {
+                padding: 8px 40px;
+            }
+
+            .nav-3-links {
+                gap: 10px;
+            }
+
+            .nav-3-links a {
+                padding: 5px 10px;
+                font-size: 0.9rem;
+            }
+
+            .scroll-btn {
+                display: block;
             }
 
             .edit-profile-main-content {
@@ -290,6 +566,53 @@
         }
 
         @media (max-width: 576px) {
+            :root {
+                --navbar-1-height: 50px;
+                --navbar-2-height: 40px;
+                --navbar-3-height: 40px;
+            }
+
+            .navbar-1 {
+                padding: 8px 12px;
+            }
+
+            .logo {
+                height: 36px;
+                width: 36px;
+            }
+
+            .company-name {
+                font-size: 1.1rem;
+            }
+
+            .search-container {
+                margin: 0 5px;
+            }
+
+            .search-input {
+                padding: 6px 12px 6px 30px;
+                font-size: 13px;
+            }
+
+            .search-icon {
+                left: 8px;
+            }
+
+            .nav-2-links a {
+                font-size: 0.9rem;
+                padding: 4px 8px;
+            }
+
+            .nav-3-links a {
+                font-size: 0.85rem;
+                padding: 4px 8px;
+            }
+
+            .scroll-btn {
+                width: 30px;
+                font-size: 1rem;
+            }
+
             .profile-preview {
                 width: 100px;
                 height: 100px;
@@ -302,7 +625,7 @@
     </style>
 </head>
 <body>
-    <!-- Navigation bars (same as profile.html) -->
+    <!-- First Navbar -->
     <nav class="navbar-1">
         <button class="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
             <i class="fas fa-bars"></i>
@@ -343,6 +666,7 @@
         </div>
     </nav>
 
+    <!-- Second Navbar - Fixed to match original -->
     <nav class="navbar-2">
         <div class="nav-2-links">
             <a target="_blank" href="http://localhost:5001" class="combined-link">Calculator Hub</a>
@@ -351,6 +675,7 @@
         </div>
     </nav>
 
+    <!-- Third Navbar -->
     <div class="navbar-3-container">
         <button class="scroll-btn left" onclick="scrollNav(-100, 'navbar-3')">
             <i class="fas fa-chevron-left"></i>

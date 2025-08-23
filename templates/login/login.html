@@ -9,15 +9,21 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            /* Primary Colors */
-            --midnight-blue: #2c3e50;
-            --ocean-blue: #3498db;
-            --emerald-green: #2ecc71;
+            /* Updated Primary Colors */
+            --midnight-blue: #1a1a2e;
+            --ocean-blue: #16213e;
+            --emerald-green: #0f3460;
             --pure-white: #ffffff;
-            /* Secondary Colors */
-            --forest-green: #27ae60;
-            --slate-gray: #7f8c8d;
-            --cloud-white: #ecf0f1;
+            
+            /* Updated Secondary Colors */
+            --forest-green: #0d2857;
+            --slate-gray: #4a4a68;
+            --cloud-white: #e6e9f0;
+            
+            /* Updated Accent Colors */
+            --accent-primary: #e94560;
+            --accent-secondary: #533483;
+            
             /* Shades and Tints */
             --white-90: rgba(255, 255, 255, 0.9);
             --white-85: rgba(255, 255, 255, 0.85);
@@ -29,13 +35,15 @@
             --white-20: rgba(255, 255, 255, 0.2);
             --white-15: rgba(255, 255, 255, 0.15);
             --white-10: rgba(255, 255, 255, 0.1);
-            --blue-tint-20: rgba(52, 152, 219, 0.2);
-            --blue-tint-15: rgba(52, 152, 219, 0.15);
-            --blue-tint-5: rgba(52, 152, 219, 0.05);
+            
+            --accent-tint-20: rgba(233, 69, 96, 0.2);
+            --accent-tint-15: rgba(233, 69, 96, 0.15);
+            --accent-tint-5: rgba(233, 69, 96, 0.05);
+            
             /* Grays */
-            --light-gray: #f5f5f5;
-            --lighter-gray: #e0e0e0;
-            --border-gray: #d5d5d5;
+            --light-gray: #f0f2f5;
+            --lighter-gray: #e1e5eb;
+            --border-gray: #d1d6de;
             --shadow-gray: rgba(0, 0, 0, 0.1);
         }
 
@@ -44,7 +52,7 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: linear-gradient(135deg, var(--cloud-white), #f8f9fa);
+            background: linear-gradient(135deg, var(--cloud-white), #f5f7fa);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -94,12 +102,12 @@
         }
 
         .alert-success {
-            background: var(--emerald-green);
+            background: var(--accent-secondary);
             color: var(--pure-white);
         }
 
         .alert-danger {
-            background: #e74c3c;
+            background: var(--accent-primary);
             color: var(--pure-white);
         }
 
@@ -167,7 +175,7 @@
 
         .logo:hover {
             transform: scale(1.1);
-            filter: drop-shadow(0 0 10px rgba(52, 152, 219, 0.8));
+            filter: drop-shadow(0 0 10px var(--accent-tint-20));
         }
 
         .company-name {
@@ -220,8 +228,8 @@
 
         .form-control:focus {
             outline: none;
-            border-color: var(--ocean-blue);
-            box-shadow: 0 0 8px var(--blue-tint-20);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 8px var(--accent-tint-20);
         }
 
         .password-wrapper {
@@ -240,7 +248,7 @@
         }
 
         .toggle-password:hover {
-            color: var(--ocean-blue);
+            color: var(--accent-primary);
         }
 
         .forgot-password {
@@ -249,19 +257,19 @@
         }
 
         .forgot-password a {
-            color: var(--ocean-blue);
+            color: var(--accent-primary);
             text-decoration: none;
             font-size: 0.9rem;
             transition: color 0.3s ease;
         }
 
         .forgot-password a:hover {
-            color: var(--midnight-blue);
+            color: var(--accent-secondary);
             text-decoration: underline;
         }
 
         .btn-login {
-            background: linear-gradient(90deg, var(--ocean-blue), var(--emerald-green));
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
             color: var(--pure-white);
             padding: 12px;
             border: none;
@@ -274,7 +282,7 @@
         }
 
         .btn-login:hover {
-            background: linear-gradient(90deg, var(--emerald-green), var(--ocean-blue));
+            background: linear-gradient(90deg, var(--accent-secondary), var(--accent-primary));
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
         }
@@ -286,14 +294,14 @@
         }
 
         .signup-section a {
-            color: var(--ocean-blue);
+            color: var(--accent-primary);
             text-decoration: none;
             font-weight: 600;
             transition: color 0.3s ease;
         }
 
         .signup-section a:hover {
-            color: var(--midnight-blue);
+            color: var(--accent-secondary);
             text-decoration: underline;
         }
 

@@ -11,21 +11,48 @@
     <script src="https://unpkg.com/htmx.org@1.9.0"></script>
     <style>
         :root {
-            --midnight-blue: #2c3e50;
-            --ocean-blue: #3498db;
-            --emerald-green: #2ecc71;
+            /* Updated Primary Colors */
+            --midnight-blue: #1a1a2e;
+            --ocean-blue: #16213e;
+            --emerald-green: #0f3460;
             --pure-white: #ffffff;
-            --cloud-white: #ecf0f1;
-            --slate-gray: #7f8c8d;
-            --light-gray: #f5f5f5;
-            --lighter-gray: #e0e0e0;
+            
+            /* Updated Secondary Colors */
+            --forest-green: #0d2857;
+            --slate-gray: #4a4a68;
+            --cloud-white: #e6e9f0;
+            
+            /* Updated Accent Colors */
+            --accent-primary: #e94560;
+            --accent-secondary: #533483;
+            
+            /* Shades and Tints */
+            --white-90: rgba(255, 255, 255, 0.9);
+            --white-85: rgba(255, 255, 255, 0.85);
+            --white-70: rgba(255, 255, 255, 0.7);
+            --white-40: rgba(255, 255, 255, 0.4);
+            --white-35: rgba(255, 255, 255, 0.35);
+            --white-30: rgba(255, 255, 255, 0.3);
+            --white-25: rgba(255, 255, 255, 0.25);
+            --white-20: rgba(255, 255, 255, 0.2);
+            --white-15: rgba(255, 255, 255, 0.15);
+            --white-10: rgba(255, 255, 255, 0.1);
+            
+            --accent-tint-20: rgba(233, 69, 96, 0.2);
+            --accent-tint-15: rgba(233, 69, 96, 0.15);
+            --accent-tint-5: rgba(233, 69, 96, 0.05);
+            
+            /* Grays */
+            --light-gray: #f0f2f5;
+            --lighter-gray: #e1e5eb;
+            --border-gray: #d1d6de;
             --shadow-gray: rgba(0, 0, 0, 0.1);
+            
             --navbar-1-height: 64px;
             --navbar-2-height: 48px;
             --navbar-3-height: 48px;
             --combined-nav-height: calc(var(--navbar-1-height) + var(--navbar-2-height) + var(--navbar-3-height));
-                    --mobile-breakpoint: 768px;
-
+            --mobile-breakpoint: 768px;
         }
 
         body {
@@ -33,11 +60,11 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: linear-gradient(to bottom, var(--cloud-white), #f8f9fa);
+            background: linear-gradient(to bottom, var(--cloud-white), #f5f7fa);
             color: var(--midnight-blue);
         }
 
-        /* Navbar Styles (Same as welcome.html) */
+        /* Navbar Styles */
         .navbar-1 {
             display: flex;
             align-items: center;
@@ -93,6 +120,21 @@
             transition: background-color 0.3s ease;
         }
 
+        .nav-1-links a:hover {
+            background-color: var(--white-20);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--cloud-white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 10px;
+            order: 1;
+            display: none;
+        }
+
         .search-container {
             flex-grow: 1;
             min-width: 150px;
@@ -122,6 +164,12 @@
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
+        .search-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 5px var(--accent-tint-20);
+            outline: none;
+        }
+
         .search-icon {
             position: absolute;
             left: 15px;
@@ -135,20 +183,6 @@
             top: 50%;
             transform: translateY(-50%);
             color: var(--slate-gray);
-            display: none;
-        }
-        .nav-1-links a:hover {
-            background-color: var(--white-20);
-        }
-
-        .menu-toggle {
-            background: none;
-            border: none;
-            color: var(--cloud-white);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 10px;
-            order: 1;
             display: none;
         }
 
@@ -179,6 +213,7 @@
             z-index: 999;
             overflow-x: auto;
         }
+        
         .navbar-2::-webkit-scrollbar {
             display: none;
         }
@@ -192,6 +227,7 @@
             align-items: center;
             flex-wrap: nowrap;
         }
+        
         .nav-2-links a {
             color: var(--pure-white);
             text-decoration: none;
@@ -202,10 +238,12 @@
             transition: transform 0.3s ease, background-color 0.3s ease;
             white-space: nowrap;
         }
-.nav-2-links a:hover {
+        
+        .nav-2-links a:hover {
             transform: translateY(-2px);
             background-color: var(--white-20);
         }
+        
         .navbar-3-container {
             position: fixed;
             top: calc(var(--navbar-1-height) + var(--navbar-2-height));
@@ -226,9 +264,11 @@
             max-width: 1200px;
             margin: 0 auto;
         }
-.navbar-3::-webkit-scrollbar {
+        
+        .navbar-3::-webkit-scrollbar {
             display: none;
         }
+        
         .nav-3-links {
             display: flex;
             gap: 12px;
@@ -243,18 +283,20 @@
             white-space: nowrap;
             padding: 6px 12px;
             border-radius: 15px;
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--white-20);
             transition: background-color 0.3s ease, transform 0.3s ease;
         }
-.nav-3-links a:hover {
+        
+        .nav-3-links a:hover {
             background-color: var(--white-35);
             transform: scale(1.05);
         }
 
         .nav-3-links a.active {
-            background: var(--white-40);
+            background: var(--accent-tint-20);
             font-weight: bold;
         }
+        
         .scroll-btn {
             position: absolute;
             top: 0;
@@ -280,6 +322,7 @@
         .scroll-btn.right {
             right: 0;
         }
+        
         .dropdown {
             position: relative;
             display: inline-block;
@@ -311,82 +354,8 @@
         .dropdown-content a:hover {
             background-color: var(--light-gray);
         }
+
         /* Search-specific styles */
-        .search-container {
-            flex-grow: 1;
-            min-width: 150px;
-            max-width: 600px;
-            margin: 0 10px;
-            order: 3;
-        }
-
-        .search-form {
-            position: relative;
-        }
-
-        .input-group {
-            display: flex;
-            align-items: center;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 10px 15px 10px 40px;
-            border-radius: 25px;
-            border: 1px solid var(--slate-gray);
-            font-size: 16px;
-            box-sizing: border-box;
-            background-color: var(--pure-white);
-            color: var(--midnight-blue);
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .search-input:focus {
-            border-color: var(--ocean-blue);
-            box-shadow: 0 0 5px var(--blue-tint-20);
-            outline: none;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 15px;
-            color: var(--slate-gray);
-            z-index: 2;
-        }
-
-        .search-loading {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--slate-gray);
-            display: none;
-        }
-
-        .htmx-request .search-loading {
-            display: block;
-        }
-
-        @keyframes spin {
-            100% {
-                transform: translateY(-50%) rotate(360deg);
-            }
-        }
-
-        .search-results-dropdown {
-            position: absolute;
-            width: 100%;
-            max-height: 400px;
-            overflow-y: auto;
-            background: var(--pure-white);
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 4px 6px var(--shadow-gray);
-            z-index: 1000;
-            display: none;
-            margin-top: 2px;
-            padding: 0;
-        }
-
         .search-results-dropdown.show {
             display: block;
         }
@@ -421,13 +390,13 @@
 
         .search-result-meta i {
             font-size: 0.9rem;
-            color: var(--ocean-blue);
+            color: var(--accent-primary);
         }
 
         .result-type {
             font-size: 0.75rem;
             color: var(--slate-gray);
-            background: var(--blue-tint-5);
+            background: var(--accent-tint-5);
             padding: 2px 6px;
             border-radius: 10px;
         }
@@ -485,7 +454,7 @@
             color: var(--midnight-blue);
             font-weight: 600;
             margin-bottom: 1rem;
-            border-bottom: 2px solid var(--ocean-blue);
+            border-bottom: 2px solid var(--accent-primary);
             padding-bottom: 0.5rem;
         }
 
@@ -497,18 +466,21 @@
         }
 
         .btn-edit-profile {
-            background: linear-gradient(135deg, var(--ocean-blue), var(--emerald-green));
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             border: none;
             padding: 10px 25px;
             border-radius: 25px;
             font-weight: 600;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+            color: var(--pure-white);
         }
 
         .btn-edit-profile:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+            box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+            color: var(--pure-white);
         }
 
         /* Responsive Styles */
@@ -518,7 +490,8 @@
                 --navbar-2-height: 44px;
                 --navbar-3-height: 44px;
             }
-.navbar-1 {
+            
+            .navbar-1 {
                 padding: 8px 15px;
                 flex-wrap: nowrap;
             }
@@ -604,11 +577,6 @@
             .nav-2-links a {
                 font-size: 0.95rem;
                 padding: 5px 10px;
-            }
-
-            .nav-2-links .combined-link {
-                font-size: 1rem;
-                padding: 6px 10px;
             }
 
             .navbar-3 {
@@ -699,7 +667,7 @@
                 padding: 1rem;
             }
         }
-        /* Responsive Styles */
+        
         @media (max-width: 992px) {
             .navbar-1 {
                 padding: 10px 15px;
@@ -723,6 +691,7 @@
                 justify-content: flex-end;
             }
         }
+        
         @media (max-width: 480px) {
             .search-container {
                 min-width: 120px;
@@ -848,7 +817,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Navigation and search functionality (same as welcome.html)
+        // Navigation and search functionality
         document.addEventListener('DOMContentLoaded', function() {
             // Mobile menu toggle
             const menuToggle = document.querySelector('.menu-toggle');

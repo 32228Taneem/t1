@@ -526,7 +526,7 @@ def logout():
     # Removes all session data to end user/admin session
     session.clear()
     # Redirects to the homepage
-    return redirect(url_for('base'))
+    return redirect(url_for('home'))
 
 # Route: /admin_panel
 # Purpose: Displays the admin panel for authorized admins
