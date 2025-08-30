@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Password Recovery | Televerse</title>
+    <!-- Add Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* ============= COLOR VARIABLES ============= */
         :root {
             /* Updated Primary Colors */
             --midnight-blue: #1a1a2e;
@@ -24,6 +25,7 @@
             
             /* Shades and Tints */
             --accent-tint-20: rgba(233, 69, 96, 0.2);
+            --accent-secondary-tint-20: rgba(83, 52, 131, 0.2);
             
             /* Grays */
             --light-gray: #f0f2f5;
@@ -32,28 +34,29 @@
             --shadow-gray: rgba(0, 0, 0, 0.1);
         }
 
-        /* ============= BASE STYLES ============= */
         body {
             font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, var(--cloud-white), #f5f7fa);
+            background-size: cover;
+            background-position: center;
             min-height: 100vh;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 1.5rem;
-            line-height: 1.6;
+            padding: 20px;
+            line-height: 1.5;
         }
 
         /* ============= CARD CONTAINER ============= */
         .login-container {
             width: 100%;
-            max-width: 28rem; /* 448px, slightly wider for balance */
+            max-width: 420px;
         }
 
         .recovery-card {
             background: var(--pure-white);
-            border-radius: 1rem;
+            border-radius: 12px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             border: 1px solid var(--border-gray);
@@ -63,32 +66,28 @@
         .recovery-header {
             background-color: var(--midnight-blue);
             color: var(--pure-white);
-            padding: 1.5rem;
+            padding: 25px;
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
         }
 
         .recovery-header h2 {
             margin: 0;
-            font-size: 1.75rem;
+            font-size: 1.6rem;
             font-weight: 600;
         }
 
         .logo {
-            width: 6rem;
-            height: auto;
+            width: 120px;
+            margin-bottom: 15px;
         }
 
         /* ============= FORM ELEMENTS ============= */
         .recovery-form {
-            padding: 2rem;
+            padding: 25px;
         }
 
         .form-group {
-            margin-bottom: 1.25rem;
+            margin: 1rem 1.5rem;
         }
 
         .form-label {
@@ -96,18 +95,17 @@
             margin-bottom: 0.5rem;
             font-weight: 500;
             color: var(--midnight-blue);
-            font-size: 0.95rem;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.75rem 1rem;
+            padding: 12px 15px;
             border: 1px solid var(--border-gray);
-            border-radius: 0.5rem;
+            border-radius: 8px;
             font-size: 1rem;
+            transition: all 0.3s ease;
             background: var(--light-gray);
             color: var(--midnight-blue);
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .form-control:focus {
@@ -119,14 +117,15 @@
         /* ============= BUTTONS ============= */
         .btn-recovery {
             width: 100%;
-            padding: 0.75rem;
+            padding: 12px;
             background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
             color: var(--pure-white);
             border: none;
-            border-radius: 0.5rem;
+            border-radius: 8px;
             font-size: 1rem;
             font-weight: 500;
             cursor: pointer;
+            margin-top: 10px;
             transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
@@ -137,19 +136,41 @@
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
         }
 
+        /* ============= FLASH MESSAGES ============= */
+        /* Updated to match your color scheme */
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+            box-shadow: 0 4px 10px var(--shadow-gray);
+            color: var(--pure-white);
+        }
+
+        .alert-success {
+            background-color: var(--accent-secondary);
+            border-left-color: var(--accent-primary);
+        }
+
+        .alert-error {
+            background-color: var(--accent-primary);
+            border-left-color: var(--accent-secondary);
+        }
+
         /* ============= LINKS ============= */
         .login-link {
             text-align: center;
-            margin-top: 1.5rem;
+            margin-top: 20px;
             color: var(--slate-gray);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
         .login-link a {
             color: var(--accent-primary);
             font-weight: 500;
             text-decoration: none;
-            transition: color 0.2s ease;
+            transition: color 0.2s;
         }
 
         .login-link a:hover {
@@ -157,68 +178,92 @@
             text-decoration: underline;
         }
 
-        /* ============= FLASH MESSAGES ============= */
-        .alert {
-            padding: 0.75rem 1.25rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            background: var(--accent-secondary);
-            color: var(--pure-white);
-            border-left: 4px solid var(--accent-primary);
-            box-shadow: 0 4px 10px var(--shadow-gray);
+        /* ============= RESPONSIVE ADJUSTMENTS ============= */
+        @media (max-width: 1200px) {
+            .logo {
+                width: 180px;
+                height: 44px;
+            }
         }
 
-        /* ============= RESPONSIVE ADJUSTMENTS ============= */
+        @media (max-width: 992px) {
+            .logo {
+                width: 160px;
+                height: 40px;
+            }
+        }
+
         @media (max-width: 768px) {
+            .logo {
+                width: 100px;
+            }
+            
+            .recovery-header h2 {
+                font-size: 1.4rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .logo {
+                width: 120px;
+                height: 32px;
+            }
+            
             .login-container {
                 max-width: 90%;
-            }
-
-            .recovery-header h2 {
-                font-size: 1.5rem;
-            }
-
-            .logo {
-                width: 5rem;
             }
         }
 
         @media (max-width: 480px) {
             body {
-                padding: 1rem;
+                padding: 0;
+                background: var(--pure-white);
             }
-
+            
             .recovery-card {
-                border-radius: 0.75rem;
-                box-shadow: 0 4px 15px var(--shadow-gray);
+                border-radius: 0;
+                box-shadow: none;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
             }
-
+            
             .recovery-header {
-                padding: 1.25rem;
+                border-radius: 0;
+                padding: 20px;
             }
-
+            
             .recovery-form {
-                padding: 1.5rem;
+                padding: 20px 15px;
             }
-
+            
             .form-group {
-                margin-bottom: 1rem;
+                margin: 1rem;
+            }
+            
+            .logo {
+                width: 100px;
+                height: 28px;
             }
         }
 
         @media (max-width: 360px) {
-            .recovery-form {
-                padding: 1.25rem;
+            .recovery-header h2 {
+                font-size: 1.3rem;
             }
-
-            .form-group {
-                margin-bottom: 0.75rem;
+            
+            .form-control {
+                padding: 10px 12px;
             }
-
+            
             .btn-recovery {
-                padding: 0.65rem;
-                font-size: 0.95rem;
+                padding: 10px;
+            }
+            
+            .logo {
+                width: 90px;
+                height: 24px;
             }
         }
     </style>
@@ -227,17 +272,23 @@
     <div class="login-container">
         <div class="recovery-card">
             <div class="recovery-header">
-                <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Company Logo" class="logo">
+                <a href="{{ url_for('home') }}">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="Televerse Logo" class="logo">
+                </a>
                 <h2>Password Recovery</h2>
             </div>
             
             <div class="recovery-form">
-                {% with messages = get_flashed_messages() %}
-                  {% if messages %}
-                    {% for message in messages %}
-                      <div class="alert">{{ message }}</div>
-                    {% endfor %}
-                  {% endif %}
+                <!-- Display flash messages only (no separate error variable) -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'success' if category == 'success' else 'error' }}">
+                                <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
                 {% endwith %}
                 
                 <form method="POST">
@@ -245,14 +296,15 @@
                     
                     <div class="form-group">
                         <label for="email" class="form-label">Email Address</label>
-                        <input type="email" id="email" name="uemail" class="form-control" placeholder="Enter your registered email" required>
+                        <input type="email" id="email" name="uemail" class="form-control" 
+                               placeholder="Enter your registered email" required>
                     </div>
                     
                     <button type="submit" class="btn-recovery">Send Reset Link</button>
                 </form>
                 
                 <div class="login-link">
-                    Remember your password? <a href="{{ url_for('login') }}">Login in here</a>
+                    Remember your password? <a href="{{ url_for('login') }}">Login here</a>
                 </div>
             </div>
         </div>

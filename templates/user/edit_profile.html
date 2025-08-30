@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,16 +17,16 @@
             --ocean-blue: #16213e;
             --emerald-green: #0f3460;
             --pure-white: #ffffff;
-            
+
             /* Updated Secondary Colors */
             --forest-green: #0d2857;
             --slate-gray: #4a4a68;
             --cloud-white: #e6e9f0;
-            
+
             /* Updated Accent Colors */
             --accent-primary: #e94560;
             --accent-secondary: #533483;
-            
+
             /* Shades and Tints */
             --white-90: rgba(255, 255, 255, 0.9);
             --white-85: rgba(255, 255, 255, 0.85);
@@ -37,17 +38,17 @@
             --white-20: rgba(255, 255, 255, 0.2);
             --white-15: rgba(255, 255, 255, 0.15);
             --white-10: rgba(255, 255, 255, 0.1);
-            
+
             --accent-tint-20: rgba(233, 69, 96, 0.2);
             --accent-tint-15: rgba(233, 69, 96, 0.15);
             --accent-tint-5: rgba(233, 69, 96, 0.05);
-            
+
             /* Grays */
             --light-gray: #f0f2f5;
             --lighter-gray: #e1e5eb;
             --border-gray: #d1d6de;
             --shadow-gray: rgba(0, 0, 0, 0.1);
-            
+
             --navbar-1-height: 64px;
             --navbar-2-height: 48px;
             --navbar-3-height: 48px;
@@ -89,12 +90,15 @@
 
         .logo {
             height: 48px;
-            width: 48px;
-            border-radius: 50%;
-            border: 2px solid var(--cloud-white);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
+    width: 200px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 10px rgba(233, 69, 96, 0.15); /* Rose glow retained */
+    transition: all 0.3s ease;
+    border-radius: 0;
         }
+        .logo:hover {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 10px var(--accent-tint-20));
+}
 
         .company-name {
             font-weight: 600;
@@ -370,7 +374,7 @@
         .edit-profile-container {
             background: var(--pure-white);
             border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             padding: 2rem;
         }
 
@@ -380,7 +384,7 @@
             object-fit: cover;
             border-radius: 50%;
             border: 5px solid var(--pure-white);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             transition: all 0.3s ease;
         }
 
@@ -439,6 +443,144 @@
             color: var(--pure-white);
         }
 
+        .search-result-item:hover {
+            background-color: var(--light-gray);
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--lighter-gray);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            gap: 0.75rem;
+        }
+
+        .result-section {
+            margin-bottom: 0.5rem;
+        }
+
+        .result-count {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--slate-gray);
+        }
+
+        .result-section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--slate-gray);
+            background-color: var(--light-gray);
+            border-bottom: 1px solid var(--lighter-gray);
+        }
+
+        .search-result-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .result-arrow {
+            font-size: 0.8rem;
+            color: var(--slate-gray);
+        }
+
+        .search-footer {
+            padding: 0.5rem 0.75rem;
+            border-top: 1px solid var(--lighter-gray);
+        }
+
+        .search-tip {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--slate-gray);
+        }
+
+        .search-error,
+        .no-results {
+            padding: 0.75rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--slate-gray);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-error i,
+        .no-results i {
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+        }
+
+        .search-result-icon {
+            font-size: 0.9rem;
+            color: var(--slate-gray);
+            width: 16px;
+            text-align: center;
+        }
+
+        .search-result-title {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--midnight-blue);
+            margin-bottom: 0.1rem;
+            line-height: 1.2;
+        }
+
+        .search-result-meta {
+            font-size: 0.75rem;
+            color: var(--slate-gray);
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            /* gap: 6px; */
+        }
+.logo {
+    height: 48px;
+    width: 200px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 10px rgba(233, 69, 96, 0.15); /* Rose glow retained */
+    transition: all 0.3s ease;
+    border-radius: 0;
+}
+
+.logo:hover {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 10px var(--accent-tint-20));
+}
+
+@media (max-width: 1200px) {
+    .logo {
+        width: 180px;
+        height: 44px;
+    }
+}
+
+@media (max-width: 992px) {
+    .logo {
+        width: 160px;
+        height: 40px;
+    }
+}
+@media (max-width: 480px) {
+    .logo {
+        width: 100px;
+        height: 28px;
+    }
+}
+@media (max-width: 360px) {
+    .logo {
+        width: 90px;
+        height: 24px;
+    }
+}
         @media (max-width: 768px) {
             :root {
                 --navbar-1-height: 56px;
@@ -456,9 +598,9 @@
             }
 
             .logo {
-                height: 40px;
-                width: 40px;
-            }
+        width: 140px;
+        height: 36px;
+    }
 
             .company-name {
                 font-size: 1.2rem;
@@ -577,8 +719,8 @@
             }
 
             .logo {
-                height: 36px;
-                width: 36px;
+                height: 120px;
+                width: 32px;
             }
 
             .company-name {
@@ -617,30 +759,45 @@
                 width: 100px;
                 height: 100px;
             }
-            
+
             .edit-profile-container {
                 padding: 1rem;
             }
         }
+
+        .search-results-dropdown.show {
+            display: block;
+        }
+
+        .htmx-request .search-loading {
+            display: block;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: translateY(-50%) rotate(360deg);
+            }
+        }
     </style>
 </head>
+
 <body>
     <!-- First Navbar -->
     <nav class="navbar-1">
         <button class="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div class="logo-container">
-            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Company Logo" class="logo">
-            <span class="company-name">Televerse</span>
-        </div>
+        <i class="fas fa-bars"></i>
+    </button>
+    <a href="{{ url_for('home') }}" class="logo-container">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Company Logo" class="logo">
+    </a>
         <div class="search-container">
             <form id="searchForm" class="search-form">
                 <div class="input-group">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" name="query" class="form-control search-input" placeholder="Search courses, topics..."
-                           hx-get="{{ url_for('search') }}" hx-trigger="input changed delay:100ms" hx-target="#searchResultsContainer"
-                           hx-swap="innerHTML" hx-indicator=".search-loading" autocomplete="off" aria-label="Search">
+                    <input type="text" name="query" class="form-control search-input"
+                        placeholder="Search courses, topics..." hx-get="{{ url_for('search') }}"
+                        hx-trigger="input changed delay:100ms" hx-target="#searchResultsContainer" hx-swap="innerHTML"
+                        hx-indicator=".search-loading" autocomplete="off" aria-label="Search">
                     <div class="search-loading htmx-indicator">
                         <i class="fas fa-spinner fa-spin"></i>
                     </div>
@@ -696,21 +853,20 @@
     <main class="edit-profile-main-content">
         <div class="edit-profile-container">
             <h2 class="mb-4 text-center">Edit Profile</h2>
-            
+
             <form method="POST" enctype="multipart/form-data" action="{{ url_for('edit_profile') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
                 <div class="mb-4 text-center">
-                    <img id="profilePreview" 
-                         src="{{ url_for('static', filename='uploads/' + user[2]) if user[2] and user[2] != 'default.jpg' else url_for('static', filename='images/default.jpg') }}" 
-                         alt="Current Profile" 
-                         class="profile-preview mb-3">
-                    
+                    <img id="profilePreview"
+                        src="{{ url_for('static', filename='uploads/' + user[2]) if user[2] and user[2] != 'default.jpg' else url_for('static', filename='images/default.jpg') }}"
+                        alt="Current Profile" class="profile-preview mb-3">
+
                     <div class="mb-3">
                         <label for="profilePic" class="form-label">Change Profile Picture</label>
                         <input type="file" class="form-control" id="profilePic" name="profile_pic" accept="image/*">
                     </div>
-                    
+
                     {% if user[2] and user[2] != 'default.jpg' %}
                     <div class="mt-2">
                         <button type="button" class="btn btn-danger" id="deleteProfilePic">
@@ -719,19 +875,18 @@
                     </div>
                     {% endif %}
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" 
-                           value="{{ user[0] }}" required>
+                    <input type="text" class="form-control" id="username" name="username" value="{{ user[0] }}"
+                        required>
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="email" class="form-label">Email address</label>
-                    <input type="email" class="form-control" id="email" name="email" 
-                           value="{{ user[1] }}" required>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ user[1] }}" required>
                 </div>
-                
+
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                     <a href="{{ url_for('profile') }}" class="btn btn-secondary me-md-2">
                         <i class="fas fa-times me-2"></i>Cancel
@@ -747,11 +902,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Profile image preview
-        document.getElementById('profilePic')?.addEventListener('change', function(e) {
+        document.getElementById('profilePic')?.addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(event) {
+                reader.onload = function (event) {
                     document.getElementById('profilePreview').src = event.target.result;
                 }
                 reader.readAsDataURL(file);
@@ -759,31 +914,31 @@
         });
 
         // Delete profile picture
-        document.getElementById('deleteProfilePic')?.addEventListener('click', function() {
+        document.getElementById('deleteProfilePic')?.addEventListener('click', function () {
             if (confirm('Are you sure you want to delete your profile picture?')) {
                 // Create a form and submit it instead of using fetch/JSON
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = "{{ url_for('delete_profile_pic') }}";
-                
+
                 const csrfInput = document.createElement('input');
                 csrfInput.type = 'hidden';
                 csrfInput.name = 'csrf_token';
                 csrfInput.value = "{{ csrf_token() }}";
                 form.appendChild(csrfInput);
-                
+
                 document.body.appendChild(form);
                 form.submit();
             }
         });
 
         // Navigation and search functionality
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const menuToggle = document.querySelector('.menu-toggle');
             const navLinks = document.querySelector('.nav-1-links');
 
             if (menuToggle && navLinks) {
-                menuToggle.addEventListener('click', function() {
+                menuToggle.addEventListener('click', function () {
                     const isExpanded = navLinks.classList.toggle('active');
                     this.setAttribute('aria-expanded', isExpanded);
                     this.querySelector('i').classList.toggle('fa-bars');
@@ -791,11 +946,61 @@
                 });
             }
 
-            window.scrollNav = function(amount, navId) {
+            window.scrollNav = function (amount, navId) {
                 const nav = document.getElementById(navId);
                 nav.scrollBy({ left: amount, behavior: 'smooth' });
             };
+
+            // Search functionality - ADD THIS SECTION
+            const searchInput = document.querySelector('.search-input');
+            const searchResults = document.getElementById('searchResultsContainer');
+
+            if (searchInput && searchResults) {
+                const toggleResults = (show) => {
+                    searchResults.classList.toggle('show', show);
+                    if (!show) searchResults.innerHTML = '';
+                };
+
+                searchInput.addEventListener('input', function () {
+                    toggleResults(this.value.trim().length > 0);
+                });
+
+                searchInput.addEventListener('focus', function () {
+                    if (this.value.trim().length > 0) toggleResults(true);
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.search-container')) toggleResults(false);
+                });
+
+                // Handle HTMX response to format search results
+                document.body.addEventListener('htmx:afterSwap', function (e) {
+                    if (e.target.id === 'searchResultsContainer') {
+                        const results = e.target.children;
+                        if (results.length > 0) {
+                            toggleResults(true);
+                        }
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    const resultItem = e.target.closest('.search-result-item');
+                    if (!resultItem) return;
+
+                    const { type, id, name, category } = resultItem.dataset;
+                    const baseUrl = '/view_subtopics';
+
+                    const routes = {
+                        'category': `${baseUrl}/${name}`,
+                        'subtopic': `${baseUrl}/${category}#subtopic-${id}`,
+                        'sub-subtopic': `${baseUrl}/${category}#sub-subtopic-${id}`
+                    };
+
+                    if (routes[type]) window.location.href = routes[type];
+                });
+            }
         });
     </script>
 </body>
+
 </html>

@@ -31,10 +31,10 @@ def sendmail(to, subject, body, otp_data=None):
     try:
         # Configure server (replace with your actual credentials)
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-        server.login('taneemk14@gmail.com','glzm sdsd efvt ipzv')  # Use app-specific password
+        server.login('info.theteleverse@gmail.com','qals bzme kyag ilkr')  # Use app-specific password
         
         msg = EmailMessage()
-        msg['From'] = 'taneemk14@gmail.com'  # Your verified sender email
+        msg['From'] = 'info.theteleverse@gmail.com'  # Your verified sender email
         msg['To'] = to
         msg['Subject'] = subject
         

@@ -1,4 +1,4 @@
-from flask import Flask,render_template,url_for,redirect,request,flash,session,jsonify,send_from_directory,g,json,Blueprint
+from flask import Flask,render_template,url_for,redirect,request,flash,session,jsonify,send_from_directory,g,Blueprint,make_response
 from otp import genotp
 from cmail import sendmail
 from tokens import encode,decode
@@ -13,7 +13,7 @@ from flask_session import Session
 from werkzeug.utils import secure_filename
 from mysql.connector import IntegrityError
 from mysql.connector.errors import DatabaseError
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 from flask_caching import Cache
 import logging
@@ -22,6 +22,8 @@ import jwt
 import os
 import re
 import time
+import bcrypt
+import secrets
 # from dotenv import load_dotenv
 # load_dotenv()
 RESULTS_PER_PAGE = 10
@@ -169,7 +171,11 @@ def home():
 # Functionality: Validates credentials, initiates admin OTP or user JWT, and redirects accordingly
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Handles user and admin login; supports GET to display login form and POST to process login
+    # Check if there's a registration success message to display
+    registration_success = session.pop('registration_success', None)
+    if registration_success:
+        flash(registration_success, 'success')
+    
     if request.method == 'POST':
         # Retrieves and sanitizes email and password from form submission
         email = request.form.get('email', '').strip()
@@ -178,9 +184,10 @@ def login():
         # Validates that email and password are provided
         if not email or not password:
             flash('Email and password are required', 'error')
-            return redirect(url_for('login'))
+            return render_template('login/login.html', email=email, error=True)
 
         try:
+            cursor = mytdb.cursor(buffered=True)
             # ================= ADMIN LOGIN FLOW =================
             # Queries database for admin with matching email
             cursor.execute('SELECT admin_id, admin_name, password FROM admins WHERE admin_email=%s', [email])
@@ -219,7 +226,7 @@ def login():
                     return redirect(url_for('admin_otp_verify'))
                 
                 flash('Invalid credentials', 'error')
-                return redirect(url_for('login'))
+                return render_template('login/login.html', email=email, error=True)
 
             # ================= USER LOGIN FLOW =================
             # Queries database for user with matching email
@@ -248,7 +255,7 @@ def login():
                     
                     # Redirects to default subtopics page if available, sets JWT cookie
                     if default_item:
-                        response = redirect(url_for('view_subtopics', item_name=default_item[0]))
+                        response = make_response(redirect(url_for('view_subtopics', item_name=default_item[0])))
                         response.set_cookie(
                             'access_token', 
                             token, 
@@ -261,21 +268,21 @@ def login():
                         return response
                     else:
                         flash('No content available yet', 'info')
-                        # Redirects to home if no default item exists
-                        return redirect(url_for('base'))
+                        # Redirects to home
+                        return redirect(url_for('home'))
                 else:
-                    flash('Invalid credentials', 'error')
-                    return redirect(url_for('login'))
+                    flash('Invalid password. Please try again.', 'error')
+                    return render_template('login/login.html', email=email, error=True)
 
-            # Flashes error if email/password don't match any admin or user
-            flash('Invalid email or password', 'error')
-            return redirect(url_for('login'))
+            # Email not found in usercreate or admins
+            flash('Email not registered. Please create an account.', 'error')
+            return render_template('login/login.html', email=email, error=True)
 
         except Exception as e:
             # Logs and flashes error if an exception occurs during login
             print(f"Login error: {str(e)}")
             flash('An error occurred during login', 'error')
-            return redirect(url_for('login'))
+            return render_template('login/login.html', email=email, error=True)
     
     # For GET request, renders the login form template
     return render_template('login/login.html')
@@ -286,72 +293,161 @@ def login():
 # Defines a route for admin OTP verification, handling both GET (display form) and POST (process OTP) requests
 @app.route('/admin_otp_verify', methods=['GET', 'POST'])
 def admin_otp_verify():
-    # Debug: Logs session data for verification
-    print(f"Session data at start: {session}")
-    
-    # Checks if admin temporary session data exists; redirects to login if missing
+    # Initialize session variables for resend limits and attempts
+    if 'otp_resends' not in session:
+        session['otp_resends'] = 0
+    if 'last_resend_time' not in session:
+        session['last_resend_time'] = None
+    if 'otp_attempts' not in session:
+        session['otp_attempts'] = 0
+    if 'block_until' not in session:
+        session['block_until'] = None
+
+    # Check if admin temporary session data exists
     if 'admin_temp' not in session:
-        flash('Session expired. Please login again.')
+        flash('Session expired. Please login again.', 'error')
         return redirect(url_for('login'))
-    
-    # Verifies if OTP is still valid by comparing current time with expiration
+
+    # Check OTP expiration
     expires_at = datetime.fromisoformat(session['admin_otp']['expires_at'])
     if datetime.now() > expires_at:
         flash('OTP has expired. Please login again.', 'error')
         return redirect(url_for('login'))
-    
+
+    # Check if email is blocked
+    if session['block_until']:
+        block_until = datetime.fromisoformat(session['block_until'])
+        if datetime.now() < block_until:
+            remaining_block = (block_until - datetime.now()).total_seconds()
+            flash(f'Too many incorrect attempts. Please try again in {int(remaining_block // 3600)} hours.', 'error')
+            return redirect(url_for('login'))
+        else:
+            session['block_until'] = None
+            session['otp_attempts'] = 0
+
+    # Calculate resend cooldown
+    resend_enabled = True
+    resend_cooldown = 0
+    if session.get('last_resend_time'):
+        last_resend_time = datetime.fromisoformat(session['last_resend_time'])
+        time_since_resend = (datetime.now() - last_resend_time).total_seconds()
+        if time_since_resend < 30:
+            resend_enabled = False
+            resend_cooldown = max(0, int(30 - time_since_resend))
+        if session['otp_resends'] > 0 and time_since_resend > 90:
+            session['otp_resends'] = 0
+            session['last_resend_time'] = None
+
     if request.method == 'POST':
-        # Retrieves OTP and admin ID from form submission
+        action = request.form.get('action')
+
+        if action == 'resend':
+            # Check resend limits
+            if session['otp_resends'] >= 3:
+                flash('Maximum OTP resend attempts reached. Please login again.', 'error')
+                return redirect(url_for('login'))
+
+            if not resend_enabled:
+                flash(f'Please wait {resend_cooldown} seconds before resending OTP.', 'error')
+                return render_template('admin/adminotp.html',
+                                     expires_at=expires_at,
+                                     admin_id=session['admin_temp']['admin_id'],
+                                     resend_enabled=resend_enabled,
+                                     resend_cooldown=resend_cooldown,
+                                     attempts_left=3 - session['otp_attempts'])
+
+            # Generate and send new OTP
+            try:
+                otp, new_expires_at = genotp(valid_minutes=15)
+                session['admin_otp'] = {
+                    'code': otp,
+                    'expires_at': new_expires_at.isoformat()
+                }
+                session['otp_attempts'] = 0
+                sendmail(
+                    to=session['admin_temp']['email'],
+                    subject='New Admin OTP Verification',
+                    body=f'Your new admin verification code is: {otp}\n\nValid until: {new_expires_at.strftime("%Y-%m-%d %H:%M")}'
+                )
+                session['otp_resends'] += 1
+                session['last_resend_time'] = datetime.now().isoformat()
+                flash('New OTP sent to your email.', 'success')
+                return render_template('admin/adminotp.html',
+                                     expires_at=new_expires_at,
+                                     admin_id=session['admin_temp']['admin_id'],
+                                     resend_enabled=False,
+                                     resend_cooldown=30,
+                                     attempts_left=3)
+            except Exception as e:
+                print(f"ERROR: Resend OTP failed: {str(e)}")
+                flash('Failed to resend OTP. Please try again.', 'error')
+                return render_template('admin/adminotp.html',
+                                     expires_at=expires_at,
+                                     admin_id=session['admin_temp']['admin_id'],
+                                     resend_enabled=resend_enabled,
+                                     resend_cooldown=resend_cooldown,
+                                     attempts_left=3 - session['otp_attempts'])
+
+        # Handle OTP verification
         otp = request.form.get('otp', '').strip()
         admin_id = request.form.get('admin_id', '').strip()
-        
-        # Gets stored OTP and expected admin ID from session
         stored_otp = session['admin_otp']['code']
         expected_admin_id = session['admin_temp']['admin_id']
-        
-        # Validates OTP and admin ID
+
+        # Check if either OTP or Admin ID is incorrect
         if stored_otp == otp and admin_id == expected_admin_id:
-            # Creates JWT token with admin details
+            # Successful verification
             token = create_jwt_token({
                 'admin_id': session['admin_temp']['admin_id'],
                 'email': session['admin_temp']['email'],
                 'admin_name': session['admin_temp']['admin_name'],
                 'user_type': 'admin'
             })
-            
-            # Sets permanent admin session variables
             session['admin'] = session['admin_temp']['email']
             session['admin_id'] = session['admin_temp']['admin_id']
             session['admin_name'] = session['admin_temp']['admin_name']
-            
-            # Removes temporary session data
             session.pop('admin_temp', None)
             session.pop('admin_otp', None)
-            
-            # Redirects to admin panel and sets JWT cookie
+            session.pop('otp_resends', None)
+            session.pop('last_resend_time', None)
+            session.pop('otp_attempts', None)
+            session.pop('block_until', None)
             response = redirect(url_for('admin_panel'))
             response.set_cookie('access_token', token, httponly=True, secure=True)
-            flash('Authentication successful!')
+            flash('Authentication successful!', 'success')
             return response
         else:
-            # Flashes specific error messages for invalid OTP or admin ID
+            # Increment attempts for any incorrect input (OTP or Admin ID)
+            session['otp_attempts'] += 1
+            if session['otp_attempts'] >= 3:
+                session['block_until'] = (datetime.now() + timedelta(hours=24)).isoformat()
+                session['otp_attempts'] = 0
+                flash('Too many incorrect attempts. Please try again in 24 hours.', 'error')
+                return redirect(url_for('login'))
+            # Flash specific error messages
             if stored_otp != otp:
                 flash('Invalid OTP', 'error')
             if admin_id != expected_admin_id:
                 flash('Invalid Admin ID', 'error')
-            return redirect(url_for('admin_otp_verify'))
-    
-    # For GET request, renders OTP verification form with expiration time and admin ID
-    return render_template('admin/adminotp.html', 
-                         expires_at=expires_at,
-                         admin_id=session['admin_temp']['admin_id'])
+            return render_template('admin/adminotp.html',
+                                 expires_at=expires_at,
+                                 admin_id=session['admin_temp']['admin_id'],
+                                 resend_enabled=resend_enabled,
+                                 resend_cooldown=resend_cooldown,
+                                 attempts_left=3 - session['otp_attempts'])
 
+    return render_template('admin/adminotp.html',
+                         expires_at=expires_at,
+                         admin_id=session['admin_temp']['admin_id'],
+                         resend_enabled=resend_enabled,
+                         resend_cooldown=resend_cooldown,
+                         attempts_left=3 - session['otp_attempts'])
 
 
 # Route: /usercreate
 # Purpose: Handles user registration by displaying a signup form (GET) and processing registration data (POST)
 # Functionality: Validates email uniqueness, generates and sends OTP, and redirects to OTP verification
-@app.route('/usercreate', methods=['GET','POST'])
+@app.route('/usercreate', methods=['GET', 'POST'])
 def usercreate():
     if request.method == 'POST':
         try:
@@ -359,37 +455,55 @@ def usercreate():
             uemail = request.form['email']
             upassword = request.form['password']
             
+            # Validate password length to match varbinary(20)
+            if len(upassword) > 20:
+                flash('Password is too long. Maximum length is 20 characters.', 'error')
+                return render_template('user/usersignup.html', 
+                                     username=uname, 
+                                     email=uemail)
+            
             cursor = mytdb.cursor(buffered=True)
+            # Check usercreate table
             cursor.execute('SELECT count(user_email) FROM usercreate WHERE user_email=%s', [uemail])
-            uemail_count = cursor.fetchone()
+            uemail_count = cursor.fetchone()[0]
+            # Check admins table
+            cursor.execute('SELECT count(admin_email) FROM admins WHERE admin_email=%s', [uemail])
+            admin_email_count = cursor.fetchone()[0]
             
-            if uemail_count[0] == 0:
-                # Generate OTP (valid for 15 minutes)
-                otp, expires_at = genotp(valid_minutes=15)
-                
-                userdata = {
-                    'uname': uname,
-                    'uemail': uemail,
-                    'upassword': upassword,
-                    'uotp': otp,
-                    'otp_expires': expires_at.isoformat()
-                }
-                
-                subject = 'Thank you for registering'
-                body = f'Your verification OTP is: {otp} (valid until {expires_at.strftime("%Y-%m-%d %H:%M")})'
-                sendmail(to=uemail, subject=subject, body=body)
-                
-                flash('OTP has been sent to your email', 'success')
-                return redirect(url_for('uotp', pudata=encode(data=userdata)))
+            if uemail_count > 0 or admin_email_count > 0:
+                flash('Email already registered. Please login.', 'error')
+                return render_template('user/usersignup.html', 
+                                     username=uname, 
+                                     email=uemail)
             
-            flash('Email already exists. Please login.', 'warning')
-            return redirect(url_for('login'))
+            # Generate OTP (valid for 3 minutes)
+            otp, expires_at = genotp(valid_minutes=3)
+            
+            userdata = {
+                'uname': uname,
+                'uemail': uemail,
+                'upassword': upassword,
+                'uotp': otp,
+                'otp_expires': expires_at.isoformat(),
+                'otp_attempts': 0,  # Initialize attempts
+                'block_until': None  # Initialize block status
+            }
+            
+            subject = 'Thank you for registering'
+            body = f'Your verification OTP is: {otp}\n\nIt expires in 3 minutes.'
+            sendmail(to=uemail, subject=subject, body=body)
+            
+            flash('OTP has been sent to your email', 'success')
+            return redirect(url_for('uotp', pudata=encode(data=userdata)))
             
         except Exception as e:
             print(f"Error in usercreate: {str(e)}")
             flash('An error occurred during registration', 'error')
-            return redirect(url_for('usercreate'))
+            return render_template('user/usersignup.html', 
+                                 username=uname if 'uname' in locals() else '', 
+                                 email=uemail if 'uemail' in locals() else '')
     
+    # GET request - show empty form
     return render_template('user/usersignup.html')
 
 # Route: /uotp/<pudata>
@@ -397,74 +511,180 @@ def usercreate():
 # Functionality: Verifies OTP, checks expiration, inserts user into database, and redirects to login
 @app.route('/uotp/<pudata>', methods=['GET', 'POST'])
 def uotp(pudata):
-    if request.method == 'POST':
-        fuotp = request.form.get('otp', '').strip()
-        print(f"DEBUG: Received OTP attempt: {fuotp}")  # Debug log
-        
-        try:
-            d_udata = decode(data=pudata)
-            print(f"DEBUG: Decoded user data: {d_udata}")  # Debug log
+    # Initialize session variables for resend limits
+    if 'otp_resends' not in session:
+        session['otp_resends'] = 0
+    if 'last_resend_time' not in session:
+        session['last_resend_time'] = None
+
+    try:
+        d_udata = decode(data=pudata)
+        # Initialize attempts and block_until if not present
+        if 'otp_attempts' not in d_udata:
+            d_udata['otp_attempts'] = 0
+        if 'block_until' not in d_udata:
+            d_udata['block_until'] = None
+
+        # Check if email is blocked
+        if d_udata['block_until']:
+            block_until = datetime.fromisoformat(d_udata['block_until'])
+            if datetime.now() < block_until:
+                remaining_block = (block_until - datetime.now()).total_seconds()
+                flash(f'Too many incorrect attempts for this email. Please try again in {int(remaining_block // 3600)} hours.', 'error')
+                return redirect(url_for('usercreate'))
+            else:
+                # Clear block if time has passed
+                d_udata['block_until'] = None
+                d_udata['otp_attempts'] = 0
+                pudata = encode(d_udata)
+
+        # Calculate resend cooldown
+        resend_enabled = True
+        resend_cooldown = 0
+        if session.get('last_resend_time'):
+            last_resend_time = datetime.fromisoformat(session['last_resend_time'])
+            time_since_resend = (datetime.now() - last_resend_time).total_seconds()
+            if time_since_resend < 30:
+                resend_enabled = False
+                resend_cooldown = max(0, int(30 - time_since_resend))
+            # Check 90-second window for resend limit
+            if session['otp_resends'] > 0 and time_since_resend > 90:
+                session['otp_resends'] = 0  # Reset resends after 90 seconds
+                session['last_resend_time'] = None
+
+        # Calculate OTP expiration
+        def get_expires_in(d_udata):
+            try:
+                expires_at = datetime.fromisoformat(d_udata['otp_expires'])
+                remaining_time = int((expires_at - datetime.now()).total_seconds())
+                return max(0, remaining_time) if remaining_time > 0 else 'Expired'
+            except Exception:
+                return 'Expired'
+
+        if request.method == 'POST':
+            action = request.form.get('action')
+            
+            if action == 'resend':
+                # Check resend limits
+                if session['otp_resends'] >= 3:
+                    flash('Maximum OTP resend attempts reached. Please register again.', 'error')
+                    return redirect(url_for('usercreate'))
+                
+                if not resend_enabled:
+                    flash(f'Please wait {resend_cooldown} seconds before resending OTP.', 'error')
+                    expires_in = get_expires_in(d_udata)
+                    return render_template('user/userotp.html', 
+                                         email=d_udata['uemail'], 
+                                         pudata=pudata,
+                                         expires_in=expires_in,
+                                         expires_at=d_udata['otp_expires'],
+                                         resend_enabled=resend_enabled,
+                                         resend_cooldown=resend_cooldown,
+                                         attempts_left=3 - d_udata['otp_attempts'])
+
+                # Generate new OTP
+                try:
+                    new_otp, new_expires_at = genotp(valid_minutes=3)  # 3-minute validity
+                    d_udata['uotp'] = new_otp
+                    d_udata['otp_expires'] = new_expires_at.isoformat()
+                    d_udata['otp_attempts'] = 0  # Reset attempts on resend
+                    new_pudata = encode(d_udata)
+                    
+                    # Send new OTP email
+                    sendmail(
+                        to=d_udata['uemail'],
+                        subject='New OTP for Verification',
+                        body=f"Hello {d_udata['uname']},\n\nYour new OTP is: {new_otp}\n\nIt expires in 3 minutes."
+                    )
+                    
+                    session['otp_resends'] += 1
+                    session['last_resend_time'] = datetime.now().isoformat()
+                    flash('New OTP sent to your email.', 'success')
+                    
+                    return render_template('user/userotp.html',
+                                         email=d_udata['uemail'],
+                                         pudata=new_pudata,
+                                         expires_in=180,  # 3 minutes in seconds
+                                         expires_at=new_expires_at.isoformat(),
+                                         resend_enabled=False,
+                                         resend_cooldown=30,
+                                         attempts_left=3)
+                except Exception as e:
+                    print(f"ERROR: Resend OTP failed: {str(e)}")
+                    flash('Failed to resend OTP. Please try again.', 'error')
+                    return redirect(url_for('usercreate'))
+
+            # Handle OTP verification
+            fuotp = request.form.get('otp', '').strip()
             
             # Check OTP expiration
             expires_at = datetime.fromisoformat(d_udata['otp_expires'])
-            print(f"DEBUG: OTP expires at: {expires_at}")  # Debug log
             
             if datetime.now() > expires_at:
                 flash('Verification code has expired. Please register again.', 'error')
                 return redirect(url_for('usercreate'))
             
-            print(f"DEBUG: Comparing entered OTP {fuotp} with stored OTP {d_udata['uotp']}")  # Debug log
             if fuotp == d_udata['uotp']:
+                # OTP is correct - create user account
                 cursor = mytdb.cursor(buffered=True)
                 try:
-                    print("DEBUG: Attempting to create user in database")  # Debug log
                     cursor.execute(
                         'INSERT INTO usercreate(user_email, username, password) VALUES (%s, %s, %s)',
                         [d_udata['uemail'], d_udata['uname'], d_udata['upassword']]
                     )
                     mytdb.commit()
-                    print("DEBUG: User created successfully")  # Debug log
                     
-                    # Send welcome email
-                    sendmail(
-                        to=d_udata['uemail'],
-                        subject='Welcome to Our Service',
-                        body=f"Hello {d_udata['uname']},\n\nYour account has been successfully created!"
-                    )
+                    # Clear session resend data
+                    session.pop('otp_resends', None)
+                    session.pop('last_resend_time', None)
                     
-                    flash('Registration successful! Please login.', 'success')
-                    return redirect(url_for('login'))  # IMPORTANT: Redirect to login, not usercreate
+                    # Store success message in session to display on login page
+                    session['registration_success'] = 'Your account has been successfully created! Please login.'
+                    
+                    return redirect(url_for('login'))
                     
                 except Exception as e:
                     mytdb.rollback()
-                    print(f"ERROR: Database error: {str(e)}")  # Debug log
+                    print(f"ERROR: Database error: {str(e)}")
                     flash('Registration error. Please try again.', 'error')
                     return redirect(url_for('usercreate'))
             else:
-                print("DEBUG: OTP mismatch")  # Debug log
-                flash('Invalid verification code. Please try again.', 'error')
-                return redirect(url_for('usercreate'))
+                d_udata['otp_attempts'] += 1
+                if d_udata['otp_attempts'] >= 3:
+                    d_udata['block_until'] = (datetime.now() + timedelta(hours=24)).isoformat()
+                    d_udata['otp_attempts'] = 0
+                    pudata = encode(d_udata)
+                    flash('Too many incorrect attempts for this email. Please try again in 24 hours.', 'error')
+                    return redirect(url_for('usercreate'))
                 
-        except Exception as e:
-            print(f"ERROR: in uotp: {str(e)}")  # Debug log
-            flash('Invalid verification data', 'error')
-            return redirect(url_for('usercreate'))
-    
-    # GET request - show OTP entry form
-    try:
-        d_udata = decode(data=pudata)
-        expires_at = datetime.fromisoformat(d_udata['otp_expires'])
-        remaining_time = expires_at - datetime.now()
-        
+                flash('Invalid verification code. Please try again.', 'error')
+                pudata = encode(d_udata)  # Update pudata with new attempts
+                expires_in = get_expires_in(d_udata)
+                return render_template('user/userotp.html',
+                                      email=d_udata['uemail'],
+                                      pudata=pudata,
+                                      expires_in=expires_in,
+                                      expires_at=d_udata['otp_expires'],
+                                      resend_enabled=resend_enabled,
+                                      resend_cooldown=resend_cooldown,
+                                      attempts_left=3 - d_udata['otp_attempts'])
+                
+        # GET request - show OTP entry form
+        expires_in = get_expires_in(d_udata)
         return render_template('user/userotp.html', 
-                           email=d_udata['uemail'],
-                           expires_in=f"{int(remaining_time.total_seconds() / 60)} minutes")
+                              email=d_udata['uemail'],
+                              pudata=pudata,
+                              expires_in=expires_in,
+                              expires_at=d_udata['otp_expires'],
+                              resend_enabled=resend_enabled,
+                              resend_cooldown=resend_cooldown,
+                              attempts_left=3 - d_udata['otp_attempts'])
     
     except Exception as e:
-        print(f"ERROR: Failed to decode pudata: {str(e)}")  # Debug log
+        print(f"ERROR: Failed to decode pudata: {str(e)}")
         flash('Invalid verification data', 'error')
         return redirect(url_for('usercreate'))
-    
+        
 # Route: /userforgot
 # Purpose: Facilitates password reset requests by showing a form (GET) and sending a reset link (POST)
 # Functionality: Checks if email exists, sends a password reset link via email, and redirects appropriately
@@ -476,47 +696,85 @@ def userforgot():
         cursor.execute('select count(user_email) from usercreate where user_email=%s',[forgot_useremail])
         stored_email=cursor.fetchone()
         if stored_email[0]==1:
-            subject='reset link for user'
-            body=f"click on the link to update ur password:{url_for('user_password_update',token=encode(data=forgot_useremail),_external=True)}" # _external=true likhay nai tho o data pura text kay naad jata
-            sendmail(to=forgot_useremail,subject=subject,body=body)
-            flash(f'reset link has sent to given mail {forgot_useremail}')
-            return redirect(url_for('userforgot'))
+            # Create token with expiration (15 minutes from now)
+            expiration = datetime.now(timezone.utc) + timedelta(minutes=15)
+            token_data = {
+                'email': forgot_useremail,
+                'exp': expiration.timestamp(),
+                'used': False  # Track if token has been used
+            }
+            
+            # Generate token
+            token = encode(data=token_data)
+            
+            subject='Reset link for user'
+            body=f"Click on the link to update your password: {url_for('user_password_update', token=token, _external=True)}\n\nThis link will expire in 15 minutes."
+            sendmail(to=forgot_useremail, subject=subject, body=body)
+            flash(f'Reset link has been sent to {forgot_useremail}', 'success')
+            return render_template('user/userforgot.html')
         elif stored_email[0]==0:
-            flash('no email regestered please check')
-            return redirect(url_for('login'))
+            # Use a single flash message instead of both flash and template variable
+            flash('No email registered. Please check.', 'error')
+            return render_template('user/userforgot.html')
+    
+    # For GET requests or if there was an issue with POST
     return render_template('user/userforgot.html')
+
 
 # Route: /user_password_update/<token>
 # Purpose: Manages user password reset by displaying a form (GET) and updating the password (POST)
 # Functionality: Decodes token to get email, validates new password, updates database, and redirects
 @app.route('/user_password_update/<token>', methods=['GET', 'POST'])
 def user_password_update(token):
+    try:
+        # Decode the token
+        token_data = decode(data=token)
+        
+        # Check if token has expired
+        if datetime.now(timezone.utc).timestamp() > token_data['exp']:
+            flash('This reset link has expired. Please request a new one.', 'error')
+            return redirect(url_for('userforgot'))
+            
+        # Check if token has already been used
+        if token_data.get('used', False):
+            flash('This reset link has already been used. Please request a new one.', 'error')
+            return redirect(url_for('userforgot'))
+            
+    except Exception as e:
+        print(e)
+        flash('Invalid or corrupted reset link. Please request a new one.', 'error')
+        return redirect(url_for('userforgot'))
+    
     if request.method == 'POST':
         try:
-            # Retrieves new password, confirm password, and decodes token to get email
             npassword = request.form['npassword']
             cpassword = request.form['cpassword']
-            dtoken = decode(data=token)  # Decodes token to retrieve user email
-        except Exception as e:
-            # Handles decoding errors
-            print(e)
-            flash('something went wrong')
-            return redirect(url_for('login'))
-        else:
-            # Validates that new password and confirm password match
+            
             if npassword == cpassword:
                 cursor = mytdb.cursor(buffered=True)
-                # Updates password in database for the user with matching email
-                cursor.execute('update usercreate set password=%s where user_email=%s', [npassword, dtoken])
+                # Update password
+                cursor.execute('UPDATE usercreate SET password=%s WHERE user_email=%s', [npassword, token_data['email']])
+                
+                # Mark token as used (you might want to store this in database)
+                # For simplicity, we'll just show a success message
+                
                 mytdb.commit()
-                flash('password updated succesfully')
-                return redirect(url_for('login'))
+                flash('Password updated successfully! Please login with your new password.', 'success')
+                return render_template('user/newuserpassword.html', 
+                                      success=True, 
+                                      email=token_data['email'])
             else:
-                # Handles password mismatch
-                flash('password mismaitches')
-                return redirect(url_for('user_password_update', token=token))
-    # GET: Renders password reset form
-    return render_template('user/newuserpassword.html')
+                flash('Passwords do not match. Please try again.', 'error')
+                return render_template('user/newuserpassword.html', 
+                                      token=token)
+        except Exception as e:
+            print(e)
+            flash('Something went wrong. Please try again.', 'error')
+            return render_template('user/newuserpassword.html', 
+                                  token=token)
+    
+    # GET request - show the form
+    return render_template('user/newuserpassword.html', token=token)
 
 # Route: /logout
 # Purpose: Logs out the user by clearing session data

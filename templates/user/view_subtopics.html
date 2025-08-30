@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ item_name }} - Subtopics</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <script src="https://unpkg.com/htmx.org@1.9.0"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
   <style>
     :root {
       /* Updated Primary Colors */
@@ -15,16 +16,16 @@
       --ocean-blue: #16213e;
       --emerald-green: #0f3460;
       --pure-white: #ffffff;
-      
+
       /* Updated Secondary Colors */
       --forest-green: #0d2857;
       --slate-gray: #4a4a68;
       --cloud-white: #e6e9f0;
-      
+
       /* Updated Accent Colors */
       --accent-primary: #e94560;
       --accent-secondary: #533483;
-      
+
       /* Shades and Tints */
       --white-90: rgba(255, 255, 255, 0.9);
       --white-85: rgba(255, 255, 255, 0.85);
@@ -36,17 +37,17 @@
       --white-20: rgba(255, 255, 255, 0.2);
       --white-15: rgba(255, 255, 255, 0.15);
       --white-10: rgba(255, 255, 255, 0.1);
-      
+
       --accent-tint-20: rgba(233, 69, 96, 0.2);
       --accent-tint-15: rgba(233, 69, 96, 0.15);
       --accent-tint-5: rgba(233, 69, 96, 0.05);
-      
+
       /* Grays */
       --light-gray: #f0f2f5;
       --lighter-gray: #e1e5eb;
       --border-gray: #d1d6de;
       --shadow-gray: rgba(0, 0, 0, 0.1);
-      
+
       /* Layout Variables */
       --navbar-1-height: 64px;
       --navbar-2-height: 48px;
@@ -96,11 +97,10 @@
 
     .logo {
       height: 48px;
-      width: 48px;
-      border-radius: 50%;
-      border: 2px solid var(--cloud-white);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      width: 200px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 10px rgba(233, 69, 96, 0.15);
       transition: all 0.3s ease;
+      border-radius: 0;
     }
 
     .logo:hover {
@@ -353,11 +353,11 @@
       background-color: var(--accent-secondary);
     }
 
-    .sidebar-collapsed + .sidebar-toggle {
+    .sidebar-collapsed+.sidebar-toggle {
       left: 0;
     }
 
-    .sidebar-collapsed + .sidebar-toggle i {
+    .sidebar-collapsed+.sidebar-toggle i {
       transform: rotate(180deg);
     }
 
@@ -368,6 +368,7 @@
       overflow-y: auto;
       min-height: calc(100vh - var(--combined-nav-height));
       background: var(--light-gray);
+      position: relative;
     }
 
     /* Subtopic Styles */
@@ -430,6 +431,45 @@
       font-weight: 500;
     }
 
+    /* Navigation Buttons */
+    .nav-button {
+      background-color: var(--accent-primary);
+      color: var(--pure-white);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      position: absolute;
+      top: 20px;
+      z-index: 10;
+      font-size: 0.9rem;
+      display: none; /* Hidden by default */
+    }
+
+    .nav-button.active {
+      display: block; /* Show buttons when active */
+    }
+
+    .nav-button:hover {
+      background-color: var(--accent-secondary);
+      transform: scale(1.05);
+    }
+
+    .nav-button:disabled {
+      background-color: var(--slate-gray);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #prevButton {
+      left: 20px;
+    }
+
+    #nextButton {
+      right: 20px;
+    }
+
     /* Fullscreen Mode */
     .fullscreen-toggle {
       position: fixed;
@@ -477,18 +517,18 @@
     /* Display Area */
     #displayArea {
       display: none;
-      margin-top: 1rem;
+      margin-top: 4rem; /* Increased to accommodate buttons */
     }
 
     .subtopic-title {
       font-size: 1.5rem;
       font-weight: bold;
       text-align: left;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
       color: var(--midnight-blue);
     }
 
-    .sidebar-nav-toggle[data-collapsed="true"] ~ .subtopic-container {
+    .sidebar-nav-toggle[data-collapsed="true"]~.subtopic-container {
       display: none;
     }
 
@@ -571,10 +611,13 @@
     }
 
     .search-result-item {
-      padding: 10px 15px;
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
       border-bottom: 1px solid var(--lighter-gray);
       cursor: pointer;
       transition: background-color 0.2s;
+      gap: 0.75rem;
     }
 
     .search-result-item:hover {
@@ -583,13 +626,18 @@
 
     .search-result-title {
       font-weight: 500;
+      font-size: 0.9rem;
       color: var(--midnight-blue);
+      margin-bottom: 0.1rem;
+      line-height: 1.2;
     }
 
     .search-result-meta {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--slate-gray);
-      margin-top: 3px;
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
     }
 
     .no-results {
@@ -602,7 +650,84 @@
       align-items: center;
     }
 
+    .result-section {
+      margin-bottom: 0.5rem;
+    }
+
+    .result-count {
+      margin-left: auto;
+      font-size: 0.75rem;
+      color: var(--slate-gray);
+    }
+
+    .result-section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--slate-gray);
+      background-color: var(--light-gray);
+      border-bottom: 1px solid var(--lighter-gray);
+    }
+
+    .search-result-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .result-arrow {
+      font-size: 0.8rem;
+      color: var(--slate-gray);
+    }
+
+    .search-footer {
+      padding: 0.5rem 0.75rem;
+      border-top: 1px solid var(--lighter-gray);
+    }
+
+    .search-tip {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--slate-gray);
+    }
+
+    .search-error,
+    .no-results {
+      padding: 0.75rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--slate-gray);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .search-error i,
+    .no-results i {
+      font-size: 1.2rem;
+      color: var(--accent-primary);
+    }
+
+    .search-result-icon {
+      font-size: 0.9rem;
+      color: var(--slate-gray);
+      width: 16px;
+      text-align: center;
+    }
+
     /* Responsive Styles */
+    @media (max-width: 1200px) {
+      .logo {
+        width: 180px;
+        height: 44px;
+      }
+    }
+
     @media (max-width: 992px) {
       .sidebar {
         position: fixed;
@@ -629,9 +754,27 @@
         box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
       }
 
-      .sidebar-collapsed + .sidebar-toggle {
+      .sidebar-collapsed+.sidebar-toggle {
         left: 0;
         background-color: var(--accent-primary);
+      }
+
+      .logo {
+        width: 160px;
+        height: 40px;
+      }
+
+      .nav-button {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+      }
+
+      #prevButton {
+        left: 15px;
+      }
+
+      #nextButton {
+        right: 15px;
       }
     }
 
@@ -657,8 +800,8 @@
       }
 
       .logo {
-        height: 40px;
-        width: 40px;
+        height: 36px;
+        width: 140px;
       }
 
       .company-name {
@@ -758,6 +901,23 @@
       .scroll-btn {
         display: block;
       }
+
+      .nav-button {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+
+      #prevButton {
+        left: 10px;
+      }
+
+      #nextButton {
+        right: 10px;
+      }
+
+      #displayArea {
+        margin-top: 3.5rem;
+      }
     }
 
     @media (max-width: 576px) {
@@ -772,8 +932,8 @@
       }
 
       .logo {
-        height: 36px;
-        width: 36px;
+        height: 32px;
+        width: 120px;
       }
 
       .company-name {
@@ -808,6 +968,23 @@
         width: 30px;
         font-size: 1rem;
       }
+
+      .nav-button {
+        padding: 5px 8px;
+        font-size: 0.75rem;
+      }
+
+      #prevButton {
+        left: 8px;
+      }
+
+      #nextButton {
+        right: 8px;
+      }
+
+      #displayArea {
+        margin-top: 3rem;
+      }
     }
 
     @media (max-width: 480px) {
@@ -828,26 +1005,72 @@
       .company-name {
         font-size: 1rem;
       }
+
+      .logo {
+        width: 100px;
+        height: 28px;
+      }
+
+      .nav-button {
+        padding: 4px 6px;
+        font-size: 0.7rem;
+      }
+
+      #prevButton {
+        left: 5px;
+      }
+
+      #nextButton {
+        right: 5px;
+      }
+
+      #displayArea {
+        margin-top: 2.5rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .logo {
+        width: 90px;
+        height: 24px;
+      }
+
+      .nav-button {
+        padding: 3px 5px;
+        font-size: 0.65rem;
+      }
+
+      #prevButton {
+        left: 3px;
+      }
+
+      #nextButton {
+        right: 3px;
+      }
+
+      #displayArea {
+        margin-top: 2rem;
+      }
     }
   </style>
 </head>
+
 <body>
   <!-- First Navbar -->
   <nav class="navbar-1">
     <button class="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
       <i class="fas fa-bars"></i>
     </button>
-    <div class="logo-container">
-      <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Company Logo" class="logo">
-      <span class="company-name logo-text">Televerse</span>
-    </div>
+    <a href="{{ url_for('home') }}" class="logo-container">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Company Logo" class="logo">
+    </a>
     <div class="search-container">
       <form id="searchForm" class="search-form">
         <div class="input-group">
           <i class="fas fa-search search-icon"></i>
           <input type="text" name="query" class="form-control search-input" placeholder="Search courses, topics..."
-                 hx-get="{{ url_for('search') }}" hx-trigger="input changed delay:100ms" hx-target="#searchResultsContainer"
-                 hx-swap="innerHTML" hx-indicator=".search-loading" autocomplete="off" aria-label="Search">
+            hx-get="{{ url_for('search') }}" hx-trigger="input changed delay:100ms" hx-target="#searchResultsContainer"
+            hx-swap="innerHTML" hx-indicator=".search-loading" autocomplete="off" aria-label="Search">
           <div class="search-loading htmx-indicator">
             <i class="fas fa-spinner fa-spin"></i>
           </div>
@@ -918,7 +1141,7 @@
       <div class="subtopic-container">
         <div class="subtopic-wrapper" id="subtopic-{{ sub.id }}">
           <div class="subtopic-item" data-title="{{ sub.title }}" data-content="{{ sub.content | e }}"
-               onclick="handleSubtopicClick(this)">
+            onclick="handleSubtopicClick(this)">
             {{ sub.title }}
           </div>
           {% if sub.sub_subtopics %}
@@ -930,7 +1153,7 @@
         <div id="subsubtopics-{{ sub.id }}" class="subsubtopic-list">
           {% for subsub in sub.sub_subtopics %}
           <div class="subsubtopic-item" id="sub-subtopic-{{ subsub.id }}" data-title="{{ subsub.title }}"
-               data-content="{{ subsub.content }}" onclick="showSubSubtopic(event, this)">
+            data-content="{{ subsub.content }}" onclick="showSubSubtopic(event, this)">
             {{ subsub.title }}
           </div>
           {% endfor %}
@@ -941,6 +1164,8 @@
 
     <!-- Content Area -->
     <div class="content" id="mainContent">
+      <button class="nav-button" id="prevButton" onclick="navigateSidebar(-1)">Previous</button>
+      <button class="nav-button" id="nextButton" onclick="navigateSidebar(1)">Next</button>
       <div id="displayArea">
         <div class="subtopic-title" id="displayTitle"></div>
         <div id="displayContent" class="rich-content-container"></div>
@@ -954,7 +1179,7 @@
   </button>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       // Mobile menu toggle
       const menuToggle = document.querySelector('.menu-toggle');
       const navLinks = document.querySelector('.nav-1-links');
@@ -975,7 +1200,7 @@
 
       // Menu toggle functionality
       if (menuToggle && navLinks) {
-        menuToggle.addEventListener('click', function() {
+        menuToggle.addEventListener('click', function () {
           const isExpanded = navLinks.classList.toggle('active');
           this.setAttribute('aria-expanded', isExpanded);
           this.querySelector('i').classList.toggle('fa-bars');
@@ -983,17 +1208,17 @@
         });
 
         // Close menu when clicking outside
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
           if (!e.target.closest('.navbar-1') && navLinks.classList.contains('active')) {
             navLinks.classList.remove('active');
             menuToggle.setAttribute('aria-expanded', 'false');
             menuToggle.querySelector('i').classList.add('fa-bars');
-            menuToggle.querySelector('i').classnelist.remove('fa-times');
+            menuToggle.querySelector('i').classList.remove('fa-times');
           }
         });
 
         // Handle window resize
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', function () {
           if (window.innerWidth > 768) {
             navLinks.classList.remove('active');
             menuToggle.setAttribute('aria-expanded', 'false');
@@ -1002,13 +1227,6 @@
           }
         });
       }
-
-      // Close sidebar when clicking outside
-      document.addEventListener('click', function(e) {
-        if (!e.target.closest('.sidebar') && !e.target.closest('.sidebar-toggle') && !sidebar.classList.contains('sidebar-collapsed')) {
-          toggleSidebar();
-        }
-      });
 
       // Search functionality
       const searchInput = document.querySelector('.search-input');
@@ -1020,11 +1238,11 @@
           if (!show) searchResults.innerHTML = '';
         };
 
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
           toggleResults(this.value.trim().length > 0);
         });
 
-        searchInput.addEventListener('focus', function() {
+        searchInput.addEventListener('focus', function () {
           if (this.value.trim().length > 0) toggleResults(true);
         });
 
@@ -1048,6 +1266,9 @@
           if (routes[type]) window.location.href = routes[type];
         });
       }
+
+      // Initialize navigation buttons
+      updateNavButtons();
     });
 
     // Sidebar toggle functionality
@@ -1085,15 +1306,24 @@
       }
     }
 
+    // Function to toggle navigation buttons visibility
+    function toggleNavButtons(show) {
+      const prevButton = document.getElementById('prevButton');
+      const nextButton = document.getElementById('nextButton');
+      prevButton.classList.toggle('active', show);
+      nextButton.classList.toggle('active', show);
+    }
+
     // Subtopic functions
     function handleSubtopicClick(element) {
       const title = element.dataset.title;
       const content = element.dataset.content;
       const subtopicId = element.closest('.subtopic-wrapper').id.replace('subtopic-', '');
+      const displayArea = document.getElementById('displayArea');
 
       document.getElementById('displayTitle').innerText = title;
       document.getElementById('displayContent').innerHTML = content;
-      document.getElementById('displayArea').style.display = 'block';
+      displayArea.style.display = 'block';
       history.pushState(null, null, `#subtopic-${subtopicId}`);
 
       document.querySelectorAll('.subtopic-wrapper, .subsubtopic-item').forEach(el => {
@@ -1101,10 +1331,8 @@
       });
       element.closest('.subtopic-wrapper').classList.add('active');
 
-      const sidebar = document.getElementById('mainSidebar');
-      if (!sidebar.classList.contains('sidebar-collapsed')) {
-        toggleSidebar();
-      }
+      toggleNavButtons(true); // Show navigation buttons
+      updateNavButtons();
     }
 
     function toggleSubSubtopics(subtopicId, event) {
@@ -1127,10 +1355,11 @@
       const title = target.dataset.title;
       const content = target.dataset.content;
       const subsubtopicId = target.id.replace('sub-subtopic-', '');
+      const displayArea = document.getElementById('displayArea');
 
       document.getElementById('displayTitle').innerText = title;
       document.getElementById('displayContent').innerHTML = content;
-      document.getElementById('displayArea').style.display = 'block';
+      displayArea.style.display = 'block';
       history.pushState(null, null, `#sub-subtopic-${subsubtopicId}`);
 
       document.querySelectorAll('.subtopic-wrapper, .subsubtopic-item').forEach(el => {
@@ -1139,10 +1368,83 @@
       target.classList.add('active');
       target.closest('.subtopic-wrapper').classList.add('active');
 
-      const sidebar = document.getElementById('mainSidebar');
-      if (!sidebar.classList.contains('sidebar-collapsed')) {
-        toggleSidebar();
+      toggleNavButtons(true); // Show navigation buttons
+      updateNavButtons();
+    }
+
+    // Navigation functions
+    function getAllSidebarItems() {
+      const items = [];
+      document.querySelectorAll('.subtopic-item').forEach(subtopic => {
+        items.push(subtopic);
+        const subtopicId = subtopic.closest('.subtopic-wrapper').id.replace('subtopic-', '');
+        const subsubtopics = document.querySelectorAll(`#subsubtopics-${subtopicId} .subsubtopic-item`);
+        subsubtopics.forEach(subsub => items.push(subsub));
+      });
+      return items;
+    }
+
+    function getCurrentIndex() {
+      const items = getAllSidebarItems();
+      return items.findIndex(item => 
+        item.classList.contains('active') || 
+        item.closest('.subtopic-wrapper')?.classList.contains('active')
+      );
+    }
+
+    function navigateSidebar(direction) {
+      const items = getAllSidebarItems();
+      const currentIndex = getCurrentIndex();
+      const newIndex = currentIndex + direction;
+
+      if (direction === -1 && currentIndex === 0) {
+        // Redirect to home page for the first item
+        window.location.href = "{{ url_for('home') }}";
+        return;
       }
+
+      if (newIndex >= 0 && newIndex < items.length) {
+        const targetItem = items[newIndex];
+        if (targetItem.classList.contains('subtopic-item')) {
+          handleSubtopicClick(targetItem);
+          // Expand parent subtopic if collapsed
+          const subtopicWrapper = targetItem.closest('.subtopic-wrapper');
+          const subtopicId = subtopicWrapper.id.replace('subtopic-', '');
+          const subsubtopicContainer = document.getElementById(`subsubtopics-${subtopicId}`);
+          if (subsubtopicContainer && subsubtopicContainer.style.display === 'none') {
+            toggleSubSubtopics(subtopicId, { stopPropagation: () => {} });
+          }
+        } else {
+          showSubSubtopic({ stopPropagation: () => {} }, targetItem);
+          // Expand parent subtopic if collapsed
+          const subtopicWrapper = targetItem.closest('.subtopic-wrapper');
+          const subtopicId = subtopicWrapper.id.replace('subtopic-', '');
+          const subsubtopicContainer = document.getElementById(`subsubtopics-${subtopicId}`);
+          if (subsubtopicContainer && subsubtopicContainer.style.display === 'none') {
+            toggleSubSubtopics(subtopicId, { stopPropagation: () => {} });
+          }
+        }
+        // Scroll to the selected item
+        targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      updateNavButtons();
+    }
+
+    function updateNavButtons() {
+      const items = getAllSidebarItems();
+      const currentIndex = getCurrentIndex();
+      const prevButton = document.getElementById('prevButton');
+      const nextButton = document.getElementById('nextButton');
+
+      if (currentIndex === 0) {
+        prevButton.innerText = 'Home';
+        prevButton.disabled = false; // Ensure Home button is always enabled
+      } else {
+        prevButton.innerText = 'Previous';
+        prevButton.disabled = currentIndex <= -1; // Disable if no item is selected
+      }
+
+      nextButton.disabled = currentIndex >= items.length - 1 || currentIndex === -1;
     }
 
     // Navbar scrolling
@@ -1155,7 +1457,7 @@
     document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
     document.getElementById('fullscreenToggle').addEventListener('click', toggleFullscreen);
 
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
       if (isFullscreen && e.key === 'Escape') {
         toggleFullscreen();
       }
@@ -1173,8 +1475,11 @@
           showSubSubtopic({ stopPropagation: () => {} }, element);
         }
       }
+    } else {
+      toggleNavButtons(false); // Hide navigation buttons on initial load if no subtopic is selected
     }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

@@ -3,157 +3,441 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OTP Verification</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Admin OTP Verification - Televerse</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        /* Consistent with your project's dark theme */
         :root {
-            --primary-color: #3498db;
-            --secondary-color: #2ecc71;
-            --dark-color: #2c3e50;
-            --light-color: #ecf0f1;
-            --danger-color: #e74c3c;
+            /* Primary Colors */
+            --midnight-blue: #1a1a2e;
+            --ocean-blue: #16213e;
+            --emerald-green: #0f3460;
+            --pure-white: #ffffff;
+            /* Secondary Colors */
+            --forest-green: #0d2857;
+            --slate-gray: #4a4a68;
+            --cloud-white: #e6e9f0;
+            /* Accent Colors */
+            --accent-primary: #e94560;
+            --accent-secondary: #533483;
+            /* Shades and Tints */
+            --accent-tint-20: rgba(233, 69, 96, 0.2);
+            --accent-secondary-tint-20: rgba(83, 52, 131, 0.2);
+            /* Grays */
+            --light-gray: #f0f2f5;
+            --lighter-gray: #e1e5eb;
+            --border-gray: #d1d6de;
+            --shadow-gray: rgba(0, 0, 0, 0.1);
         }
 
         body {
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: url('https://images.unsplash.com/photo-1614064641936-44b5cb032329?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: url(https://static.vecteezy.com/system/resources/thumbnails/007/164/537/small_2x/fingerprint-identity-sensor-data-protection-system-podium-hologram-blue-light-and-concept-free-vector.jpg) no-repeat center center fixed;
-            background-size: cover;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 20px;
+            line-height: 1.5;
         }
 
-        .otp-card {
+        /* ============= CARD CONTAINER ============= */
+        .otp-container {
             width: 100%;
-            max-width: 350px;
-            background: rgba(44, 62, 80, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 30px;
+            max-width: 420px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid var(--border-gray);
             backdrop-filter: blur(8px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            color: white;
         }
 
+        /* ============= HEADER SECTION ============= */
         .otp-header {
+            background-color: var(--midnight-blue);
+            color: var(--pure-white);
+            padding: 25px;
             text-align: center;
-            margin-bottom: 25px;
         }
 
         .otp-header h2 {
-            color: var(--light-color);
+            margin: 0;
+            font-size: 1.6rem;
             font-weight: 600;
         }
 
-        .form-label {
-            color: var(--light-color);
-            font-weight: 500;
-        }
-
-        .form-control {
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 12px 15px;
+        .logo {
+            width: 120px;
             margin-bottom: 15px;
         }
 
-        .form-control:focus {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        /* ============= FORM ELEMENTS ============= */
+        .otp-form {
+            padding: 25px;
         }
 
-        .btn-submit {
+        .form-group {
+            margin: 1rem 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--midnight-blue);
+        }
+
+        .otp-input, .admin-id-input {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1rem;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            background: var(--light-gray);
+            color: var(--midnight-blue);
+            transition: all 0.3s ease;
+        }
+
+        .otp-input:focus, .admin-id-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-tint-20);
+        }
+
+        .instructions {
+            font-size: 0.85rem;
+            color: var(--slate-gray);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        /* ============= BUTTONS ============= */
+        .btn-verify, .btn-resend {
             width: 100%;
             padding: 12px;
-            background-color: var(--primary-color);
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--pure-white);
             border: none;
-            border-radius: 6px;
-            color: white;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: 500;
-            transition: all 0.3s;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .btn-submit:hover {
-            background-color: #2980b9;
+        .btn-verify:hover, .btn-resend:not(:disabled):hover {
+            background: linear-gradient(90deg, var(--accent-secondary), var(--accent-primary));
             transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
         }
 
-        .flash-message {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            color: bisque;
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 1000;
-            max-width: 90%;
+        .btn-resend:disabled {
+            background: var(--border-gray);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-verify i, .btn-resend i {
+            margin-right: 0.5rem;
+        }
+
+        /* ============= FLASH MESSAGES ============= */
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+            box-shadow: 0 4px 10px var(--shadow-gray);
+            color: var(--pure-white);
+        }
+
+        .alert-success {
+            background-color: var(--accent-secondary);
+            border-left-color: var(--accent-primary);
+        }
+
+        .alert-error {
+            background-color: var(--accent-primary);
+            border-left-color: var(--accent-secondary);
+        }
+
+        .alert .close-btn {
+            background: none;
+            border: none;
+            color: var(--pure-white);
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0 10px;
+            float: right;
+        }
+
+        .alert .close-btn:hover {
+            opacity: 0.8;
+            color: var(--cloud-white);
+        }
+
+        /* ============= LINKS ============= */
+        .otp-links {
             text-align: center;
+            margin-top: 20px;
+            color: var(--slate-gray);
+            font-size: 0.95rem;
+        }
+
+        .otp-links a {
+            color: var(--accent-primary);
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s;
+            margin: 0 10px;
+        }
+
+        .otp-links a:hover {
+            color: var(--accent-secondary);
+            text-decoration: underline;
+        }
+
+        /* ============= TIMER ============= */
+        .timer {
+            font-size: 0.95rem;
+            color: var(--slate-gray);
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        /* ============= RESPONSIVE ADJUSTMENTS ============= */
+        @media (max-width: 1200px) {
+            .logo {
+                width: 180px;
+                height: 44px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .logo {
+                width: 160px;
+                height: 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                width: 100px;
+            }
+            
+            .otp-header h2 {
+                font-size: 1.4rem;
+            }
+            
+            .otp-container {
+                max-width: 90%;
+            }
         }
 
         @media (max-width: 576px) {
-            .otp-card {
-                padding: 25px 20px;
+            body {
+                background-attachment: scroll;
             }
             
+            .logo {
+                width: 120px;
+                height: 32px;
+            }
+        }
+
+        @media (max-width: 480px) {
             body {
-                padding: 15px;
-                background-attachment: scroll;
+                padding: 0;
+                background: var(--pure-white);
+            }
+            
+            .otp-container {
+                border-radius: 0;
+                box-shadow: none;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            
+            .otp-header {
+                border-radius: 0;
+                padding: 20px;
+            }
+            
+            .otp-form {
+                padding: 20px 15px;
+            }
+            
+            .form-group {
+                margin: 1rem;
+            }
+            
+            .logo {
+                width: 100px;
+                height: 28px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .otp-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .otp-input, .admin-id-input {
+                padding: 10px;
+                font-size: 0.95rem;
+            }
+            
+            .btn-verify, .btn-resend {
+                padding: 10px;
+            }
+            
+            .logo {
+                width: 90px;
+                height: 24px;
             }
         }
     </style>
 </head>
 <body>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="flash-message">
-                {% for message in messages %}
-                    {{ message }}
-                {% endfor %}
-                <script>
-                    setTimeout(() => {
-                        document.querySelector('.flash-message').style.display = 'none';
-                    }, 5000);
-                </script>
-            </div>
-        {% endif %}
-    {% endwith %}
-
-    <div class="otp-card">
+    <div class="otp-container">
         <div class="otp-header">
-            <h2><i class="bi bi-shield-lock"></i> OTP Verification</h2>
+            <a href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Televerse Logo" class="logo">
+            </a>
+            <h2><i class="bi bi-shield-lock"></i> Admin OTP Verification</h2>
         </div>
-        
-        <form method="post">
-            <!-- CSRF Token Protection -->
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            
-            <div class="mb-3">
-                <label for="otp" class="form-label">Enter your OTP</label>
-                <input type="text" class="form-control" id="otp" name="otp" placeholder="6-digit code" required>
-                <!-- <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> -->
+
+        <div class="otp-form">
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'success' if category == 'success' else 'error' }}">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                            <span>{{ message }}</span>
+                            <button type="button" class="close-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('admin_otp_verify') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label for="otp" class="form-label">Enter verification code for {{ session['admin_temp']['email'] }}</label>
+                    <input type="text" class="otp-input" id="otp" name="otp" placeholder="6-digit code" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" required>
+                    <p class="instructions">Enter the 6-digit numeric code</p>
+                </div>
+                <div class="form-group">
+                    <label for="admin_id" class="form-label">Enter your Admin ID</label>
+                    <input type="text" class="admin-id-input" id="admin_id" name="admin_id" placeholder="Enter Admin ID" required pattern="[0-9]+" title="Please enter numbers only">
+                    <p class="instructions">Enter your numeric Admin ID</p>
+                </div>
+                <button type="submit" class="btn-verify" name="action" value="verify">
+                    <i class="bi bi-check-circle"></i> Verify & Continue
+                </button>
+            </form>
+
+            <form method="POST" action="{{ url_for('admin_otp_verify') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="resend">
+                <button type="submit" class="btn-resend" id="resend-btn" {% if not resend_enabled %}disabled{% endif %}>
+                    <i class="bi bi-arrow-repeat"></i> Resend OTP
+                </button>
+            </form>
+
+            <div class="otp-links">
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('usercreate') }}">Sign Up</a>
             </div>
-            <div class="mb-3">
-    <label for="admin_id" class="form-label">Enter your Admin ID</label>
-    <input type="text" class="form-control" id="admin_id" name="admin_id" 
-           placeholder="Enter Admin ID" required pattern="[0-9]+" title="Please enter numbers only">
-    <small class="text-muted">Enter your numeric Admin ID</small>
-</div>
-            
-            <button type="submit" class="btn-submit">
-                <i class="bi bi-check-circle"></i> Verify OTP
-            </button>
-        </form>
+
+            <div class="timer">
+                OTP expires in: <span id="otp-timer"></span>
+            </div>
+            <div class="timer">
+                Attempts left: <span id="attempts-left">{{ attempts_left }}</span>
+            </div>
+            <div class="timer">
+                Resend available in: <span id="resend-timer">{{ resend_cooldown }}</span> seconds
+            </div>
+        </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss flash messages
+        document.querySelectorAll('.alert').forEach(flash => {
+            flash.querySelector('.close-btn')?.addEventListener('click', () => {
+                flash.style.transition = 'opacity 0.5s ease';
+                flash.style.opacity = '0';
+                setTimeout(() => flash.remove(), 500);
+            });
+            setTimeout(() => {
+                flash.style.transition = 'opacity 0.5s ease';
+                flash.style.opacity = '0';
+                setTimeout(() => flash.remove(), 500);
+            }, 5000);
+        });
+
+        // Focus on OTP input on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('otp').focus();
+
+            // Real-time OTP expiration timer
+            const otpTimer = document.getElementById('otp-timer');
+            const expiresAtStr = "{{ expires_at | default('', true) | safe }}";
+
+            if (expiresAtStr) {
+                const expiresAt = new Date(expiresAtStr);
+                if (!isNaN(expiresAt)) {
+                    const updateTimer = () => {
+                        const now = new Date();
+                        const diffMs = expiresAt - now;
+                        const diffSec = Math.floor(diffMs / 1000);
+                        if (diffSec <= 0) {
+                            otpTimer.textContent = 'Expired';
+                            clearInterval(timerInterval);
+                            return;
+                        }
+                        const minutes = Math.floor(diffSec / 60);
+                        const seconds = diffSec % 60;
+                        otpTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    };
+                    updateTimer();
+                    const timerInterval = setInterval(updateTimer, 1000);
+                } else {
+                    otpTimer.textContent = 'Expired';
+                }
+            } else {
+                otpTimer.textContent = 'Expired';
+            }
+
+            // Resend cooldown timer
+            const resendTimer = document.getElementById('resend-timer');
+            const resendBtn = document.getElementById('resend-btn');
+            let cooldown = parseInt(resendTimer.textContent) || 0;
+
+            if (cooldown > 0) {
+                const countdown = () => {
+                    cooldown--;
+                    resendTimer.textContent = `${cooldown} seconds`;
+                    if (cooldown <= 0) {
+                        resendTimer.textContent = '0 seconds';
+                        resendBtn.disabled = false;
+                        clearInterval(cooldownInterval);
+                    }
+                };
+                const cooldownInterval = setInterval(countdown, 1000);
+            }
+        });
+    </script>
 </body>
 </html>

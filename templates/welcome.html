@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,16 +17,16 @@
             --ocean-blue: #16213e;
             --emerald-green: #0f3460;
             --pure-white: #ffffff;
-            
+
             /* Updated Secondary Colors */
             --forest-green: #0d2857;
             --slate-gray: #4a4a68;
             --cloud-white: #e6e9f0;
-            
+
             /* Updated Accent Colors */
             --accent-primary: #e94560;
             --accent-secondary: #533483;
-            
+
             /* Shades and Tints */
             --white-90: rgba(255, 255, 255, 0.9);
             --white-85: rgba(255, 255, 255, 0.85);
@@ -37,17 +38,17 @@
             --white-20: rgba(255, 255, 255, 0.2);
             --white-15: rgba(255, 255, 255, 0.15);
             --white-10: rgba(255, 255, 255, 0.1);
-            
+
             --accent-tint-20: rgba(233, 69, 96, 0.2);
             --accent-tint-15: rgba(233, 69, 96, 0.15);
             --accent-tint-5: rgba(233, 69, 96, 0.05);
-            
+
             /* Grays */
             --light-gray: #f0f2f5;
             --lighter-gray: #e1e5eb;
             --border-gray: #d1d6de;
             --shadow-gray: rgba(0, 0, 0, 0.1);
-            
+
             /* Layout Variables */
             --navbar-1-height: 64px;
             --navbar-2-height: 48px;
@@ -97,12 +98,11 @@
         }
 
         .logo {
-            height: 48px;
-            width: 48px;
-            border-radius: 50%;
-            border: 2px solid var(--cloud-white);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
+          height: 48px;
+    width: 200px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 10px rgba(233, 69, 96, 0.15); /* Rose glow retained */
+    transition: all 0.3s ease;
+    border-radius: 0;
         }
 
         .logo:hover {
@@ -389,13 +389,14 @@
         }
 
         .search-result-item {
-            padding: 8px 12px;
+            padding: 0.5rem 0.75rem;
             border-bottom: 1px solid var(--lighter-gray);
             cursor: pointer;
             transition: background-color 0.2s ease;
             display: flex;
-            flex-direction: column;
-            gap: 4px;
+            /* flex-direction: column; */
+            gap: 0.75px;
+            align-items: center;
         }
 
         .search-result-item:hover {
@@ -405,15 +406,18 @@
         .search-result-title {
             font-weight: 500;
             font-size: 0.95rem;
-            color: var(--midnight-blue);
+            color: var(--midnight-blue) !important;
+            margin-bottom: 0.1rem;
+            line-height: 1.2;
         }
 
         .search-result-meta {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--slate-gray);
+            line-height: 1.2;
             display: flex;
             align-items: center;
-            gap: 6px;
+            /* gap: 6px; */
         }
 
         .search-result-meta i {
@@ -469,9 +473,84 @@
             z-index: 1;
         }
 
+        .result-section {
+            margin-bottom: 0.5rem;
+        }
+
+        .result-count {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--slate-gray);
+        }
+
+        .result-section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--slate-gray);
+            background-color: var(--light-gray);
+            border-bottom: 1px solid var(--lighter-gray);
+        }
+
+        .search-result-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .result-arrow {
+            font-size: 0.8rem;
+            color: var(--slate-gray);
+        }
+
+        .search-footer {
+            padding: 0.5rem 0.75rem;
+            border-top: 1px solid var(--lighter-gray);
+        }
+
+        .search-tip {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--slate-gray);
+        }
+
+        .search-error,
+        .no-results {
+            padding: 0.75rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--slate-gray);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-error i,
+        .no-results i {
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+        }
+
+        .search-result-icon {
+            font-size: 0.9rem;
+            color: var(--slate-gray);
+            width: 16px;
+            text-align: center;
+        }
+
         @keyframes pattern-move {
-            0% { background-position: 0 0; }
-            100% { background-position: 50px 50px; }
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 50px 50px;
+            }
         }
 
         .banner-content {
@@ -521,9 +600,17 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         .banner-decor {
@@ -552,7 +639,8 @@
             box-shadow: 0 2px 10px var(--shadow-gray);
         }
 
-        .course-card, .feature-card {
+        .course-card,
+        .feature-card {
             flex: 1 1 300px;
             max-width: 300px;
             background: var(--pure-white);
@@ -567,13 +655,15 @@
             align-items: center;
         }
 
-        .course-card h3, .feature-card h3 {
+        .course-card h3,
+        .feature-card h3 {
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
             color: var(--midnight-blue);
         }
 
-        .course-card p, .feature-card p {
+        .course-card p,
+        .feature-card p {
             color: var(--slate-gray);
             font-size: 0.9rem;
             margin-bottom: 1rem;
@@ -593,14 +683,14 @@
             background: white;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
-            border: 1px solid rgba(0,0,0,0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .course-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
         }
 
         .course-image {
@@ -646,8 +736,8 @@
         .features-section {
             padding: 4rem 1rem;
             background: var(--pure-white);
-            border-top: 1px solid rgba(0,0,0,0.05);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .features-container {
@@ -676,15 +766,15 @@
             padding: 2rem;
             text-align: center;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             flex: 0 0 300px;
             min-width: 300px;
         }
 
         .feature-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
         .feature-icon {
@@ -791,6 +881,10 @@
             .banner-subtitle {
                 font-size: 1.2rem;
             }
+            .logo {
+        width: 160px;
+        height: 40px;
+    }
         }
 
         @media (max-width: 768px) {
@@ -810,9 +904,9 @@
             }
 
             .logo {
-                height: 40px;
-                width: 40px;
-            }
+        width: 140px;
+        height: 36px;
+    }
 
             .company-name {
                 font-size: 1.2rem;
@@ -944,12 +1038,18 @@
                 text-align: center;
             }
 
-            .course-card, .feature-card {
+            .course-card,
+            .feature-card {
                 flex: 1 1 100%;
                 max-width: 100%;
             }
         }
-
+@media (max-width: 1200px) {
+    .logo {
+        width: 180px;
+        height: 44px;
+    }
+}
         @media (max-width: 576px) {
             :root {
                 --navbar-1-height: 50px;
@@ -962,9 +1062,9 @@
             }
 
             .logo {
-                height: 36px;
-                width: 36px;
-            }
+        width: 120px;
+        height: 32px;
+    }
 
             .company-name {
                 font-size: 1.1rem;
@@ -1041,26 +1141,37 @@
             .course-card {
                 min-height: auto;
             }
+            .logo {
+        width: 100px;
+        height: 28px;
+    }
         }
+        @media (max-width: 360px) {
+    .logo {
+        width: 90px;
+        height: 24px;
+    }
+}
     </style>
 </head>
+
 <body>
     <!-- First Navbar -->
     <nav class="navbar-1">
         <button class="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div class="logo-container">
-            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Company Logo" class="logo">
-            <span class="company-name logo-text">Televerse</span>
-        </div>
+        <i class="fas fa-bars"></i>
+    </button>
+    <a href="{{ url_for('home') }}" class="logo-container">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Company Logo" class="logo">
+    </a>
         <div class="search-container">
             <form id="searchForm" class="search-form">
                 <div class="input-group">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" name="query" class="form-control search-input" placeholder="Search courses, topics..."
-                           hx-get="{{ url_for('search') }}" hx-trigger="input changed delay:100ms" hx-target="#searchResultsContainer"
-                           hx-swap="innerHTML" hx-indicator=".search-loading" autocomplete="off" aria-label="Search">
+                    <input type="text" name="query" class="form-control search-input"
+                        placeholder="Search courses, topics..." hx-get="{{ url_for('search') }}"
+                        hx-trigger="input changed delay:100ms" hx-target="#searchResultsContainer" hx-swap="innerHTML"
+                        hx-indicator=".search-loading" autocomplete="off" aria-label="Search">
                     <div class="search-loading htmx-indicator">
                         <i class="fas fa-spinner fa-spin"></i>
                     </div>
@@ -1122,7 +1233,8 @@
         <div class="banner-pattern"></div>
         <div class="banner-content">
             <h1 class="banner-title">Unlock Your Learning Potential</h1>
-            <p class="banner-subtitle">Discover interactive courses, quizzes, and calculators designed to make learning engaging and effective for every student.</p>
+            <p class="banner-subtitle">Discover interactive courses, quizzes, and calculators designed to make learning
+                engaging and effective for every student.</p>
             <a href="#" class="banner-cta">Explore Courses</a>
             <div class="banner-decor"><i class="fas fa-graduation-cap"></i></div>
         </div>
@@ -1131,10 +1243,13 @@
     <div class="main-content">
         <section class="course-grid">
             <div class="course-card">
-                <div class="course-image" style="background-image: url('https://images.pexels.com/photos/6238050/pexels-photo-6238050.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');"></div>
+                <div class="course-image"
+                    style="background-image: url('https://images.pexels.com/photos/6238050/pexels-photo-6238050.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');">
+                </div>
                 <div class="course-content">
                     <h3 class="course-title">Mathematics Fundamentals</h3>
-                    <p class="course-desc">Master the basics of algebra, geometry, and calculus with our interactive lessons.</p>
+                    <p class="course-desc">Master the basics of algebra, geometry, and calculus with our interactive
+                        lessons.</p>
                     <div class="course-meta">
                         <span><i class="fas fa-book-open"></i> 12 Lessons</span>
                         <span><i class="fas fa-user-graduate"></i> Beginner</span>
@@ -1142,10 +1257,13 @@
                 </div>
             </div>
             <div class="course-card">
-                <div class="course-image" style="background-image: url('https://images.pexels.com/photos/256381/pexels-photo-256381.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');"></div>
+                <div class="course-image"
+                    style="background-image: url('https://images.pexels.com/photos/256381/pexels-photo-256381.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');">
+                </div>
                 <div class="course-content">
                     <h3 class="course-title">Physics Basics</h3>
-                    <p class="course-desc">Explore the fundamentals of motion, energy, and forces with engaging exercises.</p>
+                    <p class="course-desc">Explore the fundamentals of motion, energy, and forces with engaging
+                        exercises.</p>
                     <div class="course-meta">
                         <span><i class="fas fa-book-open"></i> 10 Lessons</span>
                         <span><i class="fas fa-user-graduate"></i> Beginner</span>
@@ -1153,10 +1271,13 @@
                 </div>
             </div>
             <div class="course-card">
-                <div class="course-image" style="background-image: url('https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');"></div>
+                <div class="course-image"
+                    style="background-image: url('https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');">
+                </div>
                 <div class="course-content">
                     <h3 class="course-title">Chemistry Essentials</h3>
-                    <p class="course-desc">Learn the basics of chemical reactions and elements with interactive labs.</p>
+                    <p class="course-desc">Learn the basics of chemical reactions and elements with interactive labs.
+                    </p>
                     <div class="course-meta">
                         <span><i class="fas fa-book-open"></i> 11 Lessons</span>
                         <span><i class="fas fa-user-graduate"></i> Beginner</span>
@@ -1164,7 +1285,9 @@
                 </div>
             </div>
             <div class="course-card">
-                <div class="course-image" style="background-image: url('https://images.pexels.com/photos/3938023/pexels-photo-3938023.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');"></div>
+                <div class="course-image"
+                    style="background-image: url('https://images.pexels.com/photos/3938023/pexels-photo-3938023.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');">
+                </div>
                 <div class="course-content">
                     <h3 class="course-title">Biology Introduction</h3>
                     <p class="course-desc">Discover the basics of cells, genetics, and ecosystems with visual aids.</p>
@@ -1250,7 +1373,7 @@
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Mobile menu toggle
             const menuToggle = document.querySelector('.menu-toggle');
             const navLinks = document.querySelector('.nav-1-links');
@@ -1265,7 +1388,7 @@
 
             // Menu toggle functionality
             if (menuToggle && navLinks) {
-                menuToggle.addEventListener('click', function() {
+                menuToggle.addEventListener('click', function () {
                     const isExpanded = navLinks.classList.toggle('active');
                     this.setAttribute('aria-expanded', isExpanded);
                     this.querySelector('i').classList.toggle('fa-bars');
@@ -1273,7 +1396,7 @@
                 });
 
                 // Close menu when clicking outside
-                document.addEventListener('click', function(e) {
+                document.addEventListener('click', function (e) {
                     if (!e.target.closest('.navbar-1') && navLinks.classList.contains('active')) {
                         navLinks.classList.remove('active');
                         menuToggle.setAttribute('aria-expanded', 'false');
@@ -1283,7 +1406,7 @@
                 });
 
                 // Handle window resize
-                window.addEventListener('resize', function() {
+                window.addEventListener('resize', function () {
                     if (window.innerWidth > 768) {
                         navLinks.classList.remove('active');
                         menuToggle.setAttribute('aria-expanded', 'false');
@@ -1303,11 +1426,11 @@
                     if (!show) searchResults.innerHTML = '';
                 };
 
-                searchInput.addEventListener('input', function() {
+                searchInput.addEventListener('input', function () {
                     toggleResults(this.value.trim().length > 0);
                 });
 
-                searchInput.addEventListener('focus', function() {
+                searchInput.addEventListener('focus', function () {
                     if (this.value.trim().length > 0) toggleResults(true);
                 });
 
@@ -1316,7 +1439,7 @@
                 });
 
                 // Handle HTMX response to format search results
-                document.body.addEventListener('htmx:afterSwap', function(e) {
+                document.body.addEventListener('htmx:afterSwap', function (e) {
                     if (e.target.id === 'searchResultsContainer') {
                         const results = e.target.children;
                         if (results.length > 0 && !e.target.querySelector('.no-results').style.display) {
@@ -1358,7 +1481,7 @@
             }
 
             // Navbar scrolling
-            window.scrollNav = function(amount, navId) {
+            window.scrollNav = function (amount, navId) {
                 const nav = document.getElementById(navId);
                 nav.scrollBy({ left: amount, behavior: 'smooth' });
             };
@@ -1366,4 +1489,5 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
