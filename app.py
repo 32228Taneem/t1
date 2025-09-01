@@ -16,6 +16,7 @@ from mysql.connector.errors import DatabaseError
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 from flask_caching import Cache
+from urllib.parse import quote
 import logging
 logging.basicConfig(level=logging.DEBUG)
 import jwt
@@ -125,6 +126,14 @@ def jwt_required(f):
         elif 'Authorization' in request.headers:
             token = request.headers['Authorization'].split(" ")[1]
         
+        # Check if we have a token but no session (likely logged out)
+        if token and not session:
+            if request.path.startswith('/api/'):
+                return jsonify({'error': 'Session expired'}), 401
+            response = redirect(url_for('login'))
+            response.set_cookie('access_token', '', expires=0, max_age=0)
+            return response
+        
         # Returns error or redirects if no token is found
         if not token:
             if request.path.startswith('/api/'):
@@ -151,6 +160,68 @@ def jwt_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def no_cache(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        response = make_response(f(*args, **kwargs))
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
+    return decorated_function
+
+@app.before_request
+def check_valid_session():
+    # List of paths that don't require authentication
+    public_paths = ['/', '/login', '/usercreate', '/userforgot', '/user_password_update', 
+                   '/uotp', '/static', '/uploads', '/search', '/view_subtopics']
+    
+    # Check if the request is for a protected path
+    if not any(request.path.startswith(path) for path in public_paths):
+        # Check if there's a JWT token but no session (indicating logout)
+        if 'access_token' in request.cookies and not session:
+            # Clear the invalid token and redirect to login
+            response = redirect(url_for('login'))
+            response.set_cookie('access_token', '', expires=0, max_age=0)
+            return response
+def is_title_unique(table_name, title, parent_id=None, exclude_id=None):
+    """
+    Check if a title is unique within a table
+    table_name: name of the table to check
+    title: title to check for uniqueness
+    parent_id: for subtopics/sub_subtopics, the parent ID to scope the uniqueness
+    exclude_id: ID to exclude from check (for updates)
+    """
+    try:
+        if table_name == 'navbar_items':
+            if exclude_id:
+                cursor.execute('SELECT COUNT(*) FROM navbar_items WHERE name = %s AND id != %s', (title, exclude_id))
+            else:
+                cursor.execute('SELECT COUNT(*) FROM navbar_items WHERE name = %s', (title,))
+        
+        elif table_name == 'subtopics':
+            if exclude_id:
+                cursor.execute('SELECT COUNT(*) FROM subtopics WHERE title = %s AND navbar_id = %s AND id != %s', 
+                             (title, parent_id, exclude_id))
+            else:
+                cursor.execute('SELECT COUNT(*) FROM subtopics WHERE title = %s AND navbar_id = %s', 
+                             (title, parent_id))
+        
+        elif table_name == 'sub_subtopics':
+            if exclude_id:
+                cursor.execute('SELECT COUNT(*) FROM sub_subtopics WHERE title = %s AND subtopic_id = %s AND id != %s', 
+                             (title, parent_id, exclude_id))
+            else:
+                cursor.execute('SELECT COUNT(*) FROM sub_subtopics WHERE title = %s AND subtopic_id = %s', 
+                             (title, parent_id))
+        
+        count = cursor.fetchone()[0]
+        return count == 0
+        
+    except Exception as e:
+        print(f"Error checking title uniqueness: {str(e)}")
+        return False
+      
 # Route: /
 # @app.route('/')
 # def base():
@@ -170,6 +241,7 @@ def home():
 # Purpose: Handles user and admin login with form display (GET) and authentication (POST)
 # Functionality: Validates credentials, initiates admin OTP or user JWT, and redirects accordingly
 @app.route('/login', methods=['GET', 'POST'])
+@no_cache
 def login():
     # Check if there's a registration success message to display
     registration_success = session.pop('registration_success', None)
@@ -781,16 +853,24 @@ def user_password_update(token):
 # Functionality: Clears all session variables and redirects to the homepage
 @app.route('/logout')
 def logout():
+    response = make_response(redirect(url_for('home')))
     # Removes all session data to end user/admin session
     session.clear()
-    # Redirects to the homepage
-    return redirect(url_for('home'))
+    response.set_cookie('access_token', '', expires=0, httponly=True, secure=True)
+    
+    # Add headers to prevent caching of protected pages
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    
+    return response
 
 # Route: /admin_panel
 # Purpose: Displays the admin panel for authorized admins
 # Functionality: Verifies admin JWT, fetches navbar items, and renders admin panel template
 @app.route('/admin_panel')
 @jwt_required  # Ensures valid JWT token is present
+@no_cache
 def admin_panel():
     # Redirects to login if user is not an admin
     if g.current_user.get('user_type') != 'admin':
@@ -809,6 +889,8 @@ def admin_panel():
 # Purpose: Allows admins to add new navigation bar items via a form submission
 # Functionality: Validates admin session, checks for duplicate items, assigns position, and inserts item into database
 @app.route('/add_navbar_item', methods=['POST'])
+@jwt_required
+@no_cache
 def add_navbar_item():
     # Verifies admin is logged in by checking session keys
     if not any(key in session for key in ['Admin_mail', 'admin', 'admin_email']):
@@ -822,6 +904,12 @@ def add_navbar_item():
             flash('Navbar item name cannot be empty', 'error')
             return redirect(url_for('admin_panel'))
 
+        # Check if navbar item title is unique
+        if not is_title_unique('navbar_items', item):
+            flash('This navbar item already exists. Please use a different name.', 'error')
+            return redirect(url_for('admin_panel'))
+
+        # [Rest of your existing code remains the same]
         # Retrieves admin ID from session or database
         admin_id = session.get('Admin_id')
         if not admin_id:
@@ -832,19 +920,14 @@ def add_navbar_item():
                 flash('Admin account not found', 'error')
                 return redirect(url_for('login'))
             admin_id = admin_record[0]
-            session['Admin_id'] = admin_id  # Stores admin ID in session
-            session.modified = True
-
-        # Debug: Logs admin ID and item name
-        app.logger.debug(f"Adding navbar item - Admin ID: {admin_id}")
-        app.logger.debug(f"New item: {item}")
+            session['Admin_id'] = admin_id
 
         # Determines next position for new item
         cursor.execute('SELECT MAX(position) FROM navbar_items')
         max_position = cursor.fetchone()[0]
         new_position = max_position + 1 if max_position is not None else 1
 
-        # Inserts new navbar item into database with current timestamp
+        # Inserts new navbar item into database
         cursor.execute(
             'INSERT INTO navbar_items (name, position, admin_id, created_at) '
             'VALUES (%s, %s, %s, CURRENT_TIMESTAMP)',
@@ -852,33 +935,26 @@ def add_navbar_item():
         )
         mytdb.commit()
 
-        # Notifies success and redirects to admin panel
         flash(f'Navbar item "{item}" added successfully!', 'success')
         return redirect(url_for('admin_panel'))
 
     except mysql.connector.IntegrityError:
-        # Handles duplicate item error
         mytdb.rollback()
         flash('This navbar item already exists', 'error')
         return redirect(url_for('admin_panel'))
 
-    except mysql.connector.Error as err:
-        # Handles general database errors
-        mytdb.rollback()
-        flash(f'Database error: {err.msg}', 'error')
-        return redirect(url_for('admin_panel'))
-
     except Exception as e:
-        # Handles unexpected errors
         mytdb.rollback()
         app.logger.error(f"Error adding navbar item: {str(e)}")
         flash('An unexpected error occurred', 'error')
         return redirect(url_for('admin_panel'))
-
+    
   # Route: /update_navbar_item
 # Purpose: Allows admins to rename existing navigation bar items via form submission
 # Functionality: Validates admin session, updates item name in database, and handles duplicates/errors
 @app.route('/update_navbar_item', methods=['POST'])
+@jwt_required
+@no_cache
 def update_navbar_item():
     # Verifies admin is logged in by checking session keys
     if not any(key in session for key in ['Admin_mail', 'admin', 'admin_email']):
@@ -886,7 +962,6 @@ def update_navbar_item():
         return redirect(url_for('login'))
 
     try:
-        # Retrieves admin ID from session or database
         admin_id = session.get('Admin_id')
         if not admin_id:
             admin_email = session.get('Admin_mail') or session.get('admin') or session.get('admin_email')
@@ -896,13 +971,11 @@ def update_navbar_item():
                 flash('Admin account not found', 'error')
                 return redirect(url_for('login'))
             admin_id = admin_record[0]
-            session['Admin_id'] = admin_id  # Stores admin ID in session
+            session['Admin_id'] = admin_id
 
-        # Retrieves and sanitizes old and new item names from form
         old_item = request.form.get('old_item', '').strip()
         new_item = request.form.get('new_item', '').strip()
         
-        # Validates that both fields are provided and different
         if not old_item or not new_item:
             flash('Both old and new item names are required', 'error')
             return redirect(url_for('admin_panel'))
@@ -910,7 +983,21 @@ def update_navbar_item():
             flash('New name cannot be same as old name', 'warning')
             return redirect(url_for('admin_panel'))
 
-        # Updates navbar item name and admin ID in database
+        # Get the ID of the item being updated for uniqueness check
+        cursor.execute('SELECT id FROM navbar_items WHERE name=%s', (old_item,))
+        nav_item = cursor.fetchone()
+        if not nav_item:
+            flash('Item not found', 'error')
+            return redirect(url_for('admin_panel'))
+        
+        nav_item_id = nav_item[0]
+
+        # Check if new navbar item title is unique (excluding current item)
+        if not is_title_unique('navbar_items', new_item, None, nav_item_id):
+            flash('This navbar item name already exists. Please use a different name.', 'error')
+            return redirect(url_for('admin_panel'))
+
+        # [Rest of your existing code remains the same]
         cursor.execute(
             '''UPDATE navbar_items 
             SET name = %s, 
@@ -919,7 +1006,6 @@ def update_navbar_item():
             (new_item, admin_id, old_item)
         )
         
-        # Checks if update was successful
         if cursor.rowcount == 0:
             flash('No changes made - item not found', 'warning')
         else:
@@ -929,22 +1015,22 @@ def update_navbar_item():
         return redirect(url_for('admin_panel'))
 
     except mysql.connector.IntegrityError:
-        # Handles duplicate item name error
         mytdb.rollback()
         flash('This navbar item name already exists', 'error')
         return redirect(url_for('admin_panel'))
 
     except Exception as e:
-        # Handles unexpected errors
         mytdb.rollback()
         print(f"Error updating navbar item: {str(e)}")
         flash('An error occurred while updating the navbar item', 'error')
         return redirect(url_for('admin_panel'))
-
+    
 # Route: /update_navbar_order
 # Purpose: Updates the order of navigation bar items based on admin input
 # Functionality: Validates admin session, updates item positions in database, and returns JSON response
 @app.route('/update_navbar_order', methods=['POST'])
+@jwt_required
+@no_cache
 def update_navbar_order():
     # Verifies admin authentication
     if not is_admin_logged_in():
@@ -997,6 +1083,8 @@ def update_navbar_order():
 # Purpose: Allows admins to delete navigation bar items and their associated subitems
 # Functionality: Validates admin session, logs deletion reason, deletes related content, and removes item
 @app.route('/delete_navbar_item', methods=['POST'])
+@jwt_required
+@no_cache
 def delete_navbar_item():
     # Verifies admin is logged in by checking session keys
     if not any(key in session for key in ['admin', 'Admin_mail', 'admin_id', 'Admin_id']):
@@ -1062,8 +1150,23 @@ def delete_navbar_item():
 # Purpose: Displays subtopics and their sub-subtopics for a specific navbar item for admin view
 # Functionality: Fetches navbar item, its subtopics, and sub-subtopics from database, then renders content view
 @app.route('/view_content/<item_name>')
+@jwt_required
+@no_cache
 def view_content(item_name):
     try:
+        subtopic_id = request.args.get('subtopic_id', type=int)
+        subsubtopic_id = request.args.get('subsubtopic_id', type=int)
+        # Redirects to login if user is not an admin
+        if g.current_user.get('user_type') != 'admin':
+            return redirect(url_for('login'))
+        
+        # Retrieves admin name from session or JWT
+        admin_name = session.get('admin_name') or g.current_user.get('admin_name')
+        
+        # Fetches navbar item names from database, ordered by position
+        cursor.execute('SELECT name FROM navbar_items ORDER BY position')
+        nav_items = [item[0] for item in cursor.fetchall()]
+
         # Retrieves navbar item ID based on item name
         cursor.execute('SELECT id FROM navbar_items WHERE name=%s', (item_name,))
         nav_id = cursor.fetchone()
@@ -1108,7 +1211,11 @@ def view_content(item_name):
             })
         
         # Renders content view template with item name and subtopics data
-        return render_template('admin/view_content.html', item_name=item_name, subtopics=subtopics)
+        return render_template('admin/view_content.html', 
+                             item_name=item_name, 
+                             subtopics=subtopics,
+                             navbar_items=nav_items,
+                             admin_name=admin_name, subsubtopic_id=subsubtopic_id)
     
     except Exception as e:
         # Handles unexpected errors and returns error message
@@ -1185,75 +1292,107 @@ def view_subtopics(item_name):
 # Purpose: Allows admins to add subtopics to a specific navbar item via form submission
 # Functionality: Validates admin session, checks navbar item, inserts subtopic, and redirects to content view
 @app.route('/add_subtopic/<item_name>', methods=['POST'])
+@jwt_required
+@no_cache
 def add_subtopic(item_name):
     # Verifies admin is logged in by checking session keys
     if not any(key in session for key in ['Admin_mail', 'admin', 'admin_email']):
-        flash('Please login as admin first', 'error')
-        return redirect(url_for('login'))
+        return jsonify({
+            'success': False,
+            'error': 'Please login as admin first',
+            'redirect': url_for('login')
+        }), 401
 
     try:
         # Retrieves and validates subtopic title from form
         title = request.form.get('title', '').strip()
         if not title:
-            flash('Title is required', 'error')
-            return redirect(url_for('view_content', item_name=item_name))
+            return jsonify({
+                'success': False,
+                'error': 'Title is required'
+            }), 400
 
-        # Retrieves subtopic content from form
+        # Retrieves navbar item ID for the given item name
+        cursor.execute('SELECT id FROM navbar_items WHERE name=%s', (item_name,))
+        nav_id_record = cursor.fetchone()
+        if not nav_id_record:
+            return jsonify({
+                'success': False,
+                'error': 'Category not found'
+            }), 404
+        
+        nav_id = nav_id_record[0]
+
+        # Check if subtopic title is unique within this navbar item
+        if not is_title_unique('subtopics', title, nav_id):
+            return jsonify({
+                'success': False,
+                'error': 'A subtopic with this title already exists in this category. Please use a different name.'
+            }), 400
+
+        # Rest of the code
         content = request.form.get('content', '').strip()
         
-        # Retrieves admin ID from session or database
         admin_id = session.get('Admin_id')
         if not admin_id:
             admin_email = session.get('Admin_mail') or session.get('admin') or session.get('admin_email')
             cursor.execute('SELECT admin_id FROM admins WHERE admin_email=%s', (admin_email,))
             admin_record = cursor.fetchone()
             if not admin_record:
-                flash('Admin account not found', 'error')
-                return redirect(url_for('login'))
+                return jsonify({
+                    'success': False,
+                    'error': 'Admin account not found',
+                    'redirect': url_for('login')
+                }), 401
             admin_id = admin_record[0]
-            session['Admin_id'] = admin_id  # Stores admin ID in session
+            session['Admin_id'] = admin_id
 
-        # Retrieves navbar item ID for the given item name
-        cursor.execute('SELECT id FROM navbar_items WHERE name=%s', (item_name,))
-        nav_id_record = cursor.fetchone()
-        if not nav_id_record:
-            flash('Category not found', 'error')
-            return redirect(url_for('admin_panel'))
-
-        # Inserts new subtopic into database
         cursor.execute(
             'INSERT INTO subtopics (title, content, navbar_id, admin_id) '
             'VALUES (%s, %s, %s, %s)',
-            (title, content, nav_id_record[0], admin_id)
+            (title, content, nav_id, admin_id)
         )
         mytdb.commit()
 
-        # Notifies success and redirects to content view
-        flash(f'Subtopic "{title}" added successfully!', 'success')
-        return redirect(url_for('view_content', item_name=item_name))
+        return jsonify({
+            'success': True,
+            'message': f'Subtopic "{title}" added successfully!',
+            'redirect': url_for('view_content', item_name=item_name)
+        })
 
     except mysql.connector.IntegrityError:
-        # Handles duplicate subtopic title error
         mytdb.rollback()
-        flash('This subtopic title already exists', 'error')
-        return redirect(url_for('view_content', item_name=item_name))
+        return jsonify({
+            'success': False,
+            'error': 'This subtopic title already exists'
+        }), 400
 
     except Exception as e:
-        # Handles unexpected errors
         mytdb.rollback()
         print(f"Error adding subtopic: {str(e)}")
-        flash('An error occurred while adding the subtopic', 'error')
-        return redirect(url_for('view_content', item_name=item_name))
-
+        return jsonify({
+            'success': False,
+            'error': 'An error occurred while adding the subtopic'
+        }), 500
+        
 # Route: /edit_subtopic/<int:sub_id>
 # Purpose: Allows admins to edit existing subtopics with form display (GET) and update (POST)
 # Functionality: Validates admin session, updates subtopic details, and redirects to content view
 @app.route('/edit_subtopic/<int:sub_id>', methods=['GET', 'POST'])
+@jwt_required
+@no_cache
 def edit_subtopic(sub_id):
-    # Verifies admin is logged in by checking session keys
+    # Verifies admin is logged in
     if not any(key in session for key in ['Admin_mail', 'admin', 'admin_email']):
-        flash('Please login as admin first', 'error')
-        return redirect(url_for('login'))
+        if request.method == 'POST':
+            return jsonify({
+                'success': False,
+                'error': 'Please login as admin first',
+                'redirect': url_for('login')
+            }), 401
+        else:
+            flash('Please login as admin first', 'error')
+            return redirect(url_for('login'))
 
     try:
         if request.method == 'POST':
@@ -1263,10 +1402,22 @@ def edit_subtopic(sub_id):
                 flash('Title is required', 'error')
                 return redirect(url_for('edit_subtopic', sub_id=sub_id))
 
-            # Retrieves subtopic content from form
+            # Get navbar_id for uniqueness check
+            cursor.execute('SELECT navbar_id FROM subtopics WHERE id=%s', (sub_id,))
+            result = cursor.fetchone()
+            if not result:
+                flash('Subtopic not found', 'error')
+                return redirect(url_for('admin_panel'))
+            nav_id = result[0]
+
+            # Check if subtopic title is unique (excluding current subtopic)
+            if not is_title_unique('subtopics', title, nav_id, sub_id):
+                flash('A subtopic with this title already exists in this category. Please use a different name.', 'error')
+                return redirect(url_for('edit_subtopic', sub_id=sub_id))
+
+            # Rest of the update logic
             content = request.form.get('content', '').strip()
             
-            # Retrieves admin ID from session or database
             admin_id = session.get('Admin_id')
             if not admin_id:
                 admin_email = session.get('Admin_mail') or session.get('admin') or session.get('admin_email')
@@ -1276,24 +1427,20 @@ def edit_subtopic(sub_id):
                     flash('Admin account not found', 'error')
                     return redirect(url_for('login'))
                 admin_id = admin_record[0]
-                session['Admin_id'] = admin_id  # Stores admin ID in session
+                session['Admin_id'] = admin_id
 
-            # Updates subtopic details in database
             cursor.execute(
                 'UPDATE subtopics SET title=%s, admin_id=%s, content=%s WHERE id=%s', 
                 (title, admin_id, content, sub_id)
             )
             mytdb.commit()
 
-            # Retrieves navbar item name for redirection
-            cursor.execute('SELECT navbar_id FROM subtopics WHERE id=%s', (sub_id,))
-            nav_id = cursor.fetchone()[0]
             cursor.execute('SELECT name FROM navbar_items WHERE id=%s', (nav_id,))
             item_name = cursor.fetchone()[0]
 
-            # Notifies success and redirects to content view
             flash('Subtopic updated successfully!', 'success')
-            return redirect(url_for('view_content', item_name=item_name))
+            # Redirect to view_content with the subtopic ID to display
+            return redirect(url_for('view_content', item_name=item_name, subtopic_id=sub_id))
 
         else:
             # GET: Fetches subtopic data for edit form
@@ -1317,17 +1464,17 @@ def edit_subtopic(sub_id):
             )
 
     except Exception as e:
-        # Handles unexpected errors
         mytdb.rollback()
         print(f"Error editing subtopic: {str(e)}")
         flash('An error occurred while editing the subtopic', 'error')
         return redirect(url_for('admin_panel'))
-
-
+        
 # Route: /update_subtopic_order
 # Purpose: Updates the order of subtopics based on admin input
 # Functionality: Validates admin session, updates subtopic positions, and returns JSON response
 @app.route('/update_subtopic_order', methods=['POST'])
+@jwt_required
+@no_cache
 def update_subtopic_order():
     # Verifies admin is logged in by checking session keys
     if not any(key in session for key in ['Admin_mail', 'admin', 'admin_email']):
@@ -1382,6 +1529,8 @@ def update_subtopic_order():
 # Purpose: Allows admins to delete subtopics via JSON request
 # Functionality: Validates admin session, logs deletion reason, deletes subtopic, and returns JSON response
 @app.route('/delete_subtopic/<int:sub_id>/<item_name>', methods=['POST'])
+@jwt_required
+@no_cache
 def delete_subtopic(sub_id, item_name):
     # Verifies admin is logged in by checking session keys
     if not any(key in session for key in ['Admin_mail', 'admin', 'admin_email']):
@@ -1428,6 +1577,8 @@ def delete_subtopic(sub_id, item_name):
 
  # sub-sub-topics key routes ya c
 @app.route('/get_sub_subtopics/<int:subtopic_id>')
+@jwt_required
+@no_cache
 def get_sub_subtopics(subtopic_id):
     try:
         cursor.execute('''
@@ -1454,6 +1605,8 @@ def get_sub_subtopics(subtopic_id):
 # Purpose: Allows admins to add sub-subtopics to a specific subtopic via form submission
 # Functionality: Validates admin session, verifies subtopic, inserts sub-subtopic, and returns JSON response
 @app.route('/add_sub_subtopic', methods=['POST'])
+@jwt_required
+@no_cache
 def add_sub_subtopic():
     # Verifies admin is logged in by checking session keys
     if not any(key in session for key in ['Admin_mail', 'admin', 'admin_email']):
@@ -1464,19 +1617,25 @@ def add_sub_subtopic():
         }), 401
 
     try:
-        # Retrieves and validates form data for subtopic ID, title, and content
+        # Retrieves and validates form data
         subtopic_id = request.form.get('parent_subtopic_id', '').strip()
         title = request.form.get('title', '').strip()
         content = request.form.get('content', '').strip()
 
-        # Ensures subtopic ID and title are provided
         if not subtopic_id or not title:
             return jsonify({
                 'success': False,
                 'error': 'Both parent subtopic ID and title are required'
             }), 400
 
-        # Retrieves admin ID from session or database
+        # Check if sub-subtopic title is unique within this subtopic
+        if not is_title_unique('sub_subtopics', title, subtopic_id):
+            return jsonify({
+                'success': False,
+                'error': 'A sub-subtopic with this title already exists in this subtopic. Please use a different name.'
+            }), 400
+
+        # Rest of your existing code
         admin_id = session.get('Admin_id')
         if not admin_id:
             admin_email = session.get('Admin_mail') or session.get('admin') or session.get('admin_email')
@@ -1489,9 +1648,8 @@ def add_sub_subtopic():
                     'redirect': url_for('login')
                 }), 401
             admin_id = admin_record[0]
-            session['Admin_id'] = admin_id  # Stores admin ID in session
+            session['Admin_id'] = admin_id
 
-        # Verifies parent subtopic exists in database
         cursor.execute('SELECT id FROM subtopics WHERE id=%s', (subtopic_id,))
         if not cursor.fetchone():
             return jsonify({
@@ -1499,14 +1657,12 @@ def add_sub_subtopic():
                 'error': 'Parent subtopic not found'
             }), 404
 
-        # Inserts new sub-subtopic into database
         cursor.execute('''
             INSERT INTO sub_subtopics (subtopic_id, title, content, admin_id)
             VALUES (%s, %s, %s, %s)
         ''', (subtopic_id, title, content, admin_id))
         mytdb.commit()
 
-        # Retrieves newly created sub-subtopic with parent subtopic title
         cursor.execute('''
             SELECT ss.id, ss.title, ss.content, s.title as parent_title
             FROM sub_subtopics ss
@@ -1515,7 +1671,6 @@ def add_sub_subtopic():
         ''')
         new_subsub = cursor.fetchone()
 
-        # Returns success response with new sub-subtopic details
         return jsonify({
             'success': True,
             'newSubSubtopic': {
@@ -1528,7 +1683,6 @@ def add_sub_subtopic():
         })
 
     except mysql.connector.IntegrityError as e:
-        # Handles database integrity errors (e.g., duplicate entries)
         mytdb.rollback()
         return jsonify({
             'success': False,
@@ -1536,17 +1690,7 @@ def add_sub_subtopic():
             'details': 'This sub-subtopic may already exist' if 'Duplicate entry' in str(e) else str(e)
         }), 400
 
-    except mysql.connector.Error as db_error:
-        # Handles general database errors
-        mytdb.rollback()
-        return jsonify({
-            'success': False,
-            'error': 'Database operation failed',
-            'details': str(db_error)
-        }), 500
-
     except Exception as e:
-        # Handles unexpected errors
         mytdb.rollback()
         return jsonify({
             'success': False,
@@ -1554,18 +1698,20 @@ def add_sub_subtopic():
             'details': str(e)
         }), 500
     
-
 # Route: /edit_subsubtopic/<int:subsub_id>
 # Purpose: Allows admins to edit sub-subtopics with form display (GET) and update (POST)
 # Functionality: Validates admin session and ownership, updates sub-subtopic details, and redirects to content view
 @app.route('/edit_subsubtopic/<int:subsub_id>', methods=['GET', 'POST'])
+@jwt_required
+@no_cache
 def edit_subsubtopic(subsub_id):
     # Verifies admin is logged in by checking session keys
     if not any(key in session for key in ['Admin_mail', 'admin', 'admin_email']):
+        flash('Please login as admin first', 'error')
         return redirect(url_for('login'))
 
     try:
-        # Retrieves admin ID from session or database
+        # Get admin_id
         admin_id = session.get('Admin_id')
         if not admin_id:
             admin_email = session.get('Admin_mail') or session.get('admin') or session.get('admin_email')
@@ -1577,26 +1723,70 @@ def edit_subsubtopic(subsub_id):
             admin_id = admin_record[0]
             session['Admin_id'] = admin_id
 
+        # Verify ownership first
+        cursor.execute('''
+            SELECT ss.id FROM sub_subtopics ss
+            JOIN subtopics st ON ss.subtopic_id = st.id
+            WHERE ss.id = %s AND st.admin_id = %s
+        ''', (subsub_id, admin_id))
+        if not cursor.fetchone():
+            flash('Not authorized to edit this sub-subtopic', 'error')
+            return redirect(url_for('admin_panel'))
+
+        # Get the navbar item name for the form and redirect
+        cursor.execute('''
+            SELECT ni.name, st.id as subtopic_id
+            FROM sub_subtopics ss
+            JOIN subtopics st ON ss.subtopic_id = st.id
+            JOIN navbar_items ni ON st.navbar_id = ni.id
+            WHERE ss.id = %s
+        ''', (subsub_id,))
+        result = cursor.fetchone()
+        if not result:
+            flash('Sub-subtopic not found', 'error')
+            return redirect(url_for('admin_panel'))
+        item_name = result[0]
+        subtopic_id = result[1]
+
+        # Get the current sub-subtopic data for the form
+        cursor.execute('SELECT title, content FROM sub_subtopics WHERE id=%s', (subsub_id,))
+        subsub = cursor.fetchone()
+        if not subsub:
+            flash('Sub-subtopic not found', 'error')
+            return redirect(url_for('admin_panel'))
+
         if request.method == 'POST':
-            # Retrieves and validates title and content from form
             title = request.form.get('title', '').strip()
             content = request.form.get('content', '').strip()
 
             if not title:
                 flash('Title is required', 'error')
-                return redirect(url_for('edit_subsubtopic', subsub_id=subsub_id))
+                # Return to the form with the submitted data
+                return render_template(
+                    'admin/edit_subsubtopic.html', 
+                    subsub_id=subsub_id, 
+                    title=title, 
+                    content=content, 
+                    item_name=item_name
+                )
 
-            # Verifies sub-subtopic exists and belongs to admin
+            # Check if sub-subtopic title is unique (excluding current sub-subtopic)
             cursor.execute('''
-                SELECT ss.id FROM sub_subtopics ss
-                JOIN subtopics st ON ss.subtopic_id = st.id
-                WHERE ss.id = %s AND st.admin_id = %s
-            ''', (subsub_id, admin_id))
-            if not cursor.fetchone():
-                flash('Not authorized to edit this sub-subtopic', 'error')
-                return redirect(url_for('admin/admin_panel'))
+                SELECT id FROM sub_subtopics 
+                WHERE title = %s AND subtopic_id = %s AND id != %s
+            ''', (title, subtopic_id, subsub_id))
+            if cursor.fetchone():
+                flash('A sub-subtopic with this title already exists in this subtopic. Please use a different name.', 'error')
+                # Return to the form with the submitted data
+                return render_template(
+                    'admin/edit_subsubtopic.html', 
+                    subsub_id=subsub_id, 
+                    title=title, 
+                    content=content, 
+                    item_name=item_name
+                )
 
-            # Updates sub-subtopic in database
+            # Update the sub-subtopic
             cursor.execute('''
                 UPDATE sub_subtopics 
                 SET title=%s, content=%s, admin_id=%s
@@ -1604,63 +1794,32 @@ def edit_subsubtopic(subsub_id):
             ''', (title, content, admin_id, subsub_id))
             mytdb.commit()
 
-            # Retrieves navbar item name for redirection
-            cursor.execute('''
-                SELECT ni.name 
-                FROM sub_subtopics ss
-                JOIN subtopics st ON ss.subtopic_id = st.id
-                JOIN navbar_items ni ON st.navbar_id = ni.id
-                WHERE ss.id = %s
-            ''', (subsub_id,))
-            item_name = cursor.fetchone()[0]
-
-            # Notifies success and redirects to content view
             flash('Sub-subtopic updated successfully!', 'success')
+            # Redirect to view_content with the correct parameters to show the updated content
             return redirect(url_for('view_content', item_name=item_name))
 
         else:
-            # GET: Fetches sub-subtopic data for edit form
-            cursor.execute('''
-                SELECT ss.title, ss.content, st.navbar_id 
-                FROM sub_subtopics ss
-                JOIN subtopics st ON ss.subtopic_id = st.id
-                WHERE ss.id = %s AND st.admin_id = %s
-            ''', (subsub_id, admin_id))
-            
-            subsub = cursor.fetchone()
-            if not subsub:
-                flash('Sub-subtopic not found or not authorized', 'error')
-                return redirect(url_for('admin_panel'))
-
-            # Retrieves navbar item name
-            cursor.execute('SELECT name FROM navbar_items WHERE id=%s', (subsub[2],))
-            item_name = cursor.fetchone()[0]
-
-            # Renders edit form with sub-subtopic details
+            # GET method - display the edit form with current data
             return render_template(
-                'admin/edit_subsubtopic.html',
-                subsub_id=subsub_id,
-                title=subsub[0],
-                content=subsub[1],
+                'admin/edit_subsubtopic.html', 
+                subsub_id=subsub_id, 
+                title=subsub[0], 
+                content=subsub[1], 
                 item_name=item_name
             )
 
-    except mysql.connector.Error as db_error:
-        # Handles database errors
-        mytdb.rollback()
-        flash('Database error occurred', 'error')
-        return redirect(url_for('admin_panel'))
-
     except Exception as e:
-        # Handles unexpected errors
         mytdb.rollback()
-        flash('An unexpected error occurred', 'error')
+        print(f"Error editing sub-subtopic: {str(e)}")
+        flash('An error occurred while processing your request', 'error')
         return redirect(url_for('admin_panel'))
-
+           
 # Route: /update_subsubtopic_order
 # Purpose: Updates the order of sub-subtopics under a parent subtopic
 # Functionality: Validates admin session and parent subtopic, updates positions, and returns JSON response
 @app.route('/update_subsubtopic_order', methods=['POST'])
+@jwt_required
+@no_cache
 def update_subsubtopic_order():
     # Verifies admin is logged in by checking session keys
     if not any(key in session for key in ['Admin_mail', 'admin', 'admin_email']):
@@ -1732,6 +1891,8 @@ def update_subsubtopic_order():
 # Purpose: Deletes a specific sub-subtopic and logs the deletion
 # Functionality: Validates admin session and ownership, archives sub-subtopic, deletes it, and returns JSON response
 @app.route('/delete_sub_subtopic/<int:subsub_id>', methods=['DELETE'])
+@jwt_required
+@no_cache
 def delete_sub_subtopic(subsub_id):
     # Verifies admin is logged in by checking session keys
     if not any(key in session for key in ['Admin_mail', 'admin', 'admin_email']):
@@ -1810,6 +1971,8 @@ def delete_sub_subtopic(subsub_id):
 # Purpose: Handles image uploads for content
 # Functionality: Validates file type, handles duplicates, saves file, and returns file URL
 @app.route('/upload_image', methods=['POST'])
+@jwt_required
+@no_cache
 def upload_image():
     try:
         # Checks if file is included in request
@@ -1853,16 +2016,17 @@ def upload_image():
 # Purpose: Serves uploaded image files
 # Functionality: Sends requested file from upload directory
 @app.route('/uploads/<filename>')
+@jwt_required
+@no_cache
 def uploaded_file(filename):
     # Serves file from configured upload directory
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
   
-
-
 # Route: /profile
 # Update the profile route to include user_id
 @app.route('/profile')
 @jwt_required
+@no_cache
 def profile():
     try:
         user_id = g.current_user.get('user_id')
@@ -1905,6 +2069,7 @@ def profile():
 # Route: /edit_profile
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @jwt_required
+@no_cache
 def edit_profile():
     user_id = g.current_user.get('user_id')
     if not user_id:
@@ -1968,16 +2133,14 @@ def edit_profile():
         user = cursor.fetchone()
         if request.args.get('deleted'):
             flash("Profile picture deleted successfully", "success")
-        return render_template('user/edit_profile.html', 
-                             user=user,
-                             token=request.cookies.get('access_token'),
-                             navbar_items=navbar_items)
+        return render_template('user/edit_profile.html', user=user, token=request.cookies.get('access_token'), navbar_items=navbar_items)
     
     
 # Add these routes to your app.py
 
 @app.route('/delete_profile_pic', methods=['POST'])
 @jwt_required
+@no_cache
 def delete_profile_pic():
     try:
         user_id = g.current_user.get('user_id')
