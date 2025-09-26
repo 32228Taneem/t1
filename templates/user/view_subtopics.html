@@ -11,18 +11,18 @@
   <script src="https://unpkg.com/htmx.org@2.0.2"></script>
   <style>
     :root {
-      /* Updated Primary Colors */
+      /* Primary Colors */
       --midnight-blue: #1a1a2e;
       --ocean-blue: #16213e;
       --emerald-green: #0f3460;
       --pure-white: #ffffff;
 
-      /* Updated Secondary Colors */
+      /* Secondary Colors */
       --forest-green: #0d2857;
       --slate-gray: #4a4a68;
       --cloud-white: #e6e9f0;
 
-      /* Updated Accent Colors */
+      /* Accent Colors */
       --accent-primary: #e94560;
       --accent-secondary: #533483;
 
@@ -56,6 +56,7 @@
       --sidebar-width: 280px;
       --sidebar-collapsed-width: 0px;
       --mobile-breakpoint: 768px;
+      --nav-button-height: 36px; /* Reduced for tighter spacing */
     }
 
     body {
@@ -159,7 +160,6 @@
       z-index: 999;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      scroll-behavior: smooth;
       scrollbar-width: none;
     }
 
@@ -323,8 +323,9 @@
       padding: 15px;
       border-right: 1px solid var(--border-gray);
       transition: all 0.3s ease;
-      position: sticky;
+      position: fixed;
       top: var(--combined-nav-height);
+      left: 0;
     }
 
     .sidebar-collapsed {
@@ -369,6 +370,50 @@
       min-height: calc(100vh - var(--combined-nav-height));
       background: var(--light-gray);
       position: relative;
+      margin-left: var(--sidebar-width);
+    }
+
+    /* Navigation Buttons Container */
+    .nav-buttons-container {
+      position: fixed;
+      top: var(--combined-nav-height);
+      left: calc(var(--sidebar-width) + 20px);
+      right: 20px;
+      height: var(--nav-button-height);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 11;
+      background: var(--light-gray);
+    }
+
+    /* Navigation Buttons */
+    .nav-button {
+      background-color: var(--accent-primary);
+      color: var(--pure-white);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      font-size: 0.9rem;
+      min-width: 80px; /* Ensure buttons are not too narrow */
+      display: none;
+    }
+
+    .nav-button.active {
+      display: block;
+    }
+
+    .nav-button:hover {
+      background-color: var(--accent-secondary);
+      transform: scale(1.05);
+    }
+
+    .nav-button:disabled {
+      background-color: var(--slate-gray);
+      cursor: not-allowed;
+      transform: none;
     }
 
     /* Subtopic Styles */
@@ -431,45 +476,6 @@
       font-weight: 500;
     }
 
-    /* Navigation Buttons */
-    .nav-button {
-      background-color: var(--accent-primary);
-      color: var(--pure-white);
-      border: none;
-      padding: 8px 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      position: absolute;
-      top: 20px;
-      z-index: 10;
-      font-size: 0.9rem;
-      display: none; /* Hidden by default */
-    }
-
-    .nav-button.active {
-      display: block; /* Show buttons when active */
-    }
-
-    .nav-button:hover {
-      background-color: var(--accent-secondary);
-      transform: scale(1.05);
-    }
-
-    .nav-button:disabled {
-      background-color: var(--slate-gray);
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    #prevButton {
-      left: 20px;
-    }
-
-    #nextButton {
-      right: 20px;
-    }
-
     /* Fullscreen Mode */
     .fullscreen-toggle {
       position: fixed;
@@ -514,10 +520,18 @@
       height: 100%;
     }
 
+    .fullscreen-mode .nav-buttons-container {
+      top: 0;
+      left: 20px;
+      right: 20px;
+      z-index: 11;
+      height: var(--nav-button-height);
+    }
+
     /* Display Area */
     #displayArea {
       display: none;
-      margin-top: 4rem; /* Increased to accommodate buttons */
+      margin-top: 1rem;
     }
 
     .subtopic-title {
@@ -726,6 +740,16 @@
         width: 180px;
         height: 44px;
       }
+
+      .nav-buttons-container {
+        left: calc(var(--sidebar-width) + 15px);
+        right: 15px;
+      }
+
+      .fullscreen-mode .nav-buttons-container {
+        left: 15px;
+        right: 15px;
+      }
     }
 
     @media (max-width: 992px) {
@@ -745,6 +769,16 @@
       .content {
         margin-left: 0;
         padding: 15px;
+      }
+
+      .nav-buttons-container {
+        left: 15px;
+        right: 15px;
+      }
+
+      .fullscreen-mode .nav-buttons-container {
+        left: 15px;
+        right: 15px;
       }
 
       .sidebar-toggle {
@@ -767,14 +801,7 @@
       .nav-button {
         padding: 6px 12px;
         font-size: 0.85rem;
-      }
-
-      #prevButton {
-        left: 15px;
-      }
-
-      #nextButton {
-        right: 15px;
+        min-width: 70px;
       }
     }
 
@@ -783,6 +810,7 @@
         --navbar-1-height: 56px;
         --navbar-2-height: 44px;
         --navbar-3-height: 44px;
+        --nav-button-height: 34px;
       }
 
       .navbar-1 {
@@ -905,18 +933,21 @@
       .nav-button {
         padding: 6px 10px;
         font-size: 0.8rem;
+        min-width: 60px;
       }
 
-      #prevButton {
-        left: 10px;
+      .nav-buttons-container {
+        left: 8px;
+        right: 8px;
       }
 
-      #nextButton {
-        right: 10px;
+      .fullscreen-mode .nav-buttons-container {
+        left: 8px;
+        right: 8px;
       }
 
       #displayArea {
-        margin-top: 3.5rem;
+        margin-top: 0.8rem;
       }
     }
 
@@ -925,6 +956,7 @@
         --navbar-1-height: 50px;
         --navbar-2-height: 40px;
         --navbar-3-height: 40px;
+        --nav-button-height: 32px;
       }
 
       .navbar-1 {
@@ -972,18 +1004,21 @@
       .nav-button {
         padding: 5px 8px;
         font-size: 0.75rem;
+        min-width: 55px;
       }
 
-      #prevButton {
+      .nav-buttons-container {
         left: 8px;
+        right: 8px;
       }
 
-      #nextButton {
+      .fullscreen-mode .nav-buttons-container {
+        left: 8px;
         right: 8px;
       }
 
       #displayArea {
-        margin-top: 3rem;
+        margin-top: 0.7rem;
       }
     }
 
@@ -1014,18 +1049,21 @@
       .nav-button {
         padding: 4px 6px;
         font-size: 0.7rem;
+        min-width: 50px;
       }
 
-      #prevButton {
+      .nav-buttons-container {
         left: 5px;
+        right: 5px;
       }
 
-      #nextButton {
+      .fullscreen-mode .nav-buttons-container {
+        left: 5px;
         right: 5px;
       }
 
       #displayArea {
-        margin-top: 2.5rem;
+        margin-top: 0.6rem;
       }
     }
 
@@ -1038,19 +1076,52 @@
       .nav-button {
         padding: 3px 5px;
         font-size: 0.65rem;
+        min-width: 45px;
       }
 
-      #prevButton {
+      .nav-buttons-container {
         left: 3px;
+        right: 3px;
       }
 
-      #nextButton {
+      .fullscreen-mode .nav-buttons-container {
+        left: 3px;
         right: 3px;
       }
 
       #displayArea {
-        margin-top: 2rem;
+        margin-top: 0.5rem;
       }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      background-color: var(--pure-white);
+      box-shadow: 0 1px 3px var(--shadow-gray);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border-gray);
+    }
+
+    th {
+      background-color: var(--emerald-green);
+      color: var(--pure-white);
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--light-gray);
+    }
+
+    tr:hover {
+      background-color: var(--lighter-gray);
     }
   </style>
 </head>
@@ -1164,8 +1235,10 @@
 
     <!-- Content Area -->
     <div class="content" id="mainContent">
-      <button class="nav-button" id="prevButton" onclick="navigateSidebar(-1)">Previous</button>
-      <button class="nav-button" id="nextButton" onclick="navigateSidebar(1)">Next</button>
+      <div class="nav-buttons-container">
+        <button class="nav-button" id="prevButton" onclick="navigateSidebar(-1)">Previous</button>
+        <button class="nav-button" id="nextButton" onclick="navigateSidebar(1)">Next</button>
+      </div>
       <div id="displayArea">
         <div class="subtopic-title" id="displayTitle"></div>
         <div id="displayContent" class="rich-content-container"></div>
@@ -1180,6 +1253,12 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+      // Prevent browser scroll restoration
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0); // Force scroll to top on load
+
       // Mobile menu toggle
       const menuToggle = document.querySelector('.menu-toggle');
       const navLinks = document.querySelector('.nav-1-links');
@@ -1263,12 +1342,48 @@
             'sub-subtopic': `${baseUrl}/${category}#sub-subtopic-${id}`
           };
 
-          if (routes[type]) window.location.href = routes[type];
+          if (routes[type]) {
+            window.location.href = routes[type];
+            // Scroll to display area after navigation
+            setTimeout(() => {
+              const displayArea = document.getElementById('displayArea');
+              if (displayArea.style.display === 'block') {
+                displayArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              }
+            }, 0);
+          }
         });
       }
 
       // Initialize navigation buttons
       updateNavButtons();
+
+      // Automatically select the first subtopic or sub-subtopic on page load
+      if (!window.location.hash) {
+        const firstSubtopic = document.querySelector('.subtopic-item');
+        if (firstSubtopic) {
+          handleSubtopicClick(firstSubtopic);
+          firstSubtopic.closest('.subtopic-wrapper').classList.add('active');
+        }
+      } else {
+        const element = document.querySelector(window.location.hash);
+        if (element) {
+          if (element.classList.contains('subtopic-wrapper')) {
+            const subtopicItem = element.querySelector('.subtopic-item');
+            if (subtopicItem) {
+              handleSubtopicClick(subtopicItem);
+            }
+          } else if (element.classList.contains('subsubtopic-item')) {
+            showSubSubtopic({ stopPropagation: () => {} }, element);
+          }
+        }
+      }
+
+      // Ensure display area is visible on initial load
+      const displayArea = document.getElementById('displayArea');
+      if (displayArea.style.display === 'block') {
+        displayArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     });
 
     // Sidebar toggle functionality
@@ -1276,16 +1391,74 @@
       const sidebar = document.getElementById('mainSidebar');
       const content = document.getElementById('mainContent');
       const sidebarToggle = document.getElementById('sidebarToggle');
+      const navButtonsContainer = document.querySelector('.nav-buttons-container');
 
       sidebar.classList.toggle('sidebar-collapsed');
       content.classList.toggle('content-expanded');
 
-      if (sidebar.classList.contains('sidebar-collapsed')) {
+      const isFullscreen = document.body.classList.contains('fullscreen-mode');
+      const isSidebarCollapsed = sidebar.classList.contains('sidebar-collapsed');
+
+      if (isSidebarCollapsed) {
         sidebarToggle.innerHTML = '<i class="bi bi-chevron-right"></i>';
         sidebarToggle.style.left = '0';
+        content.style.marginLeft = '0';
+        // Responsive left positioning for nav-buttons-container
+        if (isFullscreen) {
+          if (window.innerWidth <= 360) {
+            navButtonsContainer.style.left = '3px';
+          } else if (window.innerWidth <= 480) {
+            navButtonsContainer.style.left = '5px';
+          } else if (window.innerWidth <= 768) {
+            navButtonsContainer.style.left = '8px';
+          } else if (window.innerWidth <= 1200) {
+            navButtonsContainer.style.left = '15px';
+          } else {
+            navButtonsContainer.style.left = '20px';
+          }
+        } else {
+          if (window.innerWidth <= 360) {
+            navButtonsContainer.style.left = '3px';
+          } else if (window.innerWidth <= 480) {
+            navButtonsContainer.style.left = '5px';
+          } else if (window.innerWidth <= 768) {
+            navButtonsContainer.style.left = '8px';
+          } else if (window.innerWidth <= 1200) {
+            navButtonsContainer.style.left = '15px';
+          } else {
+            navButtonsContainer.style.left = '20px';
+          }
+        }
       } else {
         sidebarToggle.innerHTML = '<i class="bi bi-chevron-left"></i>';
         sidebarToggle.style.left = sidebar.offsetWidth + 'px';
+        content.style.marginLeft = 'var(--sidebar-width)';
+        // Responsive left positioning for nav-buttons-container
+        if (isFullscreen) {
+          if (window.innerWidth <= 360) {
+            navButtonsContainer.style.left = '3px';
+          } else if (window.innerWidth <= 480) {
+            navButtonsContainer.style.left = '5px';
+          } else if (window.innerWidth <= 768) {
+            navButtonsContainer.style.left = '8px';
+          } else if (window.innerWidth <= 1200) {
+            navButtonsContainer.style.left = '15px';
+          } else {
+            navButtonsContainer.style.left = '20px';
+          }
+        } else {
+          if (window.innerWidth <= 360) {
+            navButtonsContainer.style.left = 'calc(var(--sidebar-width) + 3px)';
+          } else if (window.innerWidth <= 480) {
+            navButtonsContainer.style.left = 'calc(var(--sidebar-width) + 5px)';
+          } else if (window.innerWidth <= 768) {
+            navButtonsContainer.style.left = 'calc(var(--sidebar-width) + 8px)';
+          } else if (window.innerWidth <= 1200) {
+            navButtonsContainer.style.left = 'calc(var(--sidebar-width) + 15px)';
+          } else {
+            navButtonsContainer.style.left = 'calc(var(--sidebar-width) + 20px)';
+          }
+        }
       }
     }
 
@@ -1294,15 +1467,70 @@
 
     function toggleFullscreen() {
       isFullscreen = !isFullscreen;
+      const navButtonsContainer = document.querySelector('.nav-buttons-container');
+      const sidebar = document.getElementById('mainSidebar');
 
       if (isFullscreen) {
         document.documentElement.classList.add('fullscreen-mode');
         document.body.classList.add('fullscreen-mode');
         document.getElementById('fullscreenToggle').innerHTML = '<i class="bi bi-fullscreen-exit"></i>';
+        // Responsive left positioning for nav-buttons-container in fullscreen
+        if (window.innerWidth <= 360) {
+          navButtonsContainer.style.left = '3px';
+          navButtonsContainer.style.right = '3px';
+        } else if (window.innerWidth <= 480) {
+          navButtonsContainer.style.left = '5px';
+          navButtonsContainer.style.right = '5px';
+        } else if (window.innerWidth <= 768) {
+          navButtonsContainer.style.left = '8px';
+          navButtonsContainer.style.right = '8px';
+        } else if (window.innerWidth <= 1200) {
+          navButtonsContainer.style.left = '15px';
+          navButtonsContainer.style.right = '15px';
+        } else {
+          navButtonsContainer.style.left = '20px';
+          navButtonsContainer.style.right = '20px';
+        }
       } else {
         document.documentElement.classList.remove('fullscreen-mode');
         document.body.classList.remove('fullscreen-mode');
         document.getElementById('fullscreenToggle').innerHTML = '<i class="bi bi-fullscreen"></i>';
+        // Restore responsive left positioning
+        if (sidebar.classList.contains('sidebar-collapsed')) {
+          if (window.innerWidth <= 360) {
+            navButtonsContainer.style.left = '3px';
+            navButtonsContainer.style.right = '3px';
+          } else if (window.innerWidth <= 480) {
+            navButtonsContainer.style.left = '5px';
+            navButtonsContainer.style.right = '5px';
+          } else if (window.innerWidth <= 768) {
+            navButtonsContainer.style.left = '8px';
+            navButtonsContainer.style.right = '8px';
+          } else if (window.innerWidth <= 1200) {
+            navButtonsContainer.style.left = '15px';
+            navButtonsContainer.style.right = '15px';
+          } else {
+            navButtonsContainer.style.left = '20px';
+            navButtonsContainer.style.right = '20px';
+          }
+        } else {
+          if (window.innerWidth <= 360) {
+            navButtonsContainer.style.left = 'calc(var(--sidebar-width) + 3px)';
+            navButtonsContainer.style.right = '3px';
+          } else if (window.innerWidth <= 480) {
+            navButtonsContainer.style.left = 'calc(var(--sidebar-width) + 5px)';
+            navButtonsContainer.style.right = '5px';
+          } else if (window.innerWidth <= 768) {
+            navButtonsContainer.style.left = 'calc(var(--sidebar-width) + 8px)';
+            navButtonsContainer.style.right = '8px';
+          } else if (window.innerWidth <= 1200) {
+            navButtonsContainer.style.left = 'calc(var(--sidebar-width) + 15px)';
+            navButtonsContainer.style.right = '15px';
+          } else {
+            navButtonsContainer.style.left = 'calc(var(--sidebar-width) + 20px)';
+            navButtonsContainer.style.right = '20px';
+          }
+        }
       }
     }
 
@@ -1324,14 +1552,14 @@
       document.getElementById('displayTitle').innerText = title;
       document.getElementById('displayContent').innerHTML = content;
       displayArea.style.display = 'block';
-      history.pushState(null, null, `#subtopic-${subtopicId}`);
+      history.replaceState(null, null, `#subtopic-${subtopicId}`);
 
       document.querySelectorAll('.subtopic-wrapper, .subsubtopic-item').forEach(el => {
         el.classList.remove('active');
       });
       element.closest('.subtopic-wrapper').classList.add('active');
 
-      toggleNavButtons(true); // Show navigation buttons
+      toggleNavButtons(true);
       updateNavButtons();
     }
 
@@ -1360,7 +1588,7 @@
       document.getElementById('displayTitle').innerText = title;
       document.getElementById('displayContent').innerHTML = content;
       displayArea.style.display = 'block';
-      history.pushState(null, null, `#sub-subtopic-${subsubtopicId}`);
+      history.replaceState(null, null, `#sub-subtopic-${subsubtopicId}`);
 
       document.querySelectorAll('.subtopic-wrapper, .subsubtopic-item').forEach(el => {
         el.classList.remove('active');
@@ -1368,7 +1596,7 @@
       target.classList.add('active');
       target.closest('.subtopic-wrapper').classList.add('active');
 
-      toggleNavButtons(true); // Show navigation buttons
+      toggleNavButtons(true);
       updateNavButtons();
     }
 
@@ -1426,6 +1654,11 @@
         }
         // Scroll to the selected item
         targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Ensure display area is visible
+        const displayArea = document.getElementById('displayArea');
+        if (displayArea.style.display === 'block') {
+          displayArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
       }
       updateNavButtons();
     }
@@ -1438,10 +1671,10 @@
 
       if (currentIndex === 0) {
         prevButton.innerText = 'Home';
-        prevButton.disabled = false; // Ensure Home button is always enabled
+        prevButton.disabled = false;
       } else {
         prevButton.innerText = 'Previous';
-        prevButton.disabled = currentIndex <= -1; // Disable if no item is selected
+        prevButton.disabled = currentIndex <= -1;
       }
 
       nextButton.disabled = currentIndex >= items.length - 1 || currentIndex === -1;
@@ -1462,22 +1695,6 @@
         toggleFullscreen();
       }
     });
-
-    if (window.location.hash) {
-      const element = document.querySelector(window.location.hash);
-      if (element) {
-        if (element.classList.contains('subtopic-wrapper')) {
-          const subtopicItem = element.querySelector('.subtopic-item');
-          if (subtopicItem) {
-            handleSubtopicClick(subtopicItem);
-          }
-        } else if (element.classList.contains('subsubtopic-item')) {
-          showSubSubtopic({ stopPropagation: () => {} }, element);
-        }
-      }
-    } else {
-      toggleNavButtons(false); // Hide navigation buttons on initial load if no subtopic is selected
-    }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

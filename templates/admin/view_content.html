@@ -414,6 +414,21 @@
       display: block;
     }
 
+    /* Custom Modal for Cancel Confirmation */
+    #cancelConfirmModal .modal-content {
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    #cancelConfirmModal .modal-header {
+      background-color: #d1ecf1;
+      border-bottom: 1px solid #bee5eb;
+    }
+    
+    #cancelConfirmModal .modal-title {
+      color: #0c5460;
+    }
+
     /* Responsive Adjustments */
     @media (max-width: 992px) {
       .sidebar {
@@ -450,6 +465,20 @@
         right: 10px;
         max-width: none;
       }
+    }
+    /* Custom Modal for Unsaved Changes */
+    #unsavedChangesModal .modal-content {
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    #unsavedChangesModal .modal-header {
+      background-color: #f8d7da;
+      border-bottom: 1px solid #f5c6cb;
+    }
+    
+    #unsavedChangesModal .modal-title {
+      color: #721c24;
     }
   </style>
 </head>
@@ -625,7 +654,9 @@
             <button type="submit" class="btn btn-primary">
               <i class="bi bi-save me-2"></i>Save Subtopic
             </button>
-            <button type="button" class="btn btn-outline-secondary" onclick="toggleForm()">Cancel</button>
+            <button type="button" class="btn btn-outline-secondary" id="cancelSubtopicBtn">
+              <i class="bi bi-x-circle me-2"></i>Cancel
+            </button>
           </div>
         </form>
       </div>
@@ -650,7 +681,9 @@
             <button type="submit" class="btn btn-primary" id="submitSubSubtopicBtn">
               <i class="bi bi-save me-2"></i>Save Sub-Subtopic
             </button>
-            <button type="button" class="btn btn-outline-secondary" onclick="hideSubSubtopicForm()">Cancel</button>
+            <button type="button" class="btn btn-outline-secondary" id="cancelSubSubtopicBtn">
+              <i class="bi bi-x-circle me-2"></i>Cancel
+            </button>
           </div>
         </form>
       </div>
@@ -715,8 +748,47 @@
       </div>
     </div>
   </div>
+  
+  <!-- Cancel Confirmation Modal -->
+  <div class="modal fade" id="cancelConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-question-circle me-2"></i>Confirm Cancellation</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to cancel? Any unsaved changes will be lost.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelNoBtn">No, Continue Editing</button>
+          <button type="button" class="btn btn-primary" id="cancelYesBtn">Yes, Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <script>
+  <!-- Unsaved Changes Modal -->
+  <div class="modal fade" id="unsavedChangesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Unsaved Changes</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>You have unsaved changes. If you leave now, your changes will be lost.</p>
+          <p>Are you sure you want to leave?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="stayOnPageBtn">Stay on Page</button>
+          <button type="button" class="btn btn-danger" id="confirmLeaveBtn">Leave Without Saving</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
     // Shared TinyMCE configuration
     const tinyMCEConfig = {
       height: 400,
@@ -784,6 +856,17 @@
       }
     };
 
+    // Track unsaved changes
+    let hasUnsavedChanges = false;
+    let originalTitle = '';
+    let originalContent = '';
+    let subSubtopicOriginalTitle = '';
+    let subSubtopicOriginalContent = '';
+    let pendingNavigationUrl = null;
+    let unsavedChangesModal = null;
+    let cancelConfirmModal = null;
+    let currentCancelType = null; // 'subtopic' or 'subsubtopic'
+
     // Initialize everything when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
         // Check if there's a subsubtopic ID in the URL parameters
@@ -839,6 +922,97 @@
 
         initializeSortables();
         setupSubSubtopicDeletion();
+
+        // Set up change detection for forms
+        setupChangeDetection();
+        
+        // Initialize the modals
+        const unsavedChangesModalElement = document.getElementById('unsavedChangesModal');
+        unsavedChangesModal = new bootstrap.Modal(unsavedChangesModalElement);
+        
+        const cancelConfirmModalElement = document.getElementById('cancelConfirmModal');
+        cancelConfirmModal = new bootstrap.Modal(cancelConfirmModalElement);
+        
+        // Set up cancel button handlers
+        document.getElementById('cancelSubtopicBtn').addEventListener('click', function() {
+          currentCancelType = 'subtopic';
+          cancelConfirmModal.show();
+        });
+        
+        document.getElementById('cancelSubSubtopicBtn').addEventListener('click', function() {
+          currentCancelType = 'subsubtopic';
+          cancelConfirmModal.show();
+        });
+        
+        // Set up modal button handlers for cancel confirmation
+        document.getElementById('cancelNoBtn').addEventListener('click', function() {
+          cancelConfirmModal.hide();
+          currentCancelType = null;
+        });
+        
+        document.getElementById('cancelYesBtn').addEventListener('click', function() {
+          cancelConfirmModal.hide();
+          performCancel();
+        });
+        
+        // Override logout link behavior
+        const logoutLink = document.querySelector('.logout-item .nav-link');
+        if (logoutLink) {
+          logoutLink.addEventListener('click', function(e) {
+            if (hasUnsavedChanges) {
+              e.preventDefault();
+              pendingNavigationUrl = this.href;
+              showUnsavedChangesModal();
+            }
+          });
+        }
+        
+        // Override navigation links
+        document.querySelectorAll('a.nav-link').forEach(link => {
+          if (link.href && link.href !== '#' && !link.classList.contains('logout-item')) {
+            link.addEventListener('click', function(e) {
+              if (hasUnsavedChanges) {
+                e.preventDefault();
+                pendingNavigationUrl = this.href;
+                showUnsavedChangesModal();
+              }
+            });
+          }
+        });
+        
+        // Override back to admin panel button
+        const backButton = document.querySelector('a[href*="admin_panel"]');
+        if (backButton) {
+          backButton.addEventListener('click', function(e) {
+            if (hasUnsavedChanges) {
+              e.preventDefault();
+              pendingNavigationUrl = this.href;
+              showUnsavedChangesModal();
+            }
+          });
+        }
+
+        // Set up modal button handlers
+        document.getElementById('stayOnPageBtn').addEventListener('click', function() {
+          unsavedChangesModal.hide();
+          pendingNavigationUrl = null;
+        });
+        
+        document.getElementById('confirmLeaveBtn').addEventListener('click', function() {
+          hasUnsavedChanges = false; // Reset flag to prevent further prompts
+          if (pendingNavigationUrl) {
+            window.location.href = pendingNavigationUrl;
+          }
+        });
+        
+        // Listen for beforeunload event
+        window.addEventListener('beforeunload', function(e) {
+          if (hasUnsavedChanges) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+            return e.returnValue;
+          }
+        });
 
         // Sidebar Toggle Functionality
         const sidebarToggle = document.getElementById('sidebarToggle');
@@ -1005,6 +1179,7 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
+          resetChangeTracking(); // Reset tracking after successful save
           showAlert(data.message, 'success');
           // Redirect on success
           setTimeout(() => {
@@ -1039,6 +1214,9 @@
       document.getElementById('subSubtopicForm').reset();
       tinymce.get('subSubtopicEditor').setContent('');
       formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Set up change detection for the sub-subtopic form
+      setupSubSubtopicChangeDetection();
     }
 
     function hideSubSubtopicForm() {
@@ -1066,6 +1244,7 @@
         .then(response => response.json())
         .then(data => {
           if (data.success) {
+            resetChangeTracking(); // Reset tracking after successful save
             hideSubSubtopicForm();
             updateSubSubtopicList(document.getElementById('parentSubtopicId').value, data.newSubSubtopic);
             showAlert(data.message, 'success');
@@ -1358,7 +1537,138 @@
       }, 5000);
     }
     
-  </script>
+    // Set up change detection for forms
+    function setupChangeDetection() {
+      // Main form change detection
+      const titleInput = document.querySelector('#formSection input[name="title"]');
+      if (titleInput) {
+        originalTitle = titleInput.value;
+        titleInput.addEventListener('input', function() {
+          checkForChanges();
+        });
+      }
+      
+      // TinyMCE change detection for main editor
+      if (typeof tinymce !== 'undefined' && tinymce.get('editor')) {
+        originalContent = tinymce.get('editor').getContent();
+        tinymce.get('editor').on('change', function() {
+          checkForChanges();
+        });
+      }
+    }
+    
+    // Set up change detection for sub-subtopic form
+    function setupSubSubtopicChangeDetection() {
+      // Sub-subtopic form change detection
+      const subSubtopicTitleInput = document.querySelector('#subSubtopicForm input[name="title"]');
+      if (subSubtopicTitleInput) {
+        subSubtopicOriginalTitle = subSubtopicTitleInput.value;
+        subSubtopicTitleInput.addEventListener('input', function() {
+          checkForChanges();
+        });
+      }
+      
+      // TinyMCE change detection for sub-subtopic editor
+      if (typeof tinymce !== 'undefined' && tinymce.get('subSubtopicEditor')) {
+        subSubtopicOriginalContent = tinymce.get('subSubtopicEditor').getContent();
+        tinymce.get('subSubtopicEditor').on('change', function() {
+          checkForChanges();
+        });
+      }
+    }
+    
+    // Check if there are unsaved changes
+    function checkForChanges() {
+      const titleInput = document.querySelector('#formSection input[name="title"]');
+      const subSubtopicTitleInput = document.querySelector('#subSubtopicForm input[name="title"]');
+      
+      let titleChanged = false;
+      let contentChanged = false;
+      let subSubtopicTitleChanged = false;
+      let subSubtopicContentChanged = false;
+      
+      if (titleInput && titleInput.value !== originalTitle) {
+        titleChanged = true;
+      }
+      
+      if (tinymce.get('editor') && tinymce.get('editor').getContent() !== originalContent) {
+        contentChanged = true;
+      }
+      
+      if (subSubtopicTitleInput && subSubtopicTitleInput.value !== subSubtopicOriginalTitle) {
+        subSubtopicTitleChanged = true;
+      }
+      
+      if (tinymce.get('subSubtopicEditor') && tinymce.get('subSubtopicEditor').getContent() !== subSubtopicOriginalContent) {
+        subSubtopicContentChanged = true;
+      }
+      
+      hasUnsavedChanges = titleChanged || contentChanged || subSubtopicTitleChanged || subSubtopicContentChanged;
+    }
+    
+    // Show unsaved changes modal
+    function showUnsavedChangesModal() {
+      if (unsavedChangesModal) {
+        unsavedChangesModal.show();
+      }
+    }
+    
+    // Reset change tracking after successful save
+    function resetChangeTracking() {
+      const titleInput = document.querySelector('#formSection input[name="title"]');
+      const subSubtopicTitleInput = document.querySelector('#subSubtopicForm input[name="title"]');
+      
+      if (titleInput) originalTitle = titleInput.value;
+      if (tinymce.get('editor')) originalContent = tinymce.get('editor').getContent();
+      if (subSubtopicTitleInput) subSubtopicOriginalTitle = subSubtopicTitleInput.value;
+      if (tinymce.get('subSubtopicEditor')) subSubtopicOriginalContent = tinymce.get('subSubtopicEditor').getContent();
+      
+      hasUnsavedChanges = false;
+    }
+    
+    // Function to handle the actual cancellation
+    function performCancel() {
+      if (currentCancelType === 'subtopic') {
+        // Reset the subtopic form fields
+        const form = document.querySelector('#formSection form');
+        if (form) {
+          form.reset();
+          if (tinymce.get('editor')) {
+            tinymce.get('editor').setContent('');
+          }
+        }
+        
+        // Hide the subtopic form
+        document.getElementById('formSection').style.display = 'none';
+        document.getElementById('formSection').classList.remove('form-visible');
+        document.getElementById('formSection').classList.add('form-hidden');
+      } else if (currentCancelType === 'subsubtopic') {
+        // Reset the sub-subtopic form fields
+        const form = document.getElementById('subSubtopicForm');
+        if (form) {
+          form.reset();
+          if (tinymce.get('subSubtopicEditor')) {
+            tinymce.get('subSubtopicEditor').setContent('');
+          }
+        }
+        
+        // Hide the sub-subtopic form
+        document.getElementById('subSubtopicFormContainer').style.display = 'none';
+      }
+      
+      // Reset change tracking
+      resetChangeTracking();
+      
+      // Show the display area if there's content to show
+      const displayArea = document.getElementById('displayArea');
+      if (displayArea.innerHTML.trim() !== '') {
+        displayArea.style.display = 'block';
+      }
+      
+      // Reset the current cancel type
+      currentCancelType = null;
+    }
+  </script> 
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

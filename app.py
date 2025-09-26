@@ -184,6 +184,7 @@ def check_valid_session():
             response = redirect(url_for('login'))
             response.set_cookie('access_token', '', expires=0, max_age=0)
             return response
+        
 def is_title_unique(table_name, title, parent_id=None, exclude_id=None):
     """
     Check if a title is unique within a table
@@ -193,6 +194,7 @@ def is_title_unique(table_name, title, parent_id=None, exclude_id=None):
     exclude_id: ID to exclude from check (for updates)
     """
     try:
+        print(f"Checking uniqueness for table: {table_name}, title: {title}, exclude_id: {exclude_id}")
         if table_name == 'navbar_items':
             if exclude_id:
                 cursor.execute('SELECT COUNT(*) FROM navbar_items WHERE name = %s AND id != %s', (title, exclude_id))
@@ -216,6 +218,7 @@ def is_title_unique(table_name, title, parent_id=None, exclude_id=None):
                              (title, parent_id))
         
         count = cursor.fetchone()[0]
+        print(f"Found {count} matching records")
         return count == 0
         
     except Exception as e:
@@ -949,7 +952,7 @@ def add_navbar_item():
         flash('An unexpected error occurred', 'error')
         return redirect(url_for('admin_panel'))
     
-  # Route: /update_navbar_item
+# Route: /update_navbar_item
 # Purpose: Allows admins to rename existing navigation bar items via form submission
 # Functionality: Validates admin session, updates item name in database, and handles duplicates/errors
 @app.route('/update_navbar_item', methods=['POST'])
@@ -993,11 +996,14 @@ def update_navbar_item():
         nav_item_id = nav_item[0]
 
         # Check if new navbar item title is unique (excluding current item)
+        is_unique = is_title_unique('navbar_items', new_item, None, nav_item_id)
+        print(f"Checking uniqueness: {new_item} (excluding {nav_item_id}) - Result: {is_unique}")
+
         if not is_title_unique('navbar_items', new_item, None, nav_item_id):
             flash('This navbar item name already exists. Please use a different name.', 'error')
             return redirect(url_for('admin_panel'))
 
-        # [Rest of your existing code remains the same]
+        # Update the navbar item
         cursor.execute(
             '''UPDATE navbar_items 
             SET name = %s, 
@@ -1024,7 +1030,7 @@ def update_navbar_item():
         print(f"Error updating navbar item: {str(e)}")
         flash('An error occurred while updating the navbar item', 'error')
         return redirect(url_for('admin_panel'))
-    
+        
 # Route: /update_navbar_order
 # Purpose: Updates the order of navigation bar items based on admin input
 # Functionality: Validates admin session, updates item positions in database, and returns JSON response
