@@ -1186,8 +1186,8 @@
         </div>
         <div class="nav-1-links" id="navLinks">
             <!-- <a href="{{url_for('home')}}">Home</a> -->
-            <a href="#">Services</a>
-            <a href="#">Contact</a>
+            <a href="{{url_for('under_development')}}">Services</a>
+            <a href="{{url_for('under_development')}}">Contact</a>
             {% if session.get('username') %}
             <div class="dropdown">
                 <a href="#">{{ session['username'] }}</a>
@@ -1205,9 +1205,9 @@
     <!-- Second Navbar -->
     <nav class="navbar-2">
         <div class="nav-2-links">
-            <a target="_blank" href="http://localhost:5001" class="combined-link">Calculator Hub</a>
-            <a href="#">Quiz Hub</a>
-            <a href="#">Courses</a>
+            <a target="_blank" href="{{url_for('calculator_hub')}}" class="combined-link">Calculator Hub</a>
+            <a href="{{url_for('under_development')}}">Quiz Hub</a>
+            <a href="{{url_for('under_development')}}">Courses</a>
         </div>
     </nav>
 
@@ -1235,7 +1235,7 @@
             <h1 class="banner-title">Unlock Your Learning Potential</h1>
             <p class="banner-subtitle">Discover interactive courses, quizzes, and calculators designed to make learning
                 engaging and effective for every student.</p>
-            <a href="#" class="banner-cta">Explore Courses</a>
+            <a href="{{url_for('under_development')}}" class="banner-cta">Explore Courses</a>
             <div class="banner-decor"><i class="fas fa-graduation-cap"></i></div>
         </div>
     </section>

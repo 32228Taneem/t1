@@ -37,14 +37,18 @@ logger = logging.getLogger(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'
 app.secret_key = 'tech$tan111'  # Required for session and flash
 UPLOAD_FOLDER = 'static/uploads' # path to store images
+app.config['SECRET_KEY'] = 'tech$tan111'
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['WTF_CSRF_ENABLED'] = True  # Should be True in production
 app.config['JWT_SECRET_KEY'] = 'taneem@123jwT'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 app.config['SESSION_PERMANENT'] = False
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 app.config['SESSION_FILE_THRESHOLD'] = 100
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = True  # Use True if using HTTPS
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(hours=2),
     SESSION_REFRESH_EACH_REQUEST=True,
@@ -160,6 +164,33 @@ def jwt_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def get_active_admin_session(admin_id):
+    """Get current active session info for admin"""
+    try:
+        cursor = mytdb.cursor(buffered=True)
+        cursor.execute(
+            'SELECT current_session_id, last_login_ip, last_login_time FROM admins WHERE admin_id=%s',
+            (admin_id,)
+        )
+        result = cursor.fetchone()
+        if result:
+            return {
+                'session_id': result[0],
+                'ip': result[1],
+                'login_time': result[2]
+            }
+        return None
+    except Exception as e:
+        print(f"Error getting active admin session: {str(e)}")
+        return None
+
+def is_admin_active_elsewhere(admin_id, current_session_id):
+    """Check if admin is active on another device"""
+    active_session = get_active_admin_session(admin_id)
+    if active_session and active_session['session_id']:
+        return active_session['session_id'] != current_session_id
+    return False
+
 def no_cache(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -174,17 +205,60 @@ def no_cache(f):
 def check_valid_session():
     # List of paths that don't require authentication
     public_paths = ['/', '/login', '/usercreate', '/userforgot', '/user_password_update', 
-                   '/uotp', '/static', '/uploads', '/search', '/view_subtopics']
+                   '/uotp', '/static', '/uploads', '/search', '/view_subtopics',
+                   '/concurrent-login-warning', '/admin_otp_verify', '/check-session-status',
+                   '/clear-admin-sessions', '/force-logout-and-login', '/logout']
+
+    # Skip session validation for public paths
+    if any(request.path.startswith(path) for path in public_paths):
+        return None
+
+    print(f"🔍 SESSION CHECK for path: {request.path}")
     
-    # Check if the request is for a protected path
-    if not any(request.path.startswith(path) for path in public_paths):
-        # Check if there's a JWT token but no session (indicating logout)
-        if 'access_token' in request.cookies and not session:
-            # Clear the invalid token and redirect to login
-            response = redirect(url_for('login'))
-            response.set_cookie('access_token', '', expires=0, max_age=0)
-            return response
-        
+    # Check if admin is logged in
+    if is_admin_logged_in():
+        try:
+            cursor = mytdb.cursor(buffered=True)
+            admin_id = get_admin_id()
+            
+            if admin_id:
+                # Get current session from database
+                cursor.execute(
+                    'SELECT current_session_id FROM admins WHERE admin_id=%s',
+                    (admin_id,)
+                )
+                result = cursor.fetchone()
+                
+                if result:
+                    db_session_id = result[0]
+                    current_session_id = session.sid
+                    
+                    print(f"   Admin ID: {admin_id}")
+                    print(f"   DB Session: {db_session_id}")
+                    print(f"   Current Session: {current_session_id}")
+                    print(f"   Session Valid: {db_session_id == current_session_id}")
+                    
+                    # If session doesn't match, force logout
+                    if db_session_id != current_session_id:
+                        print(f"🚨 SESSION INVALIDATED - forcing logout")
+                        
+                        # Clear all session data
+                        session.clear()
+                        
+                        # Clear JWT token
+                        response = redirect(url_for('login'))
+                        response.set_cookie('access_token', '', expires=0, max_age=0)
+                        
+                        flash('Your session has been terminated by another login', 'error')
+                        return response
+                else:
+                    print(f"❌ No admin found in database for ID: {admin_id}")
+                    
+        except Exception as e:
+            print(f"Session validation error: {str(e)}")
+            import traceback
+            traceback.print_exc()
+
 def is_title_unique(table_name, title, parent_id=None, exclude_id=None):
     """
     Check if a title is unique within a table
@@ -265,16 +339,53 @@ def login():
             cursor = mytdb.cursor(buffered=True)
             # ================= ADMIN LOGIN FLOW =================
             # Queries database for admin with matching email
-            cursor.execute('SELECT admin_id, admin_name, password FROM admins WHERE admin_email=%s', [email])
+            cursor.execute('SELECT admin_id, admin_name, password, current_session_id, last_login_ip, last_login_time FROM admins WHERE admin_email=%s', [email])
             admin_data = cursor.fetchone()
             
             # If admin exists, verifies password
             if admin_data:
-                admin_id, admin_name, stored_password = admin_data
+                admin_id, admin_name, stored_password, current_session_id, last_login_ip, last_login_time = admin_data
                 
-                # If password matches, generates a 15-minute OTP and stores admin data in session
+                print(f"=== ADMIN LOGIN ATTEMPT ===")
+                print(f"Admin: {admin_name} (ID: {admin_id})")
+                print(f"DB Session ID: {current_session_id}")
+                print(f"Flask Session ID: {session.sid}")
+                print(f"Sessions match: {current_session_id == session.sid}")
+                
+                # If password matches, check for concurrent login
                 if password == stored_password.decode('utf-8'):
+                    # Check if admin is already logged in elsewhere
+                    # Show warning if there's an active session that's different from current session
+                    if current_session_id and current_session_id != session.sid:
+                        print(f"🚨 CONCURRENT LOGIN DETECTED!")
+                        print(f"   Existing session: {current_session_id}")
+                        print(f"   Current session: {session.sid}")
+                        
+                        # Store concurrent login data in session
+                        session['concurrent_login_data'] = {
+                            'email': email,
+                            'admin_id': str(admin_id),
+                            'admin_name': admin_name,
+                            'existing_session_id': current_session_id,
+                            'last_login_ip': last_login_ip,
+                            'last_login_time': last_login_time
+                        }
+                        
+                        print(f"✅ Redirecting to concurrent login warning")
+                        return redirect(url_for('concurrent_login_warning'))
+                    else:
+                        print(f"✅ No concurrent login - proceeding with OTP")
+                    
+                    # Generate OTP and proceed with normal login flow
                     otp, expires_at = genotp(valid_minutes=15)
+                    
+                    # Update admin session info in database
+                    cursor.execute(
+                        'UPDATE admins SET current_session_id=%s, last_login_ip=%s, last_login_time=NOW() WHERE admin_id=%s',
+                        (session.sid, request.remote_addr, admin_id)
+                    )
+                    mytdb.commit()
+                    print(f"✅ Updated DB with session: {session.sid}")
                     
                     # Stores temporary admin session data
                     session['admin_temp'] = {
@@ -302,7 +413,7 @@ def login():
                 
                 flash('Invalid credentials', 'error')
                 return render_template('login/login.html', email=email, error=True)
-
+            
             # ================= USER LOGIN FLOW =================
             # Queries database for user with matching email
             cursor.execute('SELECT user_id, username, password FROM usercreate WHERE user_email=%s', [email])
@@ -367,6 +478,7 @@ def login():
 # Functionality: Validates OTP and admin ID, issues JWT, and redirects to admin panel
 # Defines a route for admin OTP verification, handling both GET (display form) and POST (process OTP) requests
 @app.route('/admin_otp_verify', methods=['GET', 'POST'])
+@no_cache
 def admin_otp_verify():
     # Initialize session variables for resend limits and attempts
     if 'otp_resends' not in session:
@@ -471,22 +583,59 @@ def admin_otp_verify():
 
         # Check if either OTP or Admin ID is incorrect
         if stored_otp == otp and admin_id == expected_admin_id:
-            # Successful verification
+            # ============ CRITICAL: Update database with NEW session ============
+            try:
+                cursor = mytdb.cursor(buffered=True)
+                
+                # FIRST: Clear any existing sessions for this admin
+                cursor.execute(
+                    'UPDATE admins SET current_session_id=NULL WHERE admin_id=%s',
+                    (session['admin_temp']['admin_id'],)
+                )
+                mytdb.commit()
+                print(f"✅ Cleared existing sessions for admin {session['admin_temp']['admin_id']}")
+                
+                # THEN: Set the NEW session
+                cursor.execute(
+                    'UPDATE admins SET current_session_id=%s, last_login_ip=%s, last_login_time=NOW() WHERE admin_id=%s',
+                    (session.sid, request.remote_addr, session['admin_temp']['admin_id'])
+                )
+                mytdb.commit()
+                print(f"✅ Set NEW session in database: {session.sid}")
+                
+            except Exception as e:
+                print(f"Error updating admin session: {str(e)}")
+                # Don't continue if session update fails
+                flash('Session error. Please try again.', 'error')
+                return redirect(url_for('login'))
+
+            # Create JWT token and set session
             token = create_jwt_token({
                 'admin_id': session['admin_temp']['admin_id'],
                 'email': session['admin_temp']['email'],
                 'admin_name': session['admin_temp']['admin_name'],
                 'user_type': 'admin'
             })
+            
+            # Set admin session using your existing session keys
             session['admin'] = session['admin_temp']['email']
             session['admin_id'] = session['admin_temp']['admin_id']
             session['admin_name'] = session['admin_temp']['admin_name']
+            session['Admin_mail'] = session['admin_temp']['email']
+            session['Admin_id'] = session['admin_temp']['admin_id']
+            
+            # Clear temporary data
             session.pop('admin_temp', None)
             session.pop('admin_otp', None)
             session.pop('otp_resends', None)
             session.pop('last_resend_time', None)
             session.pop('otp_attempts', None)
             session.pop('block_until', None)
+            session.pop('concurrent_login_data', None)
+            
+            # Force session save
+            session.modified = True
+            
             response = redirect(url_for('admin_panel'))
             response.set_cookie('access_token', token, httponly=True, secure=True)
             flash('Authentication successful!', 'success')
@@ -518,7 +667,315 @@ def admin_otp_verify():
                          resend_cooldown=resend_cooldown,
                          attempts_left=3 - session['otp_attempts'])
 
+@app.route('/concurrent-login-warning', methods=['GET', 'POST'])
+@no_cache
+def concurrent_login_warning():
+    print("=== CONCURRENT LOGIN WARNING ROUTE ===")
+    print(f"Session ID: {session.sid}")
+    print(f"Concurrent data in session: {'concurrent_login_data' in session}")
+    
+    if 'concurrent_login_data' not in session:
+        print("❌ No concurrent data found - redirecting to home")
+        flash('Session expired. Please login again.', 'error')
+        return redirect(url_for('home'))
+    
+    concurrent_data = session['concurrent_login_data']
+    print(f"✅ Concurrent data found: {concurrent_data}")
+    
+    if request.method == 'POST':
+        # DEBUG: Print all form data
+        print(f"📋 Form data received: {request.form}")
+        
+        # Get action from form
+        action = request.form.get('action')
+        print(f"🎯 Action received: {action}")
+        
+        # Get CSRF token
+        csrf_token = request.form.get('csrf_token')
+        print(f"🔐 CSRF token received: {bool(csrf_token)}")
+        
+        if action == 'logout_other':
+            try:
+                cursor = mytdb.cursor(buffered=True)
+                
+                print(f"🔄 Processing logout_other action...")
+                
+                # Clear the existing session from database
+                cursor.execute(
+                    'UPDATE admins SET current_session_id=NULL WHERE admin_id=%s',
+                    (concurrent_data['admin_id'],)
+                )
+                mytdb.commit()
+                print("✅ Cleared other session from database")
+                
+                # Generate OTP
+                otp, expires_at = genotp(valid_minutes=15)
+                print(f"✅ Generated OTP: {otp}")
+                
+                # Update admin session info with new session
+                cursor.execute(
+                    'UPDATE admins SET current_session_id=%s, last_login_ip=%s, last_login_time=NOW() WHERE admin_id=%s',
+                    (session.sid, request.remote_addr, concurrent_data['admin_id'])
+                )
+                mytdb.commit()
+                print("✅ Updated database with new session")
+                
+                # Store temporary admin session data for OTP verification
+                session['admin_temp'] = {
+                    'email': concurrent_data['email'],
+                    'admin_id': concurrent_data['admin_id'],
+                    'admin_name': concurrent_data['admin_name'],
+                    'expiry': expires_at
+                }
+                
+                # Store OTP data in session
+                session['admin_otp'] = {
+                    'code': otp,
+                    'expires_at': expires_at.isoformat()
+                }
+                
+                print(f"✅ Stored admin_temp in session")
+                print(f"✅ Stored admin_otp in session")
+                
+                # Send OTP email to admin
+                sendmail(
+                    to=concurrent_data['email'],
+                    subject='Admin OTP Verification',
+                    body=f'Your admin verification code is: {otp}\n\nValid until: {expires_at.strftime("%Y-%m-%d %H:%M")}'
+                )
+                print("✅ OTP email sent")
+                
+                # Remove concurrent login data
+                session.pop('concurrent_login_data', None)
+                print("✅ Removed concurrent_login_data from session")
+                
+                # Force session save
+                session.modified = True
+                
+                flash('OTP has been sent to your email', 'success')
+                print("🔄 REDIRECTING to admin_otp_verify...")
+                
+                # Redirect to admin OTP verification page
+                return redirect(url_for('admin_otp_verify'))
+                
+            except Exception as e:
+                print(f"❌ Error in concurrent login: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                flash('An error occurred. Please try again.', 'error')
+        else:
+            print(f"❌ INVALID ACTION: Expected 'logout_other' but got '{action}'")
+            print(f"❌ ALL FORM DATA: {dict(request.form)}")
+            flash('Invalid request. Please try again.', 'error')
+    
+    print("📄 Rendering concurrent login warning template (GET request)")
+    return render_template('login/concurrent_login_warning.html', concurrent_data=concurrent_data)
 
+@app.route('/clear-admin-sessions')
+def clear_admin_sessions():
+    """Utility route to clear all admin sessions (for testing)"""
+    try:
+        cursor = mytdb.cursor(buffered=True)
+        cursor.execute('UPDATE admins SET current_session_id=NULL')
+        mytdb.commit()
+        flash('All admin sessions cleared', 'success')
+    except Exception as e:
+        print(f"Error clearing sessions: {str(e)}")
+        flash('Error clearing sessions', 'error')
+    return redirect(url_for('home'))
+
+@app.route('/check-session-status')
+def check_session_status():
+    """Check current session status for debugging"""
+    cursor = mytdb.cursor(buffered=True)
+    cursor.execute('SELECT admin_id, admin_name, admin_email, current_session_id, last_login_time FROM admins')
+    admins = cursor.fetchall()
+    
+    result = "<h1>Admin Session Status</h1>"
+    for admin in admins:
+        admin_id, admin_name, admin_email, current_session_id, last_login_time = admin
+        result += f"""
+        <div style="border: 1px solid #ccc; padding: 10px; margin: 10px;">
+            <h3>Admin: {admin_name} ({admin_email})</h3>
+            <p><strong>ID:</strong> {admin_id}</p>
+            <p><strong>Current Session ID:</strong> {current_session_id}</p>
+            <p><strong>Last Login:</strong> {last_login_time}</p>
+            <p><strong>Has Active Session:</strong> {bool(current_session_id)}</p>
+        </div>
+        """
+    
+    result += f"<p><strong>Current Flask Session ID:</strong> {session.sid}</p>"
+    return result
+
+@app.route('/force-logout-and-login', methods=['POST'])
+@no_cache
+def force_logout_and_login():
+    """Force logout from all other devices and login here"""
+    print("=== FORCE LOGOUT AND LOGIN ===")
+    
+    if 'concurrent_login_data' not in session:
+        flash('Session expired. Please login again.', 'error')
+        return redirect(url_for('home'))
+    
+    concurrent_data = session['concurrent_login_data']
+    
+    try:
+        cursor = mytdb.cursor(buffered=True)
+        
+        # ============ AGGRESSIVE SESSION CLEARING ============
+        print(f"🔄 Force logging out admin {concurrent_data['admin_id']} from all devices")
+        
+        # Clear ALL sessions for this admin (force logout from everywhere)
+        cursor.execute(
+            'UPDATE admins SET current_session_id=NULL WHERE admin_id=%s',
+            (concurrent_data['admin_id'],)
+        )
+        mytdb.commit()
+        print("✅ Cleared ALL sessions for this admin")
+        
+        # Wait a moment to ensure database is updated
+        import time
+        time.sleep(0.5)
+        
+        # Generate OTP
+        otp, expires_at = genotp(valid_minutes=15)
+        print(f"✅ Generated OTP: {otp}")
+        
+        # Set NEW session for current device
+        cursor.execute(
+            'UPDATE admins SET current_session_id=%s, last_login_ip=%s, last_login_time=NOW() WHERE admin_id=%s',
+            (session.sid, request.remote_addr, concurrent_data['admin_id'])
+        )
+        mytdb.commit()
+        print(f"✅ Set NEW session in database: {session.sid}")
+        
+        # Store temporary admin session data for OTP verification
+        session['admin_temp'] = {
+            'email': concurrent_data['email'],
+            'admin_id': concurrent_data['admin_id'],
+            'admin_name': concurrent_data['admin_name'],
+            'expiry': expires_at
+        }
+        
+        # Store OTP data in session
+        session['admin_otp'] = {
+            'code': otp,
+            'expires_at': expires_at.isoformat()
+        }
+        
+        # Remove concurrent login data
+        session.pop('concurrent_login_data', None)
+        
+        # Send OTP email to admin
+        sendmail(
+            to=concurrent_data['email'],
+            subject='Admin OTP Verification - New Login',
+            body=f'Your admin verification code is: {otp}\n\nValid until: {expires_at.strftime("%Y-%m-%d %H:%M")}\n\nNote: All other sessions have been logged out.'
+        )
+        
+        flash('OTP has been sent to your email. All other sessions have been logged out.', 'success')
+        return redirect(url_for('admin_otp_verify'))
+        
+    except Exception as e:
+        print(f"❌ Error in force logout: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        flash('An error occurred. Please try again.', 'error')
+        return redirect(url_for('concurrent_login_warning'))
+    
+@app.route('/admin/session-monitor')
+def session_monitor():
+    """Monitor active admin sessions"""
+    if not is_admin_logged_in():
+        return redirect(url_for('login'))
+    
+    cursor = mytdb.cursor(buffered=True)
+    cursor.execute('''
+        SELECT admin_id, admin_name, admin_email, current_session_id, last_login_ip, last_login_time 
+        FROM admins 
+        WHERE current_session_id IS NOT NULL
+    ''')
+    active_sessions = cursor.fetchall()
+    
+    result = "<h1>Active Admin Sessions</h1>"
+    result += f"<p>Current Session ID: {session.sid}</p>"
+    
+    for session_data in active_sessions:
+        admin_id, admin_name, admin_email, current_session_id, last_login_ip, last_login_time = session_data
+        is_current = current_session_id == session.sid
+        
+        result += f"""
+        <div style="border: 2px solid {'green' if is_current else 'red'}; padding: 10px; margin: 10px;">
+            <h3>Admin: {admin_name} ({admin_email}) {'[CURRENT]' if is_current else '[OTHER]'}</h3>
+            <p><strong>Session ID:</strong> {current_session_id}</p>
+            <p><strong>Last Login IP:</strong> {last_login_ip}</p>
+            <p><strong>Last Login Time:</strong> {last_login_time}</p>
+            <p><strong>Session Active:</strong> {'✅ YES' if is_current else '❌ NO (will be logged out)'}</p>
+        </div>
+        """ 
+    return result
+
+@app.route('/test-concurrent')
+def test_concurrent():
+    """Test route to simulate concurrent login scenario"""
+    cursor = mytdb.cursor(buffered=True)
+    
+    # Get first admin
+    cursor.execute('SELECT admin_id, admin_name, admin_email FROM admins LIMIT 1')
+    admin = cursor.fetchone()
+    
+    if admin:
+        admin_id, admin_name, admin_email = admin
+        
+        # Set a fake session ID to simulate another device being logged in
+        fake_session_id = "fake-session-12345"
+        cursor.execute(
+            'UPDATE admins SET current_session_id=%s WHERE admin_id=%s',
+            (fake_session_id, admin_id)
+        )
+        mytdb.commit()
+        
+        # Store concurrent login data
+        session['concurrent_login_data'] = {
+            'email': admin_email,
+            'admin_id': str(admin_id),
+            'admin_name': admin_name,
+            'existing_session_id': fake_session_id,
+            'last_login_ip': '192.168.1.100',
+            'last_login_time': datetime.now()
+        }
+        
+        return redirect(url_for('concurrent_login_warning'))
+    
+    return "No admin found"
+@app.route('/debug-sessions')
+def debug_sessions():
+    """Debug page to check session state"""
+    cursor = mytdb.cursor(buffered=True)
+    cursor.execute('SELECT admin_id, admin_name, current_session_id FROM admins')
+    admins = cursor.fetchall()
+    
+    result = f"""
+    <h1>Session Debug Info</h1>
+    <p><strong>Current Flask Session ID:</strong> {session.sid}</p>
+    <p><strong>Has concurrent_login_data:</strong> {'concurrent_login_data' in session}</p>
+    <p><strong>Has admin_temp:</strong> {'admin_temp' in session}</p>
+    <hr>
+    <h2>Database Sessions</h2>
+    """
+    
+    for admin in admins:
+        admin_id, admin_name, current_session_id = admin
+        result += f"""
+        <div style="border: 1px solid #ccc; padding: 10px; margin: 10px;">
+            <h3>{admin_name} (ID: {admin_id})</h3>
+            <p><strong>Current Session:</strong> {current_session_id}</p>
+            <p><strong>Matches Flask Session:</strong> {current_session_id == session.sid}</p>
+            <p><strong>Is Active:</strong> {bool(current_session_id)}</p>
+        </div>
+        """
+    
+    return result
 # Route: /usercreate
 # Purpose: Handles user registration by displaying a signup form (GET) and processing registration data (POST)
 # Functionality: Validates email uniqueness, generates and sends OTP, and redirects to OTP verification
@@ -855,18 +1312,32 @@ def user_password_update(token):
 # Purpose: Logs out the user by clearing session data
 # Functionality: Clears all session variables and redirects to the homepage
 @app.route('/logout')
+@no_cache
 def logout():
-    response = make_response(redirect(url_for('home')))
-    # Removes all session data to end user/admin session
-    session.clear()
-    response.set_cookie('access_token', '', expires=0, httponly=True, secure=True)
+    try:
+        cursor = mytdb.cursor(buffered=True)
+        
+        # If admin is logging out, clear their session from database
+        if is_admin_logged_in():
+            admin_id = get_admin_id()
+            if admin_id:
+                cursor.execute(
+                    'UPDATE admins SET current_session_id=NULL WHERE admin_id=%s',
+                    (admin_id,)
+                )
+                mytdb.commit()
+                print(f"✅ Logout: Cleared session for admin {admin_id}")
+        
+        # Clear session data
+        session.clear()
+        flash('You have been logged out successfully', 'success')
+        
+    except Exception as e:
+        print(f"Logout error: {str(e)}")
+        session.clear()
+        flash('Logged out successfully', 'success')
     
-    # Add headers to prevent caching of protected pages
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    
-    return response
+    return redirect(url_for('home'))
 
 # Route: /admin_panel
 # Purpose: Displays the admin panel for authorized admins
@@ -2229,4 +2700,11 @@ def search():
         print(f"Search error: {str(e)}")
         return render_template('_search_results.html', results={'error': 'Search failed'})
 
+@app.route('/under_development')
+def under_development():
+    return render_template('under_development.html')
+
+@app.route('/calculator_hub')
+def calculator_hub():
+    return render_template('calculator_hub.html')
 app.run(use_reloader=True, debug=True, host='0.0.0.0', port=5000)
