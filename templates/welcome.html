@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -86,209 +85,8 @@
         }
         @keyframes gradient { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
 
-        /* ===== NAVBAR 1 (Mobile: Logo Center + Menu & Theme) ===== */
-        .navbar-1 {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: 70px;
-            background: var(--glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-            z-index: 1000;
-            transition: var(--transition);
-        }
-
-        .navbar-1.scrolled {
-            background: var(--card-bg);
-            box-shadow: var(--shadow-sm);
-            height: 64px;
-        }
-
-        .logo-container {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .logo {
-            height: 48px;
-            width: auto;
-            transition: var(--transition);
-        }
-
-        .logo:hover { transform: scale(1.08); }
-
-        .menu-toggle, .theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--primary);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            transition: var(--transition);
-        }
-
-        .menu-toggle:hover, .theme-toggle:hover {
-            background: rgba(255,112,67,0.15);
-            transform: rotate(90deg);
-        }
-
-        /* Hide desktop links on mobile */
-        .nav-1-links { display: none; }
-
-        /* ===== SEARCH BAR (Mobile: Below Navbar) ===== */
-        .search-container {
-            position: fixed;
-            top: 70px;
-            left: 0;
-            right: 0;
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 16px;
-            z-index: 999;
-            transition: var(--transition);
-        }
-
-        .search-form {
-            width: 100%;
-            max-width: 600px;
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 12px 16px 12px 44px;
-            border: 2px solid var(--search-border);
-            border-radius: 50px;
-            background: var(--search-bg);
-            font-size: 1rem;
-            transition: var(--transition);
-            color: var(--text);
-            outline: none;
-        }
-
-        .search-input::placeholder { color: var(--text-light); }
-
-        .search-input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(255,112,67,0.2);
-            background: white;
-        }
-
-        [data-theme="dark"] .search-input:focus { background: #1a120b; }
-
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-light);
-        }
-
-        .search-loading {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--accent);
-            display: none;
-        }
-
-        .htmx-request .search-loading {
-            display: block;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
-
-        .search-results-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--card-bg);
-            border-radius: var(--radius-sm);
-            box-shadow: var(--shadow-md);
-            max-height: 400px;
-            overflow-y: auto;
-            margin-top: 8px;
-            z-index: 998;
-            display: none;
-            border: 1px solid var(--border);
-        }
-
-        .search-results-dropdown.show { display: block; }
-
-        .search-result-item {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 0.95rem;
-        }
-
-        .search-result-item:hover { background: rgba(255,112,67,0.1); }
-        .search-result-item:last-child { border-bottom: none; }
-
-        /* ===== MOBILE MENU (On Top of Search) ===== */
-        .mobile-menu {
-            position: fixed;
-            top: 70px;
-            left: 0;
-            right: 0;
-            background: var(--card-bg);
-            padding: 16px;
-            box-shadow: var(--shadow-md);
-            transform: translateY(-100%);
-            opacity: 0;
-            pointer-events: none;
-            transition: var(--transition);
-            z-index: 1001;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .mobile-menu.active {
-            transform: translateY(0);
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .mobile-menu a {
-            display: block;
-            padding: 14px 16px;
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 500;
-            border-bottom: 1px solid var(--border);
-        }
-
-        /* ---- Hide arrows on mobile ---- */
-        @media (max-width: 767px) {
-            .nav3-scroll-wrapper,
-            .nav3-scroll-btn {
-                display: none !important;
-            }
-        }
-
-        .mobile-menu a:last-child { border-bottom: none; }
-
-        /* ===== NAVBAR 2 & 3 (Scrollable, All Visible) ===== */
-        .navbar-2, .navbar-3-container {
+        /* Navbar 3 Styles */
+        .navbar-3-container {
             position: fixed;
             left: 0; right: 0;
             background: var(--glass);
@@ -301,23 +99,20 @@
             padding: 0 16px;
             overflow-x: auto;
             scrollbar-width: none;
-            z-index: 998;
+            z-index: 997;
+            top: 182px;
         }
 
-        .navbar-2 { top: 126px; }
-        .navbar-3-container { top: 182px; z-index: 997; }
-
-        .navbar-2::-webkit-scrollbar,
         .navbar-3-container::-webkit-scrollbar { display: none; }
 
-        .nav-2-links, .nav-3-links {
+        .nav-3-links {
             display: flex;
             gap: 14px;
             white-space: nowrap;
             min-width: max-content;
         }
 
-        .nav-2-links a, .nav-3-links a {
+        .nav-3-links a {
             color: var(--primary);
             text-decoration: none;
             font-weight: 600;
@@ -327,14 +122,6 @@
             min-width: 100px;
             text-align: center;
             flex-shrink: 0;
-        }
-
-        .nav-2-links a:hover {
-            background: rgba(255,112,67,0.15);
-            color: var(--accent);
-        }
-
-        .nav-3-links a {
             background: rgba(93,64,55,0.1);
         }
 
@@ -344,7 +131,7 @@
             transform: scale(1.05);
         }
 
-        /* ===== HERO BANNER ===== */
+        /* Hero Banner */
         .education-banner {
             margin-top: 238px;
             padding: 4rem 1.5rem;
@@ -386,7 +173,7 @@
             box-shadow: 0 12px 35px rgba(255,112,67,0.4);
         }
 
-        /* ===== MAIN CONTENT ===== */
+        /* Main Content */
         .main-content {
             max-width: 1400px;
             margin: 3rem auto;
@@ -508,124 +295,24 @@
         .footer-bottom { border-top: 1px solid rgba(255,255,255,0.2); padding-top: 2rem; font-size: 0.85rem; }
         .footer-bottom a { color: var(--accent-light); text-decoration: none; }
 
-        /* ===== DESKTOP VIEW: FINAL FIXES ===== */
+        /* Desktop View Adjustments */
         @media (min-width: 768px) {
-            .navbar-1 {
-                height: 78px;
-                padding: 0 5%;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 20px;
-            }
-
-            .navbar-1.scrolled { height: 72px; }
-
-            /* LOGO + THEME TOGGLE TOGETHER */
-            .logo-theme-group {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-
-            .logo-container {
-                position: static;
-                transform: none;
-            }
-
-            /* SEARCH BOX CENTERED */
-            .search-container {
-                    position: static;
-                    top: auto;
-                    height: auto;
-                    background: transparent;
-                    backdrop-filter: none;
-                    border-bottom: none;
-                    flex: 1;                     /* <-- keep flex growth */
-                    max-width: 600px;
-                    padding: 0;
-                    z-index: auto;
-                    display: flex;
-                    justify-content: center;     /* <-- center the form */
-                    margin: 0 auto;              /* <-- force true center */
-                }
-
-            .search-form {
-                width: 100%;
-                max-width: 100%;
-            }
-
-            .search-input {
-                background: var(--search-bg);
-                border: 2px solid var(--search-border);
-            }
-
-            .search-results-dropdown {
-                left: 0;
-                right: 0;
-                width: 100%;
-            }
-
-            .nav-1-links {
-                display: flex;
-                gap: 16px;
-                align-items: center;
-                margin-left: auto;
-            }
-
-            .nav-1-links a {
-                color: var(--primary);
-                text-decoration: none;
-                font-weight: 600;
-                padding: 10px 20px;
-                border-radius: 50px;
-                transition: var(--transition);
-            }
-
-            .nav-1-links a:hover {
-                background: rgba(255,112,67,0.15);
-                color: var(--accent);
-            }
-
-            .menu-toggle, .mobile-menu { display: none; }
-
-            /* NAVBAR 2 & 3: CENTERED + NO CUT-OFF */
-            .navbar-2, .navbar-3-container {
-                top: 78px;
-                justify-content: center;
+            .navbar-3-container {
+                top: 134px;
+                justify-content: flex-start;
                 padding: 0 24px;
                 overflow-x: auto;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
             }
+            .navbar-3-container::-webkit-scrollbar { display: none; }
 
-            .navbar-3-container { top: 134px; }
-
-            .nav-2-links, .nav-3-links {
-                justify-content: center;
+            .nav-3-links {
+                display: flex;
                 gap: 16px;
                 padding: 0 16px;
+                min-width: max-content;
             }
-
-            /* PREVENT LEFT CUT-OFF */
-            .navbar-3-container {
-                padding-left: 32px;
-                padding-right: 32px;
-            }
-            .navbar-3-container {
-                    top: 134px;
-                    justify-content: flex-start;   /* <-- allow scrolling from the very left */
-                    padding: 0 24px;
-                    overflow-x: auto;
-                    scrollbar-width: none;
-                    -ms-overflow-style: none;
-                }
-                .navbar-3-container::-webkit-scrollbar { display: none; }
-
-                .nav-3-links {
-                    display: flex;
-                    gap: 16px;
-                    padding: 0 16px;
-                    min-width: max-content;
-                }
 
             .education-banner { margin-top: 190px; padding: 6rem 2rem; }
             .banner-title { font-size: 4.2rem; }
@@ -638,9 +325,7 @@
             .banner-title { font-size: 4.8rem; }
         }
 
-
-        /* ---- Desktop Nav-3 Scroll Arrows ---- */
-        /* ---- Desktop Nav-3 Scroll Arrows ---- */
+        /* Desktop Nav-3 Scroll Arrows */
         @media (min-width: 768px) {
             .navbar-3-container {
                 position: relative;
@@ -664,10 +349,10 @@
                 top: 0; bottom: 0;
                 display: flex;
                 align-items: center;
-                z-index: 30;                   /* higher than the links */
-                pointer-events: none;          /* wrapper does NOT block clicks */
+                z-index: 30;
+                pointer-events: none;
             }
-            .nav3-scroll-wrapper.left  { left: 0;  }
+            .nav3-scroll-wrapper.left  { left: 0; }
             .nav3-scroll-wrapper.right { right: 0; }
 
             .nav3-scroll-btn {
@@ -682,7 +367,7 @@
                 color: var(--primary);
                 box-shadow: var(--shadow-sm);
                 cursor: pointer;
-                pointer-events: auto;          /* button itself is clickable */
+                pointer-events: auto;
                 opacity: 0.7;
                 transition: var(--transition);
             }
@@ -694,126 +379,33 @@
             }
         }
 
+        /* Hide arrows on mobile */
+        @media (max-width: 767px) {
+            .nav3-scroll-wrapper,
+            .nav3-scroll-btn {
+                display: none !important;
+            }
+        }
     </style>
 </head>
-
 <body>
     <div class="bg-animation"></div>
 
-    <!-- Navbar 1 -->
-    <nav class="navbar-1" id="navbar1">
-        <button class="menu-toggle" onclick="toggleMobileMenu()">
-            <i class="fas fa-bars"></i>
-        </button>
+    <!-- Include Navigation Bars -->
+    {% include 'navs.html' %}
 
-        <!-- LOGO + THEME TOGGLE GROUP -->
-        <div class="logo-theme-group">
-            <a href="{{ url_for('home') }}" class="logo-container">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="EduJoy Logo" class="logo" loading="lazy">
-            </a>
-            <button class="theme-toggle" onclick="toggleTheme()">
-                <i class="fas fa-moon"></i>
-            </button>
-        </div>
-
-        <!-- SEARCH BOX (CENTERED IN DESKTOP) -->
-        <div class="search-container">
-            <form id="searchForm" class="search-form">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" name="query" class="search-input"
-                    placeholder="Search courses, topics..."
-                    hx-get="{{ url_for('search') }}"
-                    hx-trigger="input changed delay:100ms"
-                    hx-target="#searchResultsContainer"
-                    hx-swap="innerHTML"
-                    hx-indicator=".search-loading"
-                    autocomplete="off"
-                    aria-label="Search">
-                <div class="search-loading htmx-indicator">
-                    <i class="fas fa-spinner fa-spin"></i>
-                </div>
-            </form>
-            <div id="searchResultsContainer" class="search-results-dropdown"></div>
-        </div>
-
-        <!-- Desktop Links -->
-        <div class="nav-1-links">
-            <a href="{{url_for('under_development')}}">Services</a>
-            <a href="{{url_for('under_development')}}">Contact</a>
-            {% if session.get('username') %}
-            <div class="dropdown" style="position:relative;">
-                <a href="#" style="padding:10px 20px;">{{ session['username'] }}</a>
-                <div class="dropdown-content" style="position:absolute;top:100%;right:0;background:var(--card-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-sm);min-width:160px;display:none;z-index:1000;border:1px solid var(--border);">
-                    <a href="{{ url_for('profile') }}" style="display:block;padding:12px 16px;color:var(--text);">Profile</a>
-                    <a href="{{ url_for('logout') }}" style="display:block;padding:12px 16px;color:var(--text);">Logout</a>
-                </div>
-            </div>
-            {% else %}
-            <a href="{{url_for('login')}}">Login</a>
-            {% endif %}
-        </div>
-    </nav>
-
-    <!-- Mobile Search (Hidden on Desktop) -->
-    <div class="search-container" style="display:none;" id="mobileSearch">
-        <form id="searchFormMobile" class="search-form">
-            <i class="fas fa-search search-icon"></i>
-            <input type="text" name="query" class="search-input"
-                placeholder="Search courses, topics..."
-                hx-get="{{ url_for('search') }}"
-                hx-trigger="input changed delay:100ms"
-                hx-target="#searchResultsContainer"
-                hx-swap="innerHTML"
-                hx-indicator=".search-loading"
-                autocomplete="off"
-                aria-label="Search">
-            <div class="search-loading htmx-indicator">
-                <i class="fas fa-spinner fa-spin"></i>
-            </div>
-        </form>
-        <div id="searchResultsContainer" class="search-results-dropdown"></div>
-    </div>
-
-    <!-- Mobile Menu -->
-    <div class="mobile-menu" id="mobileMenu">
-        <a href="{{url_for('under_development')}}">Services</a>
-        <a href="{{url_for('under_development')}}">Contact</a>
-        {% if session.get('username') %}
-        <a href="{{ url_for('profile') }}">Profile</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
-        {% else %}
-        <a href="{{url_for('login')}}">Login</a>
-        {% endif %}
-    </div>
-
-    <!-- Navbar 2 -->
-    <nav class="navbar-2">
-        <div class="nav-2-links">
-            <a href="{{url_for('calculator_hub')}}">Calculator Hub</a>
-            <a href="{{url_for('under_development')}}">Quiz Hub</a>
-            <a href="{{url_for('under_development')}}">Courses</a>
-        </div>
-    </nav>
-
-
-    <!-- Navbar 3 -->
     <!-- Navbar 3 -->
     <div class="navbar-3-container" id="nav3Container">
-        <!-- Links first (so arrows can overlay) -->
         <div class="nav-3-links" id="nav3Links">
             {% for item in navbar_items %}
             <a href="{{ url_for('view_subtopics', item_name=item[1]) }}">{{ item[1] }}</a>
             {% endfor %}
         </div>
-
-        <!-- Left arrow (on top) -->
         <div class="nav3-scroll-wrapper left">
             <button class="nav3-scroll-btn nav3-scroll-left" aria-label="Scroll left">
                 <i class="fas fa-chevron-left"></i>
             </button>
         </div>
-
-        <!-- Right arrow (on top) -->
         <div class="nav3-scroll-wrapper right">
             <button class="nav3-scroll-btn nav3-scroll-right" aria-label="Scroll right">
                 <i class="fas fa-chevron-right"></i>
@@ -881,7 +473,6 @@
                     <div class="course-meta"><span>10 Lessons</span><span>Beginner</span></div>
                 </div>
             </div>
-            
             <div class="course-card">
                 <div class="course-image">
                     <img src="https://images.pexels.com/photos/3938023/pexels-photo-3938023.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Biology" loading="lazy">
@@ -892,7 +483,6 @@
                     <div class="course-meta"><span>10 Lessons</span><span>Beginner</span></div>
                 </div>
             </div>
-
         </section>
 
         <section class="features-section">
@@ -917,7 +507,7 @@
         </section>
 
         <section class="testimonials-section">
-            <h2 class="section-title">What Students Say</h2()>
+            <h2 class="section-title">What Students Say</h2>
             <div class="testimonials-grid">
                 <div class="testimonial-card">
                     <p>"The best learning platform I've used. Fun and effective!"</p>
@@ -959,78 +549,19 @@
     </footer>
 
     <script>
-        // Theme Toggle
-        function toggleTheme() {
-            const current = document.documentElement.getAttribute('data-theme');
-            const newTheme = current === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        }
-
-        // Mobile Menu Toggle
-        function toggleMobileMenu() {
-            document.getElementById('mobileMenu').classList.toggle('active');
-        }
-
-        // Scroll Effect
-        window.addEventListener('scroll', () => {
-            document.getElementById('navbar1').classList.toggle('scrolled', window.scrollY > 50);
-        });
-
-        // Load Saved Theme
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        }
-
-        // Search Results Toggle
-        const searchInput = document.querySelector('.search-input');
-        const searchResults = document.getElementById('searchResultsContainer');
-
-        if (searchInput && searchResults) {
-            const toggleResults = (show) => {
-                searchResults.classList.toggle('show', show);
-            };
-
-            searchInput.addEventListener('input', () => {
-                toggleResults(searchInput.value.trim().length > 0);
-            });
-
-            searchInput.addEventListener('focus', () => {
-                if (searchInput.value.trim().length > 0) toggleResults(true);
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.search-container')) toggleResults(false);
-            });
-        }
-
-        // Desktop Dropdown Hover
-        document.querySelectorAll('.dropdown').forEach(dropdown => {
-            dropdown.addEventListener('mouseenter', () => {
-                dropdown.querySelector('.dropdown-content').style.display = 'block';
-            });
-            dropdown.addEventListener('mouseleave', () => {
-                dropdown.querySelector('.dropdown-content').style.display = 'none';
-            });
-        });
-
         // Highlight Active Nav-3 Link
         const currentPath = window.location.pathname;
         document.querySelectorAll('.nav-3-links a').forEach(link => {
             if (link.getAttribute('href') === currentPath) link.classList.add('active');
         });
 
-
-
-
-        // === Desktop Nav-3 Scroll with Arrows ===
+        // Desktop Nav-3 Scroll with Arrows
         if (window.innerWidth >= 768) {
             const container   = document.getElementById('nav3Container');
             const links       = document.getElementById('nav3Links');
             const leftBtn     = container.querySelector('.nav3-scroll-left');
             const rightBtn    = container.querySelector('.nav3-scroll-right');
-            const scrollStep  = 200;   // px per click
+            const scrollStep  = 200;
 
             const updateButtons = () => {
                 leftBtn.disabled  = links.scrollLeft <= 0;
@@ -1046,8 +577,8 @@
 
             links.addEventListener('scroll', updateButtons);
             window.addEventListener('resize', updateButtons);
-            updateButtons();   // initial state
-            links.scrollLeft = 0;  // Ensure starts at left edge
+            updateButtons();
+            links.scrollLeft = 0;
         }
     </script>
 </body>
